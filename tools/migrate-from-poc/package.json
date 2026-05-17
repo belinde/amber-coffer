@@ -1,0 +1,30 @@
+{
+  "name": "@amber/migrate-from-poc",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Extractor that converts a POC Markdown campaign tree into an Amber Coffer JSON dump (stage 1 of the import pipeline, see ADR 0007)",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "extract": "node dist/main.js",
+    "lint": "eslint src --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "bin": {
+    "amber-migrate-from-poc": "./dist/main.js"
+  },
+  "dependencies": {
+    "@amber/shared": "workspace:*",
+    "gray-matter": "^4.0.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@amber/eslint-config": "workspace:*",
+    "@amber/tsconfig": "workspace:*",
+    "@types/node": "^22.7.4",
+    "eslint": "^9.13.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}

@@ -1,0 +1,510 @@
+{
+  "app": {
+    "title": "Amber Coffer — The Coffer",
+    "subtitle": "Narrative OS per Game Master"
+  },
+  "nav": {
+    "characters": "Personaggi giocanti",
+    "locations": "Luoghi",
+    "factions": "Fazioni",
+    "npcs": "PNG",
+    "items": "Oggetti",
+    "relationships": "Relazioni"
+  },
+  "common": {
+    "loading": "Caricamento…",
+    "saving": "Salvataggio…",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "dismiss": "Chiudi",
+    "none": "— Nessuno —"
+  },
+  "validation": {
+    "generic": {
+      "invalid": "Valore non valido"
+    },
+    "string": {
+      "min_length": "Inserisci almeno {{min}} caratteri",
+      "max_length": "Massimo {{max}} caratteri",
+      "uuid": "UUID non valido",
+      "required": "Campo obbligatorio"
+    },
+    "array": {
+      "min_length": "Almeno {{min}} elementi",
+      "max_length": "Massimo {{max}} elementi"
+    },
+    "number": {
+      "min": "Valore minimo: {{min}}",
+      "max": "Valore massimo: {{max}}"
+    },
+    "type": {
+      "invalid": "Tipo non valido"
+    },
+    "enum": {
+      "invalid": "Opzione non valida"
+    },
+    "image": {
+      "unsupported_format": "Formato immagine non supportato (usa JPEG, PNG, WebP o GIF)"
+    }
+  },
+  "list": {
+    "thumbnail": "Anteprima",
+    "name": "Nome",
+    "details": "Dettagli",
+    "actions": "Azioni",
+    "noThumbnail": "Nessuna anteprima",
+    "openPreview": "Apri anteprima a schermo intero: {{name}}",
+    "equipCount": "{{count}} oggetti notevoli",
+    "sectionCount": "{{count}} sezioni",
+    "linkCount": "{{count}} collegamenti"
+  },
+  "subject": {
+    "loading": "Caricamento elenco…",
+    "selectKindFirst": "Seleziona prima un tipo",
+    "searchPlaceholder": "Cerca per nome…",
+    "noResults": "Nessun risultato"
+  },
+  "campaign": {
+    "label": "Campagna",
+    "none": "— Seleziona —",
+    "create": "Nuova campagna",
+    "createPrompt": "Nome campagna:",
+    "selectHint": "Crea o seleziona una campagna per gestire i dati di mondo."
+  },
+  "character": {
+    "listTitle": "Personaggi giocanti",
+    "create": "Nuovo personaggio",
+    "createTitle": "Nuovo personaggio giocante",
+    "editTitle": "Modifica personaggio giocante",
+    "empty": "Nessun personaggio giocante in questa campagna.",
+    "name": "Nome",
+    "playerDiscordId": "ID Discord giocatore",
+    "playerDiscordIdPlaceholder": "Opzionale",
+    "statusLabel": "Stato",
+    "attributes": "Attributi (JSON)",
+    "attributesInvalid": "Gli attributi devono essere un oggetto JSON valido.",
+    "deleteConfirm": "Eliminare «{{name}}»?",
+    "statusValues": {
+      "active": "Attivo",
+      "retired": "Ritirato",
+      "deceased": "Deceduto"
+    }
+  },
+  "location": {
+    "listTitle": "Luoghi",
+    "create": "Nuovo luogo",
+    "createTitle": "Nuovo luogo",
+    "editTitle": "Modifica luogo",
+    "empty": "Nessun luogo in questa campagna.",
+    "name": "Nome",
+    "kind": "Tipo",
+    "parent": "Luogo genitore",
+    "description": "Descrizione",
+    "coordinates": "Coordinate (JSON)",
+    "coordinatesInvalid": "Le coordinate devono essere un oggetto JSON valido.",
+    "deleteConfirm": "Eliminare «{{name}}»?",
+    "kindValues": {
+      "region": "Regione",
+      "city": "Città",
+      "district": "Quartiere",
+      "building": "Edificio",
+      "room": "Stanza",
+      "wilderness": "Selvaggio",
+      "plane": "Piano"
+    }
+  },
+  "faction": {
+    "listTitle": "Fazioni",
+    "create": "Nuova fazione",
+    "createTitle": "Nuova fazione",
+    "editTitle": "Modifica fazione",
+    "empty": "Nessuna fazione in questa campagna.",
+    "name": "Nome",
+    "alignment": "Allineamento",
+    "headquarters": "Sede",
+    "description": "Descrizione",
+    "deleteConfirm": "Eliminare «{{name}}»?"
+  },
+  "npc": {
+    "listTitle": "PNG",
+    "create": "Nuovo PNG",
+    "createTitle": "Nuovo PNG",
+    "editTitle": "Modifica PNG",
+    "empty": "Nessun PNG in questa campagna.",
+    "name": "Nome",
+    "statusLabel": "Stato",
+    "disposition": "Dispositione",
+    "location": "Luogo attuale",
+    "faction": "Fazione",
+    "description": "Descrizione",
+    "attributes": "Attributi (JSON)",
+    "attributesInvalid": "Gli attributi devono essere un oggetto JSON valido.",
+    "deleteConfirm": "Eliminare «{{name}}»?",
+    "statusValues": {
+      "alive": "Vivo",
+      "dead": "Morto",
+      "missing": "Scomparso",
+      "unknown": "Sconosciuto"
+    },
+    "dispositionValues": {
+      "friendly": "Amichevole",
+      "neutral": "Neutrale",
+      "hostile": "Ostile",
+      "unknown": "Sconosciuto"
+    }
+  },
+  "item": {
+    "listTitle": "Oggetti",
+    "create": "Nuovo oggetto",
+    "createTitle": "Nuovo oggetto",
+    "editTitle": "Modifica oggetto",
+    "empty": "Nessun oggetto in questa campagna.",
+    "name": "Nome",
+    "kind": "Tipo",
+    "rarity": "Rarità",
+    "ownerKind": "Tipo proprietario",
+    "ownerSubject": "Proprietario",
+    "description": "Descrizione",
+    "deleteConfirm": "Eliminare «{{name}}»?",
+    "kindValues": {
+      "weapon": "Arma",
+      "armor": "Armatura",
+      "consumable": "Consumabile",
+      "key": "Chiave",
+      "artifact": "Artefatto",
+      "misc": "Vario"
+    },
+    "rarityValues": {
+      "common": "Comune",
+      "uncommon": "Non comune",
+      "rare": "Raro",
+      "legendary": "Leggendario",
+      "unique": "Unico"
+    },
+    "ownerKindValues": {
+      "character": "Personaggio",
+      "npc": "PNG",
+      "location": "Luogo",
+      "faction": "Fazione"
+    }
+  },
+  "liveSession": {
+    "pipelineTitle": "Audio e trascrizione",
+    "pipelineHint": "Invita il bot della campagna nel canale vocale Discord, registra la sessione, poi avvia lo STT offline. Il testo grezzo viene salvato nella cartella sessione per un refinement successivo.",
+    "missingBotToken": "Configura il token del bot Discord nelle impostazioni qui sotto prima di registrare.",
+    "recordingActive": "Registrazione",
+    "trackCount": "Tracce audio",
+    "hasRawTranscript": "File trascrizione grezza",
+    "valueYes": "Sì",
+    "valueNo": "No",
+    "startRecording": "Avvia registrazione",
+    "stopRecording": "Ferma registrazione",
+    "runTranscription": "Trascrivi (Whisper)",
+    "discordSettingsTitle": "Discord",
+    "discordSettingsHint": "ID canale vocale della campagna e token bot (salvato in locale, mai sincronizzato).",
+    "voiceChannelId": "ID canale vocale",
+    "voiceChannelPlaceholder": "ID numerico canale Discord",
+    "saveChannel": "Salva canale",
+    "botToken": "Token bot",
+    "botTokenPlaceholder": "Incolla il token del bot",
+    "botTokenReplacePlaceholder": "Incolla un nuovo token per sostituire",
+    "botTokenConfigured": "Un token bot è salvato su questo dispositivo.",
+    "botTokenMissing": "Nessun token bot configurato.",
+    "saveBotToken": "Salva token"
+  },
+  "session": {
+    "listTitle": "Sessioni di campagna",
+    "create": "Nuova sessione",
+    "createTitle": "Nuova sessione",
+    "editTitle": "Modifica sessione",
+    "empty": "Nessuna sessione registrata.",
+    "deleteConfirm": "Eliminare la sessione {{name}}?",
+    "numbered": "Sessione {{number}}",
+    "number": "Numero",
+    "numberAuto": "Il numero viene assegnato automaticamente (prossimo disponibile).",
+    "numberInvalid": "Inserisci un numero di sessione valido.",
+    "title": "Titolo",
+    "statusLabel": "Stato",
+    "startedAt": "Inizio",
+    "endedAt": "Fine",
+    "startedAtValue": "Inizio: {{value}}",
+    "endedAtValue": "Fine: {{value}}",
+    "statusValues": {
+      "planned": "Pianificata",
+      "recording": "In registrazione",
+      "recorded": "Registrata",
+      "transcribing": "In trascrizione",
+      "transcribed": "Trascritta",
+      "refining": "In rifinitura",
+      "refined": "Rifinita",
+      "validating": "In validazione",
+      "published": "Pubblicata"
+    }
+  },
+  "sessionDetail": {
+    "openSession": "Apri",
+    "metadataSave": "Salva",
+    "workflowTitle": "Flusso sessione",
+    "stepPrepare": "Preparazione",
+    "stepPrepareHint": "Configura token bot e canale vocale nella lista sessioni prima di registrare.",
+    "configureDiscord": "Torna alle impostazioni Discord",
+    "stepRecord": "Registrazione",
+    "stepRecordHint": "Avvia e ferma quando serve. Puoi ripetere la registrazione: l'audio nuovo si aggiunge alla sessione.",
+    "stepTranscribe": "Trascrizione",
+    "stepTranscribeHint": "Esegui Whisper solo a registrazione ferma e con file audio presenti.",
+    "stepRefine": "Rifinitura",
+    "stepRefineHint": "Prossimamente: rifinire la trascrizione grezza in note di sessione strutturate.",
+    "tabletopTitle": "Tabletop master",
+    "noMaps": "Nessuna mappa per questa campagna.",
+    "createDefaultMap": "Crea mappa predefinita",
+    "selectMap": "Mappa",
+    "notFound": "Sessione non trovata.",
+    "loadingTitle": "Sessione",
+    "createAndOpen": "Crea e apri"
+  },
+  "images": {
+    "listTitle": "Immagini di campagna",
+    "create": "Nuova immagine",
+    "empty": "Nessuna immagine in archivio.",
+    "deleteConfirm": "Eliminare l'immagine {{name}}?",
+    "linkCount": "{{count}} collegamenti",
+    "previewAlt": "Anteprima",
+    "closePreview": "Chiudi anteprima",
+    "thumbnailFailed": "Anteprima non disponibile",
+    "noFile": "Nessun file allegato",
+    "chooseFile": "Scegli file…",
+    "replaceFile": "Sostituisci file…",
+    "attaching": "Importazione…",
+    "chooseAfterCreate": "Salva la scheda, poi allega un file immagine.",
+    "pendingFileHint": "Il file verrà allegato quando salvi la scheda.",
+    "fields": {
+      "title": "Titolo",
+      "caption": "Didascalia",
+      "links": "Collegamenti"
+    }
+  },
+  "relationship": {
+    "listTitle": "Relazioni",
+    "create": "Nuova relazione",
+    "createTitle": "Nuova relazione",
+    "editTitle": "Modifica relazione",
+    "empty": "Nessuna relazione in questa campagna.",
+    "fromKind": "Da (tipo)",
+    "fromSubject": "Da",
+    "toKind": "A (tipo)",
+    "toSubject": "A",
+    "type": "Tipo relazione",
+    "strength": "Intensità (-100…100)",
+    "strengthValue": "Intensità: {{value}}",
+    "strengthInvalid": "L'intensità deve essere un numero tra -100 e 100.",
+    "bidirectional": "Bidirezionale",
+    "description": "Descrizione",
+    "deleteConfirm": "Eliminare la relazione «{{name}}»?",
+    "entityKindValues": {
+      "character": "Personaggio",
+      "npc": "PNG",
+      "location": "Luogo",
+      "faction": "Fazione",
+      "item": "Oggetto",
+      "relationship": "Relazione"
+    },
+    "typeValues": {
+      "ally": "Alleato",
+      "enemy": "Nemico",
+      "family": "Famiglia",
+      "owns": "Possiede",
+      "located_in": "Si trova in",
+      "member_of": "Membro di",
+      "knows": "Conosce",
+      "other": "Altro"
+    }
+  },
+  "vault": {
+    "homeTitle": "Lo Scrigno",
+    "homeHint": "Esplora e arricchisci il mondo di campagna per sezioni narrative, non come un foglio di calcolo.",
+    "sidebarNav": "Sezioni dello Scrigno",
+    "back": "Indietro",
+    "search": "Cerca nel catalogo",
+    "sectionNav": "Sezioni scheda",
+    "deleteConfirm": "Eliminare «{{name}}»?",
+    "connectionsTitle": "Collegamenti",
+    "connectionsBlurb": "Oggetti e relazioni (vista compatta)",
+    "connectionsHint": "Gestione rapida di oggetti e legami tra entità.",
+    "imagesTitle": "Immagini",
+    "imagesBlurb": "Ritratti, scene e asset visivi di campagna",
+    "imagesHint": "Archivio locale delle immagini (L1). Collega PG, PNG, luoghi e sessioni.",
+    "imageLinkKind": {
+      "character": "Personaggio giocante",
+      "npc": "PNG",
+      "location": "Luogo",
+      "session": "Sessione"
+    },
+    "sessionsTitle": "Sessioni",
+    "sessionsBlurb": "Episodi numerati della campagna",
+    "sessionsHint": "Ogni sessione ha un numero progressivo. Gli eventi sulle schede vi fanno riferimento.",
+    "eventsNoSessions": "Crea almeno una sessione prima di annotare eventi.",
+    "eventsNoSessionsShort": "Nessuna sessione",
+    "openSessions": "Gestisci sessioni",
+    "unknownSession": "Sessione non trovata",
+    "appearanceHint": "Solo tratti permanenti. Gli stati di scena vanno negli eventi.",
+    "operationalHint": "Regione, ambito e promemoria aiutano a ritrovare il PNG in sessione.",
+    "eventsHint": "Cronologia legata alle sessioni. La numerazione [Sessione NNN] è solo visuale.",
+    "visualPromptHint": "Prompt per immagini: spesso funziona meglio in inglese, anche con UI italiana.",
+    "imageRefHint": "Scegli un'immagine dall'archivio di campagna (deve avere un file caricato).",
+    "imageRefSearchPlaceholder": "Cerca per titolo o didascalia…",
+    "imageRefNoResults": "Nessuna immagine con file in archivio.",
+    "imageRefUnknown": "Il riferimento salvato non corrisponde a nessuna immagine in archivio; selezionane un'altra o azzera.",
+    "portraitVsArchiveHint": "Il ritratto qui sotto ha priorità in elenco. Le immagini collegate dall'archivio compaiono nella sezione «Immagini collegate» e come anteprima se non c'è ritratto.",
+    "linkedImagesHint": "Immagini dell'archivio di campagna collegate a questa scheda. Per aggiungerne o modificare i collegamenti, apri l'archivio Immagini.",
+    "linkedImagesEmpty": "Nessuna immagine collegata dall'archivio.",
+    "linkedImagesSaveFirst": "Salva la scheda per vedere le immagini collegate dall'archivio.",
+    "openImagesArchive": "Apri archivio immagini",
+    "characterLinksHint": "Collegamenti narrativi ai PG (editor completo in arrivo).",
+    "gameStatsEmpty": "Nessun campo scheda: aggiungi coppie chiave/valore libere.",
+    "addStat": "Aggiungi campo",
+    "addEvent": "Aggiungi evento",
+    "addSection": "Aggiungi sezione",
+    "newSectionTitle": "Nuova sezione",
+    "categories": {
+      "characters": "Personaggi giocanti",
+      "npcs": "PNG",
+      "locations": "Luoghi",
+      "factions": "Fazioni",
+      "lore_notes": "Ambientazione",
+      "narrative_seeds": "Spunti narrativi"
+    },
+    "categoryBlurb": {
+      "characters": "Eroi dei giocatori: identità, aspetto, scheda",
+      "npcs": "Personaggi non giocanti con contesto operativo",
+      "locations": "Luoghi con sezioni libere di descrizione",
+      "factions": "Organizzazioni, obiettivi e segreti",
+      "lore_notes": "Concetti e lore strutturale",
+      "narrative_seeds": "Idee non ancora introdotte in gioco"
+    },
+    "empty": {
+      "characters": "Nessun personaggio giocante.",
+      "npcs": "Nessun PNG.",
+      "locations": "Nessun luogo.",
+      "factions": "Nessuna fazione.",
+      "lore_notes": "Nessuna nota di ambientazione.",
+      "narrative_seeds": "Nessuno spunto narrativo."
+    },
+    "create": {
+      "characters": "Nuovo personaggio giocante",
+      "npcs": "Nuovo PNG",
+      "locations": "Nuovo luogo",
+      "factions": "Nuova fazione",
+      "lore_notes": "Nuova nota di ambientazione",
+      "narrative_seeds": "Nuovo spunto narrativo"
+    },
+    "sections": {
+      "identity": "Identità",
+      "operational": "Contesto operativo",
+      "appearance": "Aspetto",
+      "visual": "Riferimento visivo",
+      "linkedImages": "Immagini collegate",
+      "equipment": "Equipaggiamento",
+      "gameStats": "Scheda di gioco",
+      "events": "Eventi interessanti",
+      "gmNotes": "Note DM",
+      "visibility": "Visibilità",
+      "freeSections": "Sezioni libere",
+      "goals": "Obiettivi e segreti",
+      "metadata": "Metadati",
+      "body": "Testo",
+      "links": "Collegamenti",
+      "idea": "Idea",
+      "detail": "Dettaglio",
+      "characterLinks": "Legami con i PG"
+    },
+    "fields": {
+      "species": "Specie / razza",
+      "roleHint": "Ruolo (hint)",
+      "region": "Regione",
+      "scope": "Ambito",
+      "reminder": "Promemoria",
+      "population": "Popolazione",
+      "appearanceDescription": "Descrizione aspetto",
+      "visualPrompt": "Prompt visivo",
+      "notableEquipment": "Equipaggiamento (una voce per riga)",
+      "gmNotes": "Note DM",
+      "visibility": "Visibilità",
+      "sessionId": "ID sessione",
+      "eventSession": "Sessione",
+      "eventSummary": "Riassunto evento",
+      "statKey": "Campo",
+      "statValue": "Valore",
+      "sectionTitle": "Titolo sezione",
+      "sectionBody": "Corpo sezione",
+      "imageLocal": "Path immagine locale",
+      "portraitImage": "Ritratto (archivio)",
+      "factionKind": "Tipo organizzazione",
+      "goals": "Obiettivi noti",
+      "secrets": "Segreti (solo DM)",
+      "title": "Titolo",
+      "loreKind": "Tipo concetto",
+      "tags": "Tag (separati da virgola)",
+      "body": "Corpo testuale",
+      "addLink": "Aggiungi collegamento",
+      "linkKind": "Tipo entità",
+      "linkSubject": "Entità",
+      "seedStatus": "Stato spunto",
+      "summary": "Riassunto",
+      "recordKind": "Tipo scheda"
+    },
+    "placeholders": {
+      "region": "Macro-area narrativa",
+      "scope": "Ancoraggio operativo (luogo, fazione, viaggio…)",
+      "reminder": "Una frase su chi è e perché conta"
+    },
+    "visibility": {
+      "gm_only": "Solo DM",
+      "shared": "Condiviso (sessione)",
+      "public_canon": "Canone pubblico"
+    },
+    "visibilityHint": {
+      "gm_only": "Visibile solo nel Coffer.",
+      "shared": "Sincronizzabile con l'Activity in sessione.",
+      "public_canon": "Idoneo alla pubblicazione sul sito Amber."
+    },
+    "recordKind": {
+      "canonical": "Canonico",
+      "scratch": "Bozza da sessione"
+    },
+    "factionKind": {
+      "state": "Stato",
+      "kingdom": "Regno",
+      "company": "Compagnia",
+      "guild": "Gilda",
+      "cult": "Culto",
+      "family": "Famiglia",
+      "other": "Altro"
+    },
+    "loreKind": {
+      "concept": "Concetto",
+      "history": "Storia",
+      "culture": "Cultura",
+      "economy": "Economia",
+      "religion": "Religione",
+      "cosmology": "Cosmologia",
+      "custom": "Personalizzato"
+    },
+    "seedStatus": {
+      "idea": "Idea",
+      "planned": "Pianificato",
+      "introduced": "Introdotto",
+      "closed": "Chiuso",
+      "discarded": "Scartato"
+    },
+    "entityKind": {
+      "character": "PG",
+      "npc": "PNG",
+      "location": "Luogo",
+      "faction": "Fazione",
+      "lore_note": "Ambientazione",
+      "narrative_seed": "Spunto"
+    }
+  }
+}

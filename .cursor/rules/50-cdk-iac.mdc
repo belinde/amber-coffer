@@ -1,0 +1,13 @@
+---
+description: AWS CDK infrastructure
+globs: "infrastructure/**"
+alwaysApply: false
+---
+
+# Infrastructure (CDK)
+
+- Stack separati per dominio (IoT, handshake, canon pubblico, AI)
+- Tag risorse obbligatori (`Project`, `Environment`)
+- **Nessun segreto** hardcoded — usare parametri/SSM in fasi future
+- Stub stack: `synth()` valido ma risorse minime fino a implementazione
+- Naming AWS coerente: `amber-coffer-{env}-{resource}`

@@ -1,0 +1,8 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'infrastructure'
+  - 'tools/migrate-from-poc'
+
+# Notes:
+# - `packages/*` includes `tabletop-engine` (D7 of tabletop-porting-notes.md).

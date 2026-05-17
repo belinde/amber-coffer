@@ -1,0 +1,510 @@
+{
+  "app": {
+    "title": "Amber Coffer — The Coffer",
+    "subtitle": "Narrative OS for Game Masters"
+  },
+  "nav": {
+    "characters": "Player Characters",
+    "locations": "Locations",
+    "factions": "Factions",
+    "npcs": "NPCs",
+    "items": "Items",
+    "relationships": "Relationships"
+  },
+  "common": {
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "dismiss": "Dismiss",
+    "none": "— None —"
+  },
+  "validation": {
+    "generic": {
+      "invalid": "Invalid value"
+    },
+    "string": {
+      "min_length": "Enter at least {{min}} characters",
+      "max_length": "At most {{max}} characters",
+      "uuid": "Invalid UUID",
+      "required": "Required field"
+    },
+    "array": {
+      "min_length": "At least {{min}} items",
+      "max_length": "At most {{max}} items"
+    },
+    "number": {
+      "min": "Minimum value: {{min}}",
+      "max": "Maximum value: {{max}}"
+    },
+    "type": {
+      "invalid": "Invalid type"
+    },
+    "enum": {
+      "invalid": "Invalid option"
+    },
+    "image": {
+      "unsupported_format": "Unsupported image format (use JPEG, PNG, WebP, or GIF)"
+    }
+  },
+  "list": {
+    "thumbnail": "Preview",
+    "name": "Name",
+    "details": "Details",
+    "actions": "Actions",
+    "noThumbnail": "No preview",
+    "openPreview": "Open full-screen preview: {{name}}",
+    "equipCount": "{{count}} notable items",
+    "sectionCount": "{{count}} sections",
+    "linkCount": "{{count}} links"
+  },
+  "subject": {
+    "loading": "Loading list…",
+    "selectKindFirst": "Select a type first",
+    "searchPlaceholder": "Search by name…",
+    "noResults": "No results"
+  },
+  "campaign": {
+    "label": "Campaign",
+    "none": "— Select —",
+    "create": "New campaign",
+    "createPrompt": "Campaign name:",
+    "selectHint": "Create or select a campaign to manage world data."
+  },
+  "character": {
+    "listTitle": "Player Characters",
+    "create": "New character",
+    "createTitle": "New player character",
+    "editTitle": "Edit player character",
+    "empty": "No player characters in this campaign yet.",
+    "name": "Name",
+    "playerDiscordId": "Player Discord ID",
+    "playerDiscordIdPlaceholder": "Optional",
+    "statusLabel": "Status",
+    "attributes": "Attributes (JSON)",
+    "attributesInvalid": "Attributes must be a valid JSON object.",
+    "deleteConfirm": "Delete “{{name}}”?",
+    "statusValues": {
+      "active": "Active",
+      "retired": "Retired",
+      "deceased": "Deceased"
+    }
+  },
+  "location": {
+    "listTitle": "Locations",
+    "create": "New location",
+    "createTitle": "New location",
+    "editTitle": "Edit location",
+    "empty": "No locations in this campaign yet.",
+    "name": "Name",
+    "kind": "Kind",
+    "parent": "Parent location",
+    "description": "Description",
+    "coordinates": "Coordinates (JSON)",
+    "coordinatesInvalid": "Coordinates must be a valid JSON object.",
+    "deleteConfirm": "Delete “{{name}}”?",
+    "kindValues": {
+      "region": "Region",
+      "city": "City",
+      "district": "District",
+      "building": "Building",
+      "room": "Room",
+      "wilderness": "Wilderness",
+      "plane": "Plane"
+    }
+  },
+  "faction": {
+    "listTitle": "Factions",
+    "create": "New faction",
+    "createTitle": "New faction",
+    "editTitle": "Edit faction",
+    "empty": "No factions in this campaign yet.",
+    "name": "Name",
+    "alignment": "Alignment",
+    "headquarters": "Headquarters",
+    "description": "Description",
+    "deleteConfirm": "Delete “{{name}}”?"
+  },
+  "npc": {
+    "listTitle": "NPCs",
+    "create": "New NPC",
+    "createTitle": "New NPC",
+    "editTitle": "Edit NPC",
+    "empty": "No NPCs in this campaign yet.",
+    "name": "Name",
+    "statusLabel": "Status",
+    "disposition": "Disposition",
+    "location": "Current location",
+    "faction": "Faction",
+    "description": "Description",
+    "attributes": "Attributes (JSON)",
+    "attributesInvalid": "Attributes must be a valid JSON object.",
+    "deleteConfirm": "Delete “{{name}}”?",
+    "statusValues": {
+      "alive": "Alive",
+      "dead": "Dead",
+      "missing": "Missing",
+      "unknown": "Unknown"
+    },
+    "dispositionValues": {
+      "friendly": "Friendly",
+      "neutral": "Neutral",
+      "hostile": "Hostile",
+      "unknown": "Unknown"
+    }
+  },
+  "item": {
+    "listTitle": "Items",
+    "create": "New item",
+    "createTitle": "New item",
+    "editTitle": "Edit item",
+    "empty": "No items in this campaign yet.",
+    "name": "Name",
+    "kind": "Kind",
+    "rarity": "Rarity",
+    "ownerKind": "Owner type",
+    "ownerSubject": "Owner",
+    "description": "Description",
+    "deleteConfirm": "Delete “{{name}}”?",
+    "kindValues": {
+      "weapon": "Weapon",
+      "armor": "Armor",
+      "consumable": "Consumable",
+      "key": "Key",
+      "artifact": "Artifact",
+      "misc": "Misc"
+    },
+    "rarityValues": {
+      "common": "Common",
+      "uncommon": "Uncommon",
+      "rare": "Rare",
+      "legendary": "Legendary",
+      "unique": "Unique"
+    },
+    "ownerKindValues": {
+      "character": "Character",
+      "npc": "NPC",
+      "location": "Location",
+      "faction": "Faction"
+    }
+  },
+  "liveSession": {
+    "pipelineTitle": "Audio & transcription",
+    "pipelineHint": "Invite the campaign bot to your Discord voice channel, record the session, then run offline STT. Raw text is saved under the session folder for later refinement.",
+    "missingBotToken": "Configure the Discord bot token in the settings below before recording.",
+    "recordingActive": "Recording",
+    "trackCount": "Audio tracks",
+    "hasRawTranscript": "Raw transcript file",
+    "valueYes": "Yes",
+    "valueNo": "No",
+    "startRecording": "Start recording",
+    "stopRecording": "Stop recording",
+    "runTranscription": "Transcribe (Whisper)",
+    "discordSettingsTitle": "Discord",
+    "discordSettingsHint": "Voice channel ID for this campaign and bot token (stored locally, never synced).",
+    "voiceChannelId": "Voice channel ID",
+    "voiceChannelPlaceholder": "Numeric Discord channel ID",
+    "saveChannel": "Save channel",
+    "botToken": "Bot token",
+    "botTokenPlaceholder": "Paste bot token",
+    "botTokenReplacePlaceholder": "Paste new token to replace",
+    "botTokenConfigured": "A bot token is saved on this device.",
+    "botTokenMissing": "No bot token configured yet.",
+    "saveBotToken": "Save token"
+  },
+  "session": {
+    "listTitle": "Campaign sessions",
+    "create": "New session",
+    "createTitle": "New session",
+    "editTitle": "Edit session",
+    "empty": "No sessions yet.",
+    "deleteConfirm": "Delete session {{name}}?",
+    "numbered": "Session {{number}}",
+    "number": "Number",
+    "numberAuto": "Number is assigned automatically (next available).",
+    "numberInvalid": "Enter a valid session number.",
+    "title": "Title",
+    "statusLabel": "Status",
+    "startedAt": "Started",
+    "endedAt": "Ended",
+    "startedAtValue": "Started: {{value}}",
+    "endedAtValue": "Ended: {{value}}",
+    "statusValues": {
+      "planned": "Planned",
+      "recording": "Recording",
+      "recorded": "Recorded",
+      "transcribing": "Transcribing",
+      "transcribed": "Transcribed",
+      "refining": "Refining",
+      "refined": "Refined",
+      "validating": "Validating",
+      "published": "Published"
+    }
+  },
+  "sessionDetail": {
+    "openSession": "Open",
+    "metadataSave": "Save",
+    "workflowTitle": "Session workflow",
+    "stepPrepare": "Preparation",
+    "stepPrepareHint": "Configure the Discord bot token and voice channel on the sessions list before recording.",
+    "configureDiscord": "Back to Discord settings",
+    "stepRecord": "Recording",
+    "stepRecordHint": "Start and stop as needed. You can run multiple recording passes; new audio is appended to the session.",
+    "stepTranscribe": "Transcription",
+    "stepTranscribeHint": "Run offline Whisper only while recording is stopped and audio files exist.",
+    "stepRefine": "Refinement",
+    "stepRefineHint": "Coming soon: refine the raw transcript into structured session notes.",
+    "tabletopTitle": "Master tabletop",
+    "noMaps": "No maps for this campaign yet.",
+    "createDefaultMap": "Create default map",
+    "selectMap": "Map",
+    "notFound": "Session not found.",
+    "loadingTitle": "Session",
+    "createAndOpen": "Create and open"
+  },
+  "images": {
+    "listTitle": "Campaign images",
+    "create": "New image",
+    "empty": "No images in the library yet.",
+    "deleteConfirm": "Delete image {{name}}?",
+    "linkCount": "{{count}} links",
+    "previewAlt": "Preview",
+    "closePreview": "Close preview",
+    "thumbnailFailed": "Preview unavailable",
+    "noFile": "No file attached",
+    "chooseFile": "Choose file…",
+    "replaceFile": "Replace file…",
+    "attaching": "Importing…",
+    "chooseAfterCreate": "Save the record, then attach an image file.",
+    "pendingFileHint": "The file will be attached when you save.",
+    "fields": {
+      "title": "Title",
+      "caption": "Caption",
+      "links": "Links"
+    }
+  },
+  "relationship": {
+    "listTitle": "Relationships",
+    "create": "New relationship",
+    "createTitle": "New relationship",
+    "editTitle": "Edit relationship",
+    "empty": "No relationships in this campaign yet.",
+    "fromKind": "From (type)",
+    "fromSubject": "From",
+    "toKind": "To (type)",
+    "toSubject": "To",
+    "type": "Relation type",
+    "strength": "Strength (-100…100)",
+    "strengthValue": "Strength: {{value}}",
+    "strengthInvalid": "Strength must be a number between -100 and 100.",
+    "bidirectional": "Bidirectional",
+    "description": "Description",
+    "deleteConfirm": "Delete relationship “{{name}}”?",
+    "entityKindValues": {
+      "character": "Character",
+      "npc": "NPC",
+      "location": "Location",
+      "faction": "Faction",
+      "item": "Item",
+      "relationship": "Relationship"
+    },
+    "typeValues": {
+      "ally": "Ally",
+      "enemy": "Enemy",
+      "family": "Family",
+      "owns": "Owns",
+      "located_in": "Located in",
+      "member_of": "Member of",
+      "knows": "Knows",
+      "other": "Other"
+    }
+  },
+  "vault": {
+    "homeTitle": "World Vault",
+    "homeHint": "Browse and enrich your campaign world by narrative sections—not spreadsheet rows.",
+    "sidebarNav": "Vault sections",
+    "back": "Back",
+    "search": "Search catalog",
+    "sectionNav": "Sheet sections",
+    "deleteConfirm": "Delete “{{name}}”?",
+    "connectionsTitle": "Connections",
+    "connectionsBlurb": "Items and relationships (compact view)",
+    "connectionsHint": "Quick management of items and entity links.",
+    "imagesTitle": "Images",
+    "imagesBlurb": "Portraits, scenes, and campaign visuals",
+    "imagesHint": "Local image library (L1). Link to PCs, NPCs, locations, and sessions.",
+    "imageLinkKind": {
+      "character": "Player character",
+      "npc": "NPC",
+      "location": "Location",
+      "session": "Session"
+    },
+    "sessionsTitle": "Sessions",
+    "sessionsBlurb": "Numbered campaign episodes",
+    "sessionsHint": "Each session has a sequential number. Entity events reference these sessions.",
+    "eventsNoSessions": "Create at least one session before adding events.",
+    "eventsNoSessionsShort": "No sessions",
+    "openSessions": "Manage sessions",
+    "unknownSession": "Missing session",
+    "appearanceHint": "Permanent traits only. Scene state belongs in events.",
+    "operationalHint": "Region, scope, and reminder help you find NPCs at the table.",
+    "eventsHint": "Session-linked chronology. [Session NNN] labels are display-only.",
+    "visualPromptHint": "Image prompts often work better in English even when the UI is localized.",
+    "imageRefHint": "Pick an image from the campaign archive (must have an uploaded file).",
+    "imageRefSearchPlaceholder": "Search by title or caption…",
+    "imageRefNoResults": "No images with a file in the archive.",
+    "imageRefUnknown": "The saved reference does not match any archive image; pick another or clear.",
+    "portraitVsArchiveHint": "The portrait below takes priority in lists. Images linked from the archive appear under Linked images and as the list thumbnail when no portrait is set.",
+    "linkedImagesHint": "Campaign archive images linked to this record. To add or change links, open the Images archive.",
+    "linkedImagesEmpty": "No images linked from the archive.",
+    "linkedImagesSaveFirst": "Save this record to see images linked from the archive.",
+    "openImagesArchive": "Open image archive",
+    "characterLinksHint": "Narrative links to PCs (full editor coming).",
+    "gameStatsEmpty": "No sheet fields yet—add free-form key/value pairs.",
+    "addStat": "Add field",
+    "addEvent": "Add event",
+    "addSection": "Add section",
+    "newSectionTitle": "New section",
+    "categories": {
+      "characters": "Player characters",
+      "npcs": "NPCs",
+      "locations": "Locations",
+      "factions": "Factions",
+      "lore_notes": "Lore",
+      "narrative_seeds": "Narrative seeds"
+    },
+    "categoryBlurb": {
+      "characters": "Player heroes: identity, look, sheet",
+      "npcs": "NPCs with operational context",
+      "locations": "Places with free-form sections",
+      "factions": "Organizations, goals, secrets",
+      "lore_notes": "Structural world lore",
+      "narrative_seeds": "Ideas not yet played"
+    },
+    "empty": {
+      "characters": "No player characters.",
+      "npcs": "No NPCs.",
+      "locations": "No locations.",
+      "factions": "No factions.",
+      "lore_notes": "No lore notes.",
+      "narrative_seeds": "No narrative seeds."
+    },
+    "create": {
+      "characters": "New player character",
+      "npcs": "New NPC",
+      "locations": "New location",
+      "factions": "New faction",
+      "lore_notes": "New lore note",
+      "narrative_seeds": "New narrative seed"
+    },
+    "sections": {
+      "identity": "Identity",
+      "operational": "Operational context",
+      "appearance": "Appearance",
+      "visual": "Visual reference",
+      "linkedImages": "Linked images",
+      "equipment": "Equipment",
+      "gameStats": "Game sheet",
+      "events": "Notable events",
+      "gmNotes": "GM notes",
+      "visibility": "Visibility",
+      "freeSections": "Free sections",
+      "goals": "Goals & secrets",
+      "metadata": "Metadata",
+      "body": "Body",
+      "links": "Links",
+      "idea": "Idea",
+      "detail": "Detail",
+      "characterLinks": "PC links"
+    },
+    "fields": {
+      "species": "Species",
+      "roleHint": "Role hint",
+      "region": "Region",
+      "scope": "Scope",
+      "reminder": "Reminder",
+      "population": "Population",
+      "appearanceDescription": "Appearance description",
+      "visualPrompt": "Visual prompt",
+      "notableEquipment": "Equipment (one per line)",
+      "gmNotes": "GM notes",
+      "visibility": "Visibility",
+      "sessionId": "Session ID",
+      "eventSession": "Session",
+      "eventSummary": "Event summary",
+      "statKey": "Field",
+      "statValue": "Value",
+      "sectionTitle": "Section title",
+      "sectionBody": "Section body",
+      "imageLocal": "Local image path",
+      "portraitImage": "Portrait (archive)",
+      "factionKind": "Organization type",
+      "goals": "Known goals",
+      "secrets": "Secrets (GM only)",
+      "title": "Title",
+      "loreKind": "Concept kind",
+      "tags": "Tags (comma-separated)",
+      "body": "Body text",
+      "addLink": "Add link",
+      "linkKind": "Entity type",
+      "linkSubject": "Entity",
+      "seedStatus": "Seed status",
+      "summary": "Summary",
+      "recordKind": "Record kind"
+    },
+    "placeholders": {
+      "region": "Narrative macro-region",
+      "scope": "Operational anchor (place, faction, travel…)",
+      "reminder": "One line on who they are and why they matter"
+    },
+    "visibility": {
+      "gm_only": "GM only",
+      "shared": "Shared (session)",
+      "public_canon": "Public canon"
+    },
+    "visibilityHint": {
+      "gm_only": "Visible only in the Coffer.",
+      "shared": "Syncable to the Activity during play.",
+      "public_canon": "Eligible for the public Amber site."
+    },
+    "recordKind": {
+      "canonical": "Canonical",
+      "scratch": "Session scratch"
+    },
+    "factionKind": {
+      "state": "State",
+      "kingdom": "Kingdom",
+      "company": "Company",
+      "guild": "Guild",
+      "cult": "Cult",
+      "family": "Family",
+      "other": "Other"
+    },
+    "loreKind": {
+      "concept": "Concept",
+      "history": "History",
+      "culture": "Culture",
+      "economy": "Economy",
+      "religion": "Religion",
+      "cosmology": "Cosmology",
+      "custom": "Custom"
+    },
+    "seedStatus": {
+      "idea": "Idea",
+      "planned": "Planned",
+      "introduced": "Introduced",
+      "closed": "Closed",
+      "discarded": "Discarded"
+    },
+    "entityKind": {
+      "character": "PC",
+      "npc": "NPC",
+      "location": "Location",
+      "faction": "Faction",
+      "lore_note": "Lore",
+      "narrative_seed": "Seed"
+    }
+  }
+}

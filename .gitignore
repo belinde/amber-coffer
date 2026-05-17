@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.turbo/
+cdk.out/
+target/
+
+# Tauri
+apps/master-app/src-tauri/target/
+apps/master-app/src-tauri/gen/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# SQLite local dev
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Python sidecar
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+
+# Rust
+**/*.rs.bk
+
+# CDK
+infrastructure/cdk.context.json
+
+# Legacy access — read-only symlinks to external projects (never commit targets)
+_readonly/campagna-poc
+_readonly/campagna-poc/
+_readonly/legacy-cloud
+_readonly/legacy-cloud/

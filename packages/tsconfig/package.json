@@ -1,0 +1,13 @@
+{
+  "name": "@amber/tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "files": ["base.json", "react.json", "tauri.json", "node.json"],
+  "exports": {
+    "./base.json": "./base.json",
+    "./react.json": "./react.json",
+    "./tauri.json": "./tauri.json",
+    "./node.json": "./node.json"
+  }
+}

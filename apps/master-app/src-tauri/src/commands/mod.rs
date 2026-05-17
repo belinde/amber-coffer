@@ -1,0 +1,42 @@
+mod campaign_images;
+mod migrate;
+mod campaigns;
+mod characters;
+mod factions;
+mod handouts;
+mod items;
+mod locations;
+mod lore_notes;
+mod maps;
+mod narrative_seeds;
+mod npcs;
+mod relationships;
+mod session_pipeline;
+mod sessions;
+mod sync;
+mod tabletop;
+mod vault_validate;
+
+pub use campaign_images::*;
+pub use migrate::*;
+pub use campaigns::*;
+pub use characters::*;
+pub use factions::*;
+pub use handouts::*;
+pub use items::*;
+pub use locations::*;
+pub use lore_notes::*;
+pub use maps::*;
+pub use narrative_seeds::*;
+pub use npcs::*;
+pub use relationships::*;
+pub use session_pipeline::*;
+pub use sessions::*;
+pub use sync::*;
+pub use tabletop::*;
+
+/// Health-check command for renderer ↔ Rust IPC.
+#[tauri::command]
+pub fn ping() -> String {
+    "pong".to_string()
+}

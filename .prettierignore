@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+.turbo
+target
+cdk.out
+pnpm-lock.yaml
+apps/master-app/src-tauri/target
+apps/master-app/src-tauri/gen

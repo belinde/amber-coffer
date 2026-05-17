@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./apps/master-app" },
+    { "path": "./apps/player-activity" },
+    { "path": "./infrastructure" }
+  ]
+}

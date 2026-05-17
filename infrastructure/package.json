@@ -1,0 +1,26 @@
+{
+  "name": "@amber/infrastructure",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "cdk": "cdk",
+    "synth": "cdk synth",
+    "lint": "eslint bin lib",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.178.2",
+    "constructs": "^10.4.2"
+  },
+  "devDependencies": {
+    "@amber/eslint-config": "workspace:*",
+    "@amber/tsconfig": "workspace:*",
+    "@types/node": "^22.10.7",
+    "aws-cdk": "^2.178.2",
+    "eslint": "^9.18.0",
+    "typescript": "^5.7.3"
+  }
+}

@@ -1,0 +1,14 @@
+---
+description: Convenzioni React per le app
+globs: "apps/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Convenzioni React
+
+- Componenti funzionali; hooks per stato ed effetti
+- **Nessuna stringa UI hardcoded** — usare `useTranslation()` e chiavi `domain.scope.key`
+- Prop drilling max 2 livelli; oltre usare composition o context leggero
+- Accessibilità: label, ruoli ARIA, focus keyboard su controlli interattivi
+- File `kebab-case.tsx`; componenti `PascalCase`
+- Import da `@amber/shared` per tipi dominio, mai duplicare interfacce locali
