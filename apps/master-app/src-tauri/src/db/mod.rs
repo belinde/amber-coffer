@@ -1,8 +1,10 @@
 pub mod recording_state;
+pub mod transcription_state;
 mod state;
 pub mod validate;
 
 pub use recording_state::{RecordingRuntime, RecordingState};
+pub use transcription_state::{TranscriptionRuntime, TranscriptionState};
 pub use state::AppState;
 
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePool, SqlitePoolOptions};
@@ -11,7 +13,7 @@ use tracing::info;
 
 use crate::error::AppResult;
 
-/// Opens (or creates) the campaign SQLite database and runs pending migrations.
+/// Opens (or creates) a per-campaign `database.db` and runs pending migrations.
 pub async fn init_pool(database_path: &str) -> AppResult<SqlitePool> {
     let options = SqliteConnectOptions::from_str(database_path)?
         .create_if_missing(true)

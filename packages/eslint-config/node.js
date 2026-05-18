@@ -1,11 +1,8 @@
-import base from './index.js';
 import globals from 'globals';
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
-  ...base,
+/** Node overlay blocks (paths are set by the root eslint.config.js). */
+export const nodeOverlays = [
   {
-    files: ['**/*.{ts,js}'],
     languageOptions: {
       globals: {
         ...globals.node,

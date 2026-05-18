@@ -1,4 +1,4 @@
-use tauri::State;
+use tauri::{AppHandle, State};
 use uuid::Uuid;
 
 use crate::db::validate::{ensure_campaign_exists, ensure_item_owner};
@@ -13,7 +13,9 @@ const VALID_RARITIES: &[&str] = &["common", "uncommon", "rare", "legendary", "un
 const VALID_OWNER_KINDS: &[&str] = &["character", "npc", "location", "faction"];
 
 #[tauri::command]
-pub async fn list_items(campaign_id: String, state: State<'_, AppState>) -> Result<Vec<Item>, AppError> {
+pub async fn list_items(campaign_id: String, app: AppHandle,
+    state: State<'_, AppState>) -> Result<Vec<Item>, AppError> {
+    let pool = state.pool_for_campaign(&app, &campaign_id).await?;
     sqlx::query_as::<_, Item>(
         r#"
         SELECT id, campaign_id, name, kind, rarity, description, owner_kind, owner_id,
@@ -24,13 +26,17 @@ pub async fn list_items(campaign_id: String, state: State<'_, AppState>) -> Resu
         "#,
     )
     .bind(&campaign_id)
-    .fetch_all(state.pool())
+    .fetch_all(&pool)
     .await
     .map_err(Into::into)
 }
 
 #[tauri::command]
-pub async fn get_item(id: String, state: State<'_, AppState>) -> Result<Option<Item>, AppError> {
+pub async fn get_item(
+    id: String,
+    app: AppHandle,
+    state: State<'_, AppState>) -> Result<Option<Item>, AppError> {
+    let pool = state.pool_for_entity_id(&app, &id).await?;
     sqlx::query_as::<_, Item>(
         r#"
         SELECT id, campaign_id, name, kind, rarity, description, owner_kind, owner_id,
@@ -40,13 +46,14 @@ pub async fn get_item(id: String, state: State<'_, AppState>) -> Result<Option<I
         "#,
     )
     .bind(&id)
-    .fetch_optional(state.pool())
+    .fetch_optional(&pool)
     .await
     .map_err(Into::into)
 }
 
 #[tauri::command]
-pub async fn create_item(input: CreateItemInput, state: State<'_, AppState>) -> Result<Item, AppError> {
+pub async fn create_item(input: CreateItemInput, app: AppHandle,
+    state: State<'_, AppState>) -> Result<Item, AppError> {
     let name = input.name.trim();
     if name.is_empty() {
         return Err(required_field(&["name"]));
@@ -54,9 +61,11 @@ pub async fn create_item(input: CreateItemInput, state: State<'_, AppState>) -> 
     validate_kind(input.kind.as_deref())?;
     validate_rarity(input.rarity.as_deref())?;
     validate_owner_kind(input.owner_kind.as_deref())?;
-    ensure_campaign_exists(state.pool(), &input.campaign_id).await?;
+    ensure_campaign_exists(&app, &input.campaign_id).await?;
+
+    let pool = state.pool_for_campaign(&app, &input.campaign_id).await?;
     ensure_item_owner(
-        state.pool(),
+        &pool,
         &input.campaign_id,
         input.owner_kind.as_deref(),
         input.owner_id.as_deref(),
@@ -85,16 +94,17 @@ pub async fn create_item(input: CreateItemInput, state: State<'_, AppState>) -> 
     .bind(&input.owner_id)
     .bind(now)
     .bind(now)
-    .execute(state.pool())
+    .execute(&pool)
     .await?;
 
-    get_item(id, state)
+    get_item(id, app, state)
         .await?
         .ok_or_else(|| AppError::Internal("item insert succeeded but row missing".into()))
 }
 
 #[tauri::command]
-pub async fn update_item(input: UpdateItemInput, state: State<'_, AppState>) -> Result<Item, AppError> {
+pub async fn update_item(input: UpdateItemInput, app: AppHandle,
+    state: State<'_, AppState>) -> Result<Item, AppError> {
     let name = input.name.trim();
     if name.is_empty() {
         return Err(required_field(&["name"]));
@@ -103,12 +113,13 @@ pub async fn update_item(input: UpdateItemInput, state: State<'_, AppState>) -> 
     validate_rarity(input.rarity.as_deref())?;
     validate_owner_kind(input.owner_kind.as_deref())?;
 
-    let existing = get_item(input.id.clone(), state.clone())
+    let existing = get_item(input.id.clone(), app.clone(), state.clone())
         .await?
         .ok_or_else(|| AppError::NotFound("item".into()))?;
 
+    let pool = state.pool_for_campaign(&app, &existing.campaign_id).await?;
     ensure_item_owner(
-        state.pool(),
+        &pool,
         &existing.campaign_id,
         input.owner_kind.as_deref(),
         input.owner_id.as_deref(),
@@ -135,23 +146,27 @@ pub async fn update_item(input: UpdateItemInput, state: State<'_, AppState>) -> 
     .bind(now)
     .bind(next_version)
     .bind(&input.id)
-    .execute(state.pool())
+    .execute(&pool)
     .await?;
 
     if updated.rows_affected() == 0 {
         return Err(AppError::NotFound("item".into()));
     }
 
-    get_item(input.id, state)
+    get_item(input.id, app, state)
         .await?
         .ok_or_else(|| AppError::Internal("item update succeeded but row missing".into()))
 }
 
 #[tauri::command]
-pub async fn delete_item(id: String, state: State<'_, AppState>) -> Result<(), AppError> {
+pub async fn delete_item(
+    id: String,
+    app: AppHandle,
+    state: State<'_, AppState>) -> Result<(), AppError> {
+    let pool = state.pool_for_entity_id(&app, &id).await?;
     let result = sqlx::query("DELETE FROM items WHERE id = ?")
         .bind(&id)
-        .execute(state.pool())
+        .execute(&pool)
         .await?;
 
     if result.rows_affected() == 0 {

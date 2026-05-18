@@ -9,6 +9,7 @@ const { values, positionals } = parseArgs({
     'channel-id': { type: 'string' },
     'session-id': { type: 'string' },
     'output-dir': { type: 'string' },
+    locale: { type: 'string', default: 'it' },
     'token-env': { type: 'string', default: 'DISCORD_BOT_TOKEN' },
   },
 });
@@ -16,13 +17,16 @@ const { values, positionals } = parseArgs({
 async function main(): Promise<void> {
   const command = positionals[0];
   if (command !== 'record') {
-    console.error('Usage: amber-discord-bot record --channel-id <id> --session-id <id> --output-dir <path>');
+    console.error(
+      'Usage: amber-discord-bot record --channel-id <id> --session-id <id> --output-dir <path>',
+    );
     process.exit(1);
   }
 
   const channelId = values['channel-id'];
   const sessionId = values['session-id'];
   const outputDir = values['output-dir'];
+  const locale = values.locale ?? 'it';
   const tokenEnv = values['token-env'] ?? 'DISCORD_BOT_TOKEN';
 
   if (!channelId || !sessionId || !outputDir) {
@@ -41,6 +45,7 @@ async function main(): Promise<void> {
     channelId,
     sessionId,
     outputDir,
+    locale,
   });
 }
 

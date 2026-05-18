@@ -1,7 +1,63 @@
 {
+  "product": {
+    "masterScreen": "Écran du maître",
+    "gameTable": "Table de jeu"
+  },
   "app": {
-    "title": "Amber Coffer — The Coffer",
+    "title": "Amber Coffer — Écran du maître",
     "subtitle": "Narrative OS pour maîtres de jeu"
+  },
+  "settings": {
+    "title": "Discord",
+    "sidebarLink": "Discord",
+    "discordPageHint": "Configurez votre bot d'enregistrement sur cet appareil. Liez serveur et canal vocal pour chaque campagne via Vault › Campagne › Discord.",
+    "discord": {
+      "needCampaign": "Créez ou sélectionnez une campagne pour la connecter à Discord. Le jeton bot ci-dessus s’applique à toutes les campagnes sur cet appareil.",
+      "infoAside": {
+        "title": "Bot d’enregistrement",
+        "identityTitle": "Vous sur le serveur",
+        "identityBody": "Un seul bot pour cette installation d’Amber Coffer, pour toutes les campagnes. C’est votre présence de MJ sur le serveur : le nom que vous choisissez. Un autre ordinateur = un autre bot.",
+        "whyTitle": "Vos responsabilités",
+        "whyBody": "Créer le bot est votre choix. Invitez-le seulement sur des serveurs où vous avez le droit d’enregistrer, et prévenez le groupe si besoin. Le jeton est secret — ne le partagez pas ; quiconque l’a agit à votre place. S’il fuit, régénérez-le dans le portail. Amber Coffer n’écoute pas les joueurs sur nos serveurs : l’audio passe par votre bot sur votre Discord.",
+        "howTitle": "Création dans le portail",
+        "step1": "Ouvrez le portail développeur (bouton à gauche) avec votre compte Discord.",
+        "step2": "Créez une nouvelle application et donnez-lui un nom reconnaissable (ex. Narrateur).",
+        "step3": "Ouvrez l’onglet Bot et ajoutez le bot si Discord le demande.",
+        "step4": "Copiez le jeton, collez-le à gauche et enregistrez. Ne l’envoyez à personne.",
+        "step5": "Pour la voix seule, inutile de modifier le reste de l’onglet Bot en général.",
+        "wizardNote": "Puis enregistrez le jeton si besoin et reliez serveur et canal vocal sur la page Campagne dans le Vault."
+      },
+      "botSetup": {
+        "title": "Bot d'enregistrement (cet appareil)",
+        "hint": "Créez une fois votre bot Discord ; le jeton reste sur cet ordinateur et n'est jamais synchronisé.",
+        "openPortal": "Ouvrir le portail développeur Discord",
+        "stepCreate": "New Application → nom → onglet Bot.",
+        "stepBotToken": "Reset Token → copier → coller ci-dessous → Enregistrer le jeton.",
+        "stepIntents": "Onglet Bot : intents privilégiés seulement si demandé ; pour la voix seule, souvent inutile.",
+        "applicationId": "ID d'application détecté : {{id}}"
+      },
+      "campaignWizard": {
+        "title": "Connecter la campagne à Discord",
+        "hint": "Connectez-vous pour choisir un serveur et inviter votre bot.",
+        "needToken": "Enregistrez d'abord le jeton du bot ci-dessus.",
+        "configureToken": "Aller au jeton bot",
+        "loginDiscord": "Se connecter avec Discord",
+        "selectGuild": "Serveur",
+        "guildPlaceholder": "Choisissez un serveur que vous gérez…",
+        "botPresent": "bot déjà invité",
+        "inviteHint": "Invitez votre bot sur « {{name}} », puis continuez.",
+        "inviteBot": "Ouvrir l'invitation dans le navigateur",
+        "continue": "Continuer",
+        "botNotInGuild": "Le bot n'est pas encore sur ce serveur. Terminez l'invitation puis réessayez.",
+        "botMaybePresent": "Si vous avez déjà invité le bot, cliquez sur Continuer.",
+        "selectChannel": "Canal vocal",
+        "channelPlaceholder": "Choisissez un canal vocal…",
+        "stage": "scène",
+        "saveChannel": "Enregistrer le canal vocal",
+        "advanced": "Avancé : coller l'ID du canal manuellement",
+        "currentChannel": "ID du canal vocal actuel : {{id}}"
+      }
+    }
   },
   "nav": {
     "characters": "Personnages joueurs",
@@ -22,7 +78,9 @@
     "none": "— Aucun —"
   },
   "validation": {
-    "generic": { "invalid": "Valeur non valide" },
+    "generic": {
+      "invalid": "Valeur non valide"
+    },
     "string": {
       "min_length": "Saisissez au moins {{min}} caractères",
       "max_length": "Maximum {{max}} caractères",
@@ -33,9 +91,16 @@
       "min_length": "Au moins {{min}} éléments",
       "max_length": "Maximum {{max}} éléments"
     },
-    "number": { "min": "Minimum : {{min}}", "max": "Maximum : {{max}}" },
-    "type": { "invalid": "Type invalide" },
-    "enum": { "invalid": "Option invalide" },
+    "number": {
+      "min": "Minimum : {{min}}",
+      "max": "Maximum : {{max}}"
+    },
+    "type": {
+      "invalid": "Type invalide"
+    },
+    "enum": {
+      "invalid": "Option invalide"
+    },
     "image": {
       "unsupported_format": "Format d'image non pris en charge (JPEG, PNG, WebP ou GIF)"
     }
@@ -62,7 +127,50 @@
     "none": "— Sélectionner —",
     "create": "Nouvelle campagne",
     "createPrompt": "Nom de la campagne :",
-    "selectHint": "Créez ou sélectionnez une campagne pour gérer les données du monde."
+    "createName": "Nom de la campagne",
+    "createConfirm": "Créer la campagne",
+    "selectHint": "Créez ou sélectionnez une campagne pour gérer les données du monde.",
+    "createDisabledLive": "Création de campagne impossible pendant une session en direct.",
+    "sectionNav": "Sections campagne",
+    "tabs": {
+      "general": "Général",
+      "discord": "Discord"
+    },
+    "metadataTitle": "Données de campagne",
+    "nameLabel": "Nom",
+    "catchphraseLabel": "Catchphrase",
+    "playLanguage": "Langue de jeu",
+    "playLanguageHint": "Langue dans laquelle vous jouez à la table. Utilisée pour les annonces vocales d'enregistrement Discord et la transcription.",
+    "playLanguageSave": "Enregistrer la langue de jeu",
+    "playLanguageOptions": {
+      "it": "Italien",
+      "en": "Anglais",
+      "fr": "Français",
+      "es": "Espagnol"
+    },
+    "discord": {
+      "title": "Relier la campagne à Discord",
+      "hint": "Connectez-vous avec Discord pour choisir un serveur et inviter votre bot d'enregistrement.",
+      "needToken": "Configurez d'abord le jeton du bot dans Discord (barre latérale).",
+      "configureToken": "Aller au jeton bot",
+      "loginDiscord": "Se connecter avec Discord",
+      "selectGuild": "Serveur",
+      "guildPlaceholder": "Choisissez un serveur que vous administrez…",
+      "botPresent": "bot déjà invité",
+      "inviteHint": "Invitez le bot sur « {{name}} », puis continuez.",
+      "inviteBot": "Ouvrir l'invitation dans le navigateur",
+      "continue": "Continuer",
+      "botNotInGuild": "Le bot n'est pas encore sur ce serveur. Terminez l'invitation et réessayez.",
+      "botMaybePresent": "Si vous avez déjà invité le bot, cliquez sur Continuer.",
+      "selectChannel": "Canal vocal",
+      "channelPlaceholder": "Choisissez un canal vocal…",
+      "stage": "scène",
+      "saveChannel": "Enregistrer le canal vocal",
+      "advanced": "Avancé : coller l'ID du canal manuellement",
+      "currentChannel": "Canal vocal actuel : {{id}}",
+      "manualChannelId": "ID du canal vocal",
+      "manualChannelPlaceholder": "ID numérique du canal"
+    }
   },
   "character": {
     "listTitle": "Personnages joueurs",
@@ -184,7 +292,7 @@
   "liveSession": {
     "pipelineTitle": "Audio et transcription",
     "pipelineHint": "Invitez le bot de campagne dans le salon vocal Discord, enregistrez la session, puis lancez la transcription hors ligne. Le texte brut est enregistré dans le dossier de session.",
-    "missingBotToken": "Configurez le jeton du bot Discord ci-dessous avant d'enregistrer.",
+    "missingBotToken": "Configurez le jeton du bot Discord dans Paramètres → Discord avant d'enregistrer.",
     "recordingActive": "Enregistrement",
     "trackCount": "Pistes audio",
     "hasRawTranscript": "Fichier de transcription brute",
@@ -203,7 +311,18 @@
     "botTokenReplacePlaceholder": "Coller un nouveau jeton",
     "botTokenConfigured": "Un jeton bot est enregistré sur cet appareil.",
     "botTokenMissing": "Aucun jeton bot configuré.",
-    "saveBotToken": "Enregistrer le jeton"
+    "saveBotToken": "Enregistrer le jeton",
+    "discordSetupHelpButton": "Comment obtenir ces informations",
+    "discordSetupAlertWhyTitle": "POURQUOI votre propre bot",
+    "discordSetupAlertWhy": "Amber Coffer enregistre l'audio de séance depuis votre salon vocal Discord via un bot que vous contrôlez. Nous n'utilisons pas un bot centralisé du projet car le jeton donne accès à votre serveur (il reste sur cet ordinateur uniquement, jamais synchronisé), chaque campagne a son propre salon vocal et les permissions Discord varient selon les serveurs. Vous gardez la maîtrise de vos données et de votre serveur.",
+    "discordSetupAlertStepsTitle": "PROCÉDURE",
+    "discordSetupAlertStep1": "1. Ouvrez https://discord.com/developers/applications et connectez-vous avec votre compte Discord.",
+    "discordSetupAlertStep2": "2. Cliquez sur « New Application », choisissez un nom (ex. « Bot de campagne ») et validez.",
+    "discordSetupAlertStep3": "3. Onglet « Bot » → « Reset Token » (ou « View Token ») → copiez le jeton → collez-le ci-dessus et cliquez sur « Enregistrer le jeton ». Ne le partagez avec personne.",
+    "discordSetupAlertStep4": "4. Toujours dans « Bot », activez les intents privilégiés demandés par Discord si nécessaire (pour l'enregistrement vocal seul, « Message Content » n'est en général pas requis).",
+    "discordSetupAlertStep5": "5. Onglet « OAuth2 » → « URL Generator » : scope « bot », permissions « Connect » et « Use Voice Activity » (optionnel « Speak ») → copiez l'URL → ouvrez-la dans le navigateur et invitez le bot sur le serveur de la campagne.",
+    "discordSetupAlertStep6": "6. Dans Discord (application ou web) : Paramètres utilisateur → « Avancé » → activez le « Mode développeur ». Clic droit sur le salon vocal de séance → « Copier l'identifiant du salon » → collez-le ci-dessus et cliquez sur « Enregistrer le salon ».",
+    "discordSetupAlertStep7": "7. Au démarrage de l'enregistrement, le bot rejoint ce salon et enregistre une piste audio par participant pour la transcription hors ligne."
   },
   "session": {
     "listTitle": "Sessions de campagne",
@@ -232,6 +351,11 @@
       "refined": "Affinée",
       "validating": "En validation",
       "published": "Publiée"
+    },
+    "playState": {
+      "preparing": "Préparation",
+      "live": "En direct",
+      "ended": "Terminée"
     }
   },
   "sessionDetail": {
@@ -239,21 +363,67 @@
     "metadataSave": "Enregistrer",
     "workflowTitle": "Déroulement de séance",
     "stepPrepare": "Préparation",
-    "stepPrepareHint": "Configurez le token bot et le canal vocal dans la liste des séances avant d'enregistrer.",
-    "configureDiscord": "Retour aux paramètres Discord",
+    "stepPrepareHint": "Configurez le jeton bot et le canal vocal dans Paramètres → Discord avant d'enregistrer.",
+    "configureDiscord": "Ouvrir les paramètres Discord",
+    "workflowDiscordRequiredTitle": "Configurer le bot Discord",
+    "workflowDiscordRequiredHint": "L'enregistrement et la transcription nécessitent le jeton du bot et le canal vocal dans Paramètres → Discord.",
     "stepRecord": "Enregistrement",
     "stepRecordHint": "Démarrez et arrêtez selon vos besoins. Plusieurs passes sont possibles ; l'audio s'ajoute à la séance.",
     "stepTranscribe": "Transcription",
     "stepTranscribeHint": "Lancez Whisper uniquement à l'arrêt, avec des fichiers audio présents.",
+    "transcriptionStarting": "Démarrage de la transcription…",
+    "transcriptionRunning": "Transcription en cours… {{percent}} %",
+    "transcriptionFinalizing": "Finalisation de la transcription…",
+    "transcriptionNotStarted": "Impossible de démarrer la transcription. Vérifiez la configuration Whisper.",
+    "transcriptionStalled": "La transcription s'est arrêtée de façon inattendue. Vous pouvez réessayer.",
+    "retryTranscription": "Réessayer la transcription",
     "stepRefine": "Affinage",
-    "stepRefineHint": "Bientôt : affiner la transcription brute en notes structurées.",
+    "stepRefineHint": "Disponible une fois la transcription brute obtenue.",
+    "stepRefineReadyHint": "Transcription brute prête : résumé et événements structurés seront préparés ici (à venir).",
+    "hasRefinedTranscript": "Texte affiné",
     "tabletopTitle": "Table virtuelle (MJ)",
     "noMaps": "Aucune carte pour cette campagne.",
     "createDefaultMap": "Créer une carte par défaut",
     "selectMap": "Carte",
     "notFound": "Séance introuvable.",
     "loadingTitle": "Séance",
-    "createAndOpen": "Créer et ouvrir"
+    "createAndOpen": "Créer et ouvrir",
+    "returnToSession": "Retour à {{label}}",
+    "campaignLockedHint": "Changement de campagne désactivé pendant une session en direct.",
+    "editDetails": "Modifier les détails",
+    "editDetailsClose": "Fermer les détails",
+    "editDetailsHint": "Numero e date di solito sono impostati automaticamente. Modificali solo per correggere import o casi eccezionali.",
+    "numberRareHint": "Di solito assegnato in creazione; modifica solo se necessario.",
+    "startedAtRareHint": "Di solito impostato con «Inizia sessione».",
+    "endedAtRareHint": "Di solito impostato con «Termina sessione».",
+    "datesNotStarted": "Non ancora iniziata",
+    "datesInProgress": "Inizio {{start}} — in corso",
+    "datesSummary": "{{start}} — {{end}}",
+    "beginPlay": "Démarrer la session",
+    "endPlay": "Terminer la session",
+    "endPlayConfirm": "Terminare la sessione in gioco? Se la registrazione è attiva verrà fermata.",
+    "phasePreparing": "Préparation",
+    "phaseLive": "En jeu",
+    "phasePost": "Post-session",
+    "prepTitle": "Preparazione sessione",
+    "prepGmNotes": "Note e promemoria del GM",
+    "prepPinnedNpcs": "PNG in programma",
+    "prepPinnedLocations": "Luoghi in programma",
+    "prepSeeds": "Spunti narrativi pianificati",
+    "prepHandoutsPlaceholder": "I handout di sessione (condivisi con i giocatori durante il gioco) saranno gestiti qui.",
+    "prepOpenVaultNpcs": "Sfoglia PNG",
+    "prepOpenVaultLocations": "Sfoglia luoghi",
+    "prepOpenImages": "Immagini di campagna",
+    "liveRecordingTitle": "Registrazione",
+    "liveMaterials": "Materiali preparati",
+    "liveMaterialsHint": "{{npcCount}} PNG e {{locationCount}} luoghi in evidenza. Apri il vault per tutta la campagna.",
+    "openCampaignCatalog": "Ouvrir le catalogue de campagne",
+    "liveInGameTitle": "Consultazione in gioco",
+    "liveInGamePlaceholder": "La ricerca rapida sul canone durante il gioco arriverà presto (PG, PNG, luoghi, ambientazione).",
+    "postShowTabletop": "Mostra tabletop",
+    "postHideTabletop": "Nascondi tabletop",
+    "deleteSession": "Elimina sessione",
+    "editDetailsLockedLive": "Termina la sessione in gioco prima di modificare le date o eliminare."
   },
   "images": {
     "listTitle": "Images de campagne",
@@ -313,9 +483,11 @@
     }
   },
   "vault": {
-    "homeTitle": "Le Coffre",
-    "homeHint": "Browse and enrich your campaign world by narrative sections—not spreadsheet rows.",
-    "sidebarNav": "Sections du Coffre",
+    "catalogTitle": "Catalogue de campagne",
+    "homeHint": "Explorez et enrichissez le monde de campagne par sections narratives, pas comme un tableur.",
+    "sidebarNav": "Sections de campagne",
+    "campaignTitle": "Campagne",
+    "campaignBlurb": "Nom, catchphrase et canal Discord",
     "back": "Retour",
     "search": "Search catalog",
     "sectionNav": "Sheet sections",
@@ -456,9 +628,9 @@
       "public_canon": "Public canon"
     },
     "visibilityHint": {
-      "gm_only": "Visible only in the Coffer.",
-      "shared": "Syncable to the Activity during play.",
-      "public_canon": "Eligible for the public Amber site."
+      "gm_only": "Visible uniquement dans l’Écran du maître.",
+      "shared": "Synchronisable avec la Table de jeu pendant la partie.",
+      "public_canon": "Éligible au site du canon public."
     },
     "recordKind": {
       "canonical": "Canonical",

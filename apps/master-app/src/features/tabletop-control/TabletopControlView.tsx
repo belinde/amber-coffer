@@ -1,30 +1,35 @@
-import type { Token } from '@amber/shared';
+import type { Campaign, Map, Token } from '@amber/shared';
 import {
   BENCH_SLOTS_DEFAULT,
   benchSlotToPercent,
   boardCellToPercent,
-  cellKey,
   nearestFreeBenchSlot,
   nearestFreeBoardCell,
   positionKey,
   pxToBenchSlot,
   pxToBoardCell,
 } from '@amber/tabletop-engine';
+import { convertFileSrc } from '@tauri-apps/api/core';
 import type { CSSProperties, PointerEvent, ReactElement } from 'react';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { resolveCampaignImagePath } from '../../bridge/campaign-images.js';
 
 import { moveToken } from './bridge.js';
+import { tabletopBoardAspectRatio } from './tabletop-board-layout.js';
 
-type Grid = { cols: number; rows: number; benchSlots: number };
+type Grid = { cols: number; rows: number; benchSlots: number; gridSizePx: number };
 type RuntimeTokenId = Token['id'];
 type RuntimeTokenPosition = Token['position'];
 
 type Props = {
-  grid: Pick<Grid, 'cols' | 'rows'> & { benchSlots?: number };
+  campaignId: Campaign['id'];
+  map: Pick<
+    Map,
+    'imagePath' | 'widthPx' | 'heightPx' | 'gridCols' | 'gridRows' | 'gridSizePx' | 'benchSlots'
+  >;
   tokens: Token[];
-  /** When false, the Master cannot drag tokens (e.g. read-only review mode). */
   canEdit?: boolean;
-  /** Called after a successful `move_token` IPC (e.g. reload tokens). */
   onAfterMove?: () => void;
 };
 
@@ -37,27 +42,83 @@ type DragState = {
 /**
  * Master-authoritative editor for the tabletop. Drag and drop produces a final position
  * snapped to the nearest free cell (or bench slot) and dispatches `move_token` via Tauri.
- *
- * The visual layer mirrors the legacy POC (cell-based grid + vertical bench column);
- * the geometry comes from `@amber/tabletop-engine`. Per ADR 0002 the SQLite writes happen
- * exclusively in Rust through the `move_token` command.
  */
-export function TabletopControlView({ grid, tokens, canEdit = true, onAfterMove }: Props): ReactElement {
+export function TabletopControlView({
+  campaignId,
+  map,
+  tokens,
+  canEdit = true,
+  onAfterMove,
+}: Props): ReactElement {
   const gridConfig: Grid = {
-    cols: grid.cols,
-    rows: grid.rows,
-    benchSlots: grid.benchSlots ?? BENCH_SLOTS_DEFAULT,
+    cols: map.gridCols,
+    rows: map.gridRows,
+    benchSlots: map.benchSlots ?? BENCH_SLOTS_DEFAULT,
+    gridSizePx: map.gridSizePx,
   };
 
+  const boardShellRef = useRef<HTMLDivElement | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
   const benchRef = useRef<HTMLDivElement | null>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
+  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
+  const [gridScale, setGridScale] = useState(1);
+
+  const boardAspectRatio = useMemo(() => tabletopBoardAspectRatio(map), [map]);
+
+  const loadBackground = useCallback(async () => {
+    const local = map.imagePath.trim();
+    if (!local) {
+      setBackgroundUrl(null);
+      return;
+    }
+    try {
+      const absolute = await resolveCampaignImagePath(campaignId, local);
+      setBackgroundUrl(convertFileSrc(absolute));
+    } catch {
+      setBackgroundUrl(null);
+    }
+  }, [campaignId, map.imagePath]);
+
+  useEffect(() => {
+    void loadBackground();
+  }, [loadBackground]);
+
+  useEffect(() => {
+    const shell = boardShellRef.current;
+    if (!shell) return;
+
+    const updateScale = (): void => {
+      const boardWidth = shell.clientWidth;
+      const boardHeight = shell.clientHeight;
+      const gridWidth = gridConfig.cols * gridConfig.gridSizePx;
+      const gridHeight = gridConfig.rows * gridConfig.gridSizePx;
+      if (boardWidth <= 0 || boardHeight <= 0 || gridWidth <= 0 || gridHeight <= 0) {
+        setGridScale(1);
+        return;
+      }
+      setGridScale(Math.min(boardWidth / gridWidth, boardHeight / gridHeight));
+    };
+
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(shell);
+    return () => observer.disconnect();
+  }, [gridConfig.cols, gridConfig.gridSizePx, gridConfig.rows]);
 
   const occupiedKeys = useMemo(() => {
     const set = new Set<string>();
     for (const token of tokens) set.add(positionKey(token.position));
     return set;
   }, [tokens]);
+
+  const boardStyle = {
+    '--board-aspect-ratio': boardAspectRatio,
+    '--cell-size': `${gridConfig.gridSizePx}px`,
+    '--grid-cols': gridConfig.cols,
+    '--grid-rows': gridConfig.rows,
+    ...(backgroundUrl ? { '--board-bg-image': `url("${backgroundUrl}")` } : {}),
+  } as CSSProperties;
 
   function resolvePosition(
     rawClientX: number,
@@ -128,51 +189,55 @@ export function TabletopControlView({ grid, tokens, canEdit = true, onAfterMove 
   }
 
   return (
-    <div className="tabletop-wrap" onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerCancel={endDrag}>
-      <div
-        ref={boardRef}
-        className="tabletop-board tabletop-grid"
-        role="application"
-        aria-label="Tabletop control"
-        style={
-          {
-            '--grid-cols': gridConfig.cols,
-            '--grid-rows': gridConfig.rows,
-          } as CSSProperties
-        }
-      >
-        {tokens
-          .filter((t) => t.position.zone === 'board')
-          .map((token) =>
-            token.position.zone === 'board' ? (
+    <div
+      className="tabletop-wrap"
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+    >
+      <div className="tabletop-board-area">
+        <div ref={boardShellRef} className="tabletop-board" style={boardStyle}>
+          <div
+            ref={boardRef}
+            className="tabletop-board__grid"
+            role="application"
+            aria-label="Tabletop control"
+            style={{ transform: `translate(-50%, -50%) scale(${gridScale})` }}
+          >
+            {tokens
+              .filter((t) => t.position.zone === 'board')
+              .map((token) =>
+                token.position.zone === 'board' ? (
+                  <div
+                    key={token.id}
+                    className={`tabletop-token${drag?.tokenId === token.id ? ' dragging' : ''}`}
+                    style={boardCellToPercent({
+                      xCell: token.position.xCell,
+                      yCell: token.position.yCell,
+                      grid: gridConfig,
+                    })}
+                    onPointerDown={(ev) => startDrag(ev, token)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Token ${token.entityId}`}
+                  >
+                    <span className="tabletop-token-dot" />
+                  </div>
+                ) : null,
+              )}
+            {drag && drag.ghostPosition.zone === 'board' ? (
               <div
-                key={token.id}
-                className={`tabletop-token${drag?.tokenId === token.id ? ' dragging' : ''}`}
+                className="tabletop-ghost"
                 style={boardCellToPercent({
-                  xCell: token.position.xCell,
-                  yCell: token.position.yCell,
+                  xCell: drag.ghostPosition.xCell,
+                  yCell: drag.ghostPosition.yCell,
                   grid: gridConfig,
                 })}
-                onPointerDown={(ev) => startDrag(ev, token)}
-                role="button"
-                tabIndex={0}
-                aria-label={`Token ${token.entityId}`}
-              >
-                <span className="tabletop-token-dot" />
-              </div>
-            ) : null,
-          )}
-        {drag && drag.ghostPosition.zone === 'board' ? (
-          <div
-            className="tabletop-ghost"
-            style={boardCellToPercent({
-              xCell: drag.ghostPosition.xCell,
-              yCell: drag.ghostPosition.yCell,
-              grid: gridConfig,
-            })}
-            aria-hidden="true"
-          />
-        ) : null}
+                aria-hidden="true"
+              />
+            ) : null}
+          </div>
+        </div>
       </div>
 
       <aside ref={benchRef} className="tabletop-bench" aria-label="Off-board parking">
@@ -214,6 +279,3 @@ export function TabletopControlView({ grid, tokens, canEdit = true, onAfterMove 
 function pointerInRect(x: number, y: number, rect: DOMRect): boolean {
   return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
 }
-
-// Surface `cellKey` so adjacent debug tools can build occupancy sets identical to the engine.
-export { cellKey };

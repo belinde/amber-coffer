@@ -1,6 +1,6 @@
-mod commands;
-mod db;
-mod error;
+pub mod commands;
+pub mod db;
+pub mod error;
 mod models;
 mod services;
 mod validation_issue;
@@ -8,7 +8,7 @@ mod util;
 
 use std::sync::Arc;
 
-use db::RecordingState;
+use db::{RecordingState, TranscriptionState};
 use tauri::Manager;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -25,7 +25,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .setup(|app| {
@@ -39,16 +39,12 @@ pub fn run() {
                 std::fs::create_dir_all(&data_dir)
                     .map_err(|e| error::AppError::Internal(e.to_string()))?;
 
-                let db_path = data_dir.join("amber-coffer.db");
-                let pool = db::init_pool(
-                    db_path
-                        .to_str()
-                        .ok_or_else(|| error::AppError::Internal("invalid db path".into()))?,
-                )
-                .await?;
-
-                handle.manage(db::AppState::new(pool));
+                let app_state = db::AppState::new();
+                app_state.refresh_index(&handle)?;
+                handle.manage(app_state);
+                handle.manage(Arc::new(services::discord_setup::DiscordOAuthState::default()));
                 handle.manage(Arc::new(RecordingState::new()));
+                handle.manage(Arc::new(TranscriptionState::new()));
                 Ok::<(), error::AppError>(())
             })
             .map_err(|e| {
@@ -62,6 +58,7 @@ pub fn run() {
             commands::list_campaigns,
             commands::get_campaign,
             commands::create_campaign,
+            commands::ensure_poc_campaign,
             commands::update_campaign,
             commands::list_characters,
             commands::get_character,
@@ -115,8 +112,17 @@ pub fn run() {
             commands::create_session,
             commands::update_session,
             commands::delete_session,
+            commands::session_begin_play,
+            commands::session_end_play,
             commands::set_discord_bot_token,
             commands::has_discord_bot_token,
+            commands::discord_oauth_start,
+            commands::discord_oauth_clear,
+            commands::discord_list_admin_guilds,
+            commands::discord_open_bot_invite,
+            commands::discord_is_bot_in_guild,
+            commands::discord_list_voice_channels,
+            commands::discord_parse_bot_application_id,
             commands::session_start_recording,
             commands::session_stop_recording,
             commands::session_run_transcription,

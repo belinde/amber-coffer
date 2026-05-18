@@ -2,12 +2,11 @@ use std::sync::Arc;
 
 use tauri::{AppHandle, State};
 
-use crate::db::RecordingState;
-use crate::db::AppState;
+use crate::db::{AppState, RecordingState, TranscriptionState};
 use crate::error::AppError;
 use crate::models::Session;
 use crate::services::discord_recording::{
-    self, pipeline_state, run_transcription, start_recording, stop_recording, write_bot_token,
+    self, pipeline_state, start_recording, start_transcription, stop_recording, write_bot_token,
     SessionPipelineState,
 };
 
@@ -28,7 +27,8 @@ pub async fn session_start_recording(
     state: State<'_, AppState>,
     recording_state: State<'_, Arc<RecordingState>>,
 ) -> Result<Session, AppError> {
-    start_recording(&app, state.pool(), &session_id, recording_state.inner()).await
+    let pool = state.pool_for_entity_id(&app, &session_id).await?;
+    start_recording(&app, &pool, &session_id, recording_state.inner()).await
 }
 
 #[tauri::command]
@@ -38,7 +38,8 @@ pub async fn session_stop_recording(
     state: State<'_, AppState>,
     recording_state: State<'_, Arc<RecordingState>>,
 ) -> Result<Session, AppError> {
-    stop_recording(&app, state.pool(), &session_id, recording_state.inner()).await
+    let pool = state.pool_for_entity_id(&app, &session_id).await?;
+    stop_recording(&app, &pool, &session_id, recording_state.inner()).await
 }
 
 #[tauri::command]
@@ -46,8 +47,16 @@ pub async fn session_run_transcription(
     app: AppHandle,
     session_id: String,
     state: State<'_, AppState>,
+    transcription_state: State<'_, Arc<TranscriptionState>>,
 ) -> Result<Session, AppError> {
-    run_transcription(&app, state.pool(), &session_id).await
+    let pool = state.pool_for_entity_id(&app, &session_id).await?;
+    start_transcription(
+        app,
+        pool,
+        session_id,
+        transcription_state.inner().clone(),
+    )
+    .await
 }
 
 #[tauri::command]
@@ -56,6 +65,7 @@ pub async fn get_session_pipeline_state(
     session_id: String,
     state: State<'_, AppState>,
     recording_state: State<'_, Arc<RecordingState>>,
+    transcription_state: State<'_, Arc<TranscriptionState>>,
 ) -> Result<SessionPipelineState, AppError> {
     let active = recording_state
         .0
@@ -64,5 +74,13 @@ pub async fn get_session_pipeline_state(
         .as_ref()
         .map(|r| r.session_id == session_id)
         .unwrap_or(false);
-    pipeline_state(&app, state.pool(), &session_id, active).await
+    let pool = state.pool_for_entity_id(&app, &session_id).await?;
+    pipeline_state(
+        &app,
+        &pool,
+        &session_id,
+        active,
+        transcription_state.inner().as_ref(),
+    )
+    .await
 }

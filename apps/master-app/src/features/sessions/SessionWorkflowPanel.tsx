@@ -3,14 +3,16 @@ import type { ReactElement } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { formatInvokeErrorMessage } from '../../bridge/parse-invoke-error.js';
 import {
   getSessionPipelineState,
   sessionRunTranscription,
-  sessionStartRecording,
-  sessionStopRecording,
   type SessionPipelineState,
 } from '../../bridge/session-pipeline.js';
+import { getSession } from '../../bridge/sessions.js';
 import { Button } from '../../components/ui/Button.js';
+
+import { SessionRecordingControls } from './SessionRecordingControls.js';
 
 type Props = {
   session: Session;
@@ -20,6 +22,9 @@ type Props = {
 };
 
 type StepState = 'pending' | 'active' | 'done' | 'disabled';
+
+const PIPELINE_POLL_MS = 1500;
+const PIPELINE_POLL_FAST_MS = 400;
 
 function stepClass(state: StepState): string {
   return `session-workflow__step session-workflow__step--${state}`;
@@ -34,27 +39,53 @@ export function SessionWorkflowPanel({
   const { t } = useTranslation();
   const [pipeline, setPipeline] = useState<SessionPipelineState | null>(null);
   const [busy, setBusy] = useState(false);
+  const [transcriptionLaunching, setTranscriptionLaunching] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
-      setPipeline(await getSessionPipelineState(session.id));
+      const state = await getSessionPipelineState(session.id);
+      setPipeline(state);
+      if (state.status !== session.status) {
+        const row = await getSession(session.id);
+        if (row) onSessionUpdated(row);
+      }
     } catch (err) {
-      onError(err instanceof Error ? err.message : String(err));
+      onError(formatInvokeErrorMessage(err));
     }
-  }, [onError, session.id]);
+  }, [onError, onSessionUpdated, session.id, session.status]);
 
   useEffect(() => {
     void refresh();
   }, [refresh, session.status]);
 
-  async function runAction(action: () => Promise<Session>): Promise<void> {
+  const botReady = pipeline?.hasBotToken === true;
+  const transcriptionActive = pipeline?.transcriptionActive === true;
+  const isTranscribing = session.status === 'transcribing' || transcriptionActive;
+
+  useEffect(() => {
+    if (!isTranscribing && !transcriptionLaunching) return;
+    const intervalMs = transcriptionLaunching ? PIPELINE_POLL_FAST_MS : PIPELINE_POLL_MS;
+    const timer = window.setInterval(() => {
+      void refresh();
+    }, intervalMs);
+    return () => window.clearInterval(timer);
+  }, [isTranscribing, transcriptionLaunching, refresh]);
+
+  async function runTranscription(): Promise<void> {
+    setTranscriptionLaunching(true);
     setBusy(true);
     try {
-      onSessionUpdated(await action());
-      await refresh();
+      const updated = await sessionRunTranscription(session.id);
+      onSessionUpdated(updated);
+      const state = await getSessionPipelineState(session.id);
+      setPipeline(state);
+      if (updated.status !== 'transcribing' && !state.transcriptionActive) {
+        onError(t('sessionDetail.transcriptionNotStarted'));
+      }
     } catch (err) {
-      onError(err instanceof Error ? err.message : String(err));
+      onError(formatInvokeErrorMessage(err));
     } finally {
+      setTranscriptionLaunching(false);
       setBusy(false);
     }
   }
@@ -62,123 +93,197 @@ export function SessionWorkflowPanel({
   const recordingActive = pipeline?.recordingActive === true;
   const hasAudio = (pipeline?.recordingCount ?? 0) > 0 || pipeline?.hasManifest === true;
 
-  const canStart =
-    pipeline !== null &&
-    !recordingActive &&
-    pipeline.hasBotToken &&
-    ['planned', 'recording', 'recorded', 'transcribed'].includes(session.status);
-
-  const canStop = recordingActive;
   const canTranscribe =
+    botReady &&
     pipeline !== null &&
     !recordingActive &&
+    !transcriptionActive &&
     hasAudio &&
-    ['recorded', 'transcribing', 'transcribed'].includes(session.status);
+    ['recorded', 'transcribed'].includes(session.status);
 
-  const prepState: StepState = pipeline?.hasBotToken ? 'done' : 'active';
-  const recordState: StepState = recordingActive
-    ? 'active'
-    : hasAudio
-      ? 'done'
-      : pipeline?.hasBotToken
-        ? 'pending'
-        : 'disabled';
+  const transcriptionStalled =
+    session.status === 'transcribing' && !transcriptionActive && !pipeline?.hasRawTranscript;
+
+  const canRetryTranscription =
+    transcriptionStalled && botReady && pipeline !== null && !recordingActive && hasAudio;
+
+  const showTranscriptionProgress =
+    transcriptionLaunching || (isTranscribing && !transcriptionStalled);
+  const showTranscriptionAction =
+    (canTranscribe || canRetryTranscription) &&
+    !transcriptionLaunching &&
+    !showTranscriptionProgress;
+
+  const transcriptionProgressPercent = Math.round((pipeline?.transcriptionProgress ?? 0) * 100);
+
+  const recordState: StepState = pipeline?.transcriptionAttempted
+    ? 'done'
+    : recordingActive
+      ? 'active'
+      : hasAudio
+        ? 'done'
+        : 'pending';
+  const hasRawTranscript = pipeline?.hasRawTranscript === true;
+  const hasRefinedTranscript = pipeline?.hasRefinedTranscript === true;
+
   const transcribeState: StepState =
-    session.status === 'transcribed' || session.status === 'refining'
+    hasRawTranscript ||
+    session.status === 'transcribed' ||
+    session.status === 'refining' ||
+    session.status === 'refined'
       ? 'done'
-      : canTranscribe
-        ? 'pending'
-        : recordingActive
-          ? 'disabled'
-          : 'pending';
+      : showTranscriptionProgress || transcriptionLaunching
+        ? 'active'
+        : canTranscribe || canRetryTranscription
+          ? 'pending'
+          : recordingActive
+            ? 'disabled'
+            : 'pending';
+
+  const refineReady =
+    hasRawTranscript &&
+    !transcriptionActive &&
+    !transcriptionLaunching &&
+    !showTranscriptionProgress;
+
+  const refineState: StepState =
+    hasRefinedTranscript ||
+    session.status === 'refined' ||
+    session.status === 'validating' ||
+    session.status === 'published'
+      ? 'done'
+      : session.status === 'refining'
+        ? 'active'
+        : refineReady
+          ? 'pending'
+          : 'disabled';
 
   return (
     <section className="session-workflow" aria-labelledby="session-workflow-heading">
       <h3 id="session-workflow-heading">{t('sessionDetail.workflowTitle')}</h3>
 
-      <ol className="session-workflow__steps">
-        <li className={stepClass(prepState)}>
-          <div className="session-workflow__step-head">
-            <span className="session-workflow__step-index">1</span>
-            <span className="session-workflow__step-title">{t('sessionDetail.stepPrepare')}</span>
+      {pipeline === null ? (
+        <p className="empty-state">{t('common.loading')}</p>
+      ) : !botReady ? (
+        <div
+          className="info-banner info-banner--static session-workflow__bot-alert"
+          role="alert"
+          aria-labelledby="session-workflow-bot-alert-title"
+        >
+          <div className="info-banner__body">
+            <h4 id="session-workflow-bot-alert-title" className="info-banner__title">
+              {t('sessionDetail.workflowDiscordRequiredTitle')}
+            </h4>
+            <p className="info-banner__text">{t('sessionDetail.workflowDiscordRequiredHint')}</p>
+            {onConfigureDiscord ? (
+              <Button type="button" onClick={onConfigureDiscord}>
+                {t('sessionDetail.configureDiscord')}
+              </Button>
+            ) : null}
           </div>
-          <p className="session-workflow__step-hint">{t('sessionDetail.stepPrepareHint')}</p>
-          {!pipeline?.hasBotToken ? (
-            <p className="session-workflow__warn" role="status">
-              {t('liveSession.missingBotToken')}
+        </div>
+      ) : (
+        <ol className="session-workflow__steps">
+          <li className={stepClass(recordState)}>
+            <div className="session-workflow__step-head">
+              <span className="session-workflow__step-index">1</span>
+              <span className="session-workflow__step-title">{t('sessionDetail.stepRecord')}</span>
+            </div>
+            <SessionRecordingControls
+              session={session}
+              onSessionUpdated={(updated) => {
+                onSessionUpdated(updated);
+                void refresh();
+              }}
+              onError={onError}
+              onConfigureDiscord={onConfigureDiscord}
+              compact
+            />
+          </li>
+
+          <li className={stepClass(transcribeState)}>
+            <div className="session-workflow__step-head">
+              <span className="session-workflow__step-index">2</span>
+              <span className="session-workflow__step-title">
+                {t('sessionDetail.stepTranscribe')}
+              </span>
+            </div>
+            <p className="session-workflow__step-hint">{t('sessionDetail.stepTranscribeHint')}</p>
+            <dl className="session-workflow__meta">
+              <div>
+                <dt>{t('liveSession.hasRawTranscript')}</dt>
+                <dd>
+                  {pipeline.hasRawTranscript ? t('liveSession.valueYes') : t('liveSession.valueNo')}
+                </dd>
+              </div>
+            </dl>
+
+            {transcriptionStalled && !transcriptionLaunching ? (
+              <p className="session-workflow__warn" role="alert">
+                {t('sessionDetail.transcriptionStalled')}
+              </p>
+            ) : null}
+
+            {showTranscriptionProgress ? (
+              <div className="session-workflow__progress" role="status" aria-live="polite">
+                <p className="session-workflow__progress-label">
+                  {transcriptionLaunching
+                    ? t('sessionDetail.transcriptionStarting')
+                    : transcriptionActive
+                      ? t('sessionDetail.transcriptionRunning', {
+                          percent: transcriptionProgressPercent,
+                        })
+                      : t('sessionDetail.transcriptionFinalizing')}
+                </p>
+                <progress
+                  className="session-workflow__progress-bar"
+                  max={100}
+                  value={
+                    transcriptionLaunching || !transcriptionActive
+                      ? undefined
+                      : transcriptionProgressPercent
+                  }
+                />
+              </div>
+            ) : null}
+
+            {showTranscriptionAction ? (
+              <Button
+                type="button"
+                variant="primary"
+                disabled={busy}
+                onClick={() => void runTranscription()}
+              >
+                {canRetryTranscription
+                  ? t('sessionDetail.retryTranscription')
+                  : t('liveSession.runTranscription')}
+              </Button>
+            ) : null}
+          </li>
+
+          <li className={stepClass(refineState)}>
+            <div className="session-workflow__step-head">
+              <span className="session-workflow__step-index">3</span>
+              <span className="session-workflow__step-title">{t('sessionDetail.stepRefine')}</span>
+            </div>
+            <p className="session-workflow__step-hint">
+              {refineReady || refineState === 'active' || refineState === 'done'
+                ? t('sessionDetail.stepRefineReadyHint')
+                : t('sessionDetail.stepRefineHint')}
             </p>
-          ) : null}
-          {onConfigureDiscord ? (
-            <Button type="button" onClick={onConfigureDiscord}>
-              {t('sessionDetail.configureDiscord')}
-            </Button>
-          ) : null}
-        </li>
-
-        <li className={stepClass(recordState)}>
-          <div className="session-workflow__step-head">
-            <span className="session-workflow__step-index">2</span>
-            <span className="session-workflow__step-title">{t('sessionDetail.stepRecord')}</span>
-          </div>
-          <p className="session-workflow__step-hint">{t('sessionDetail.stepRecordHint')}</p>
-          <dl className="session-workflow__meta">
-            <div>
-              <dt>{t('liveSession.recordingActive')}</dt>
-              <dd>{recordingActive ? t('liveSession.valueYes') : t('liveSession.valueNo')}</dd>
-            </div>
-            <div>
-              <dt>{t('liveSession.trackCount')}</dt>
-              <dd>{pipeline?.recordingCount ?? 0}</dd>
-            </div>
-          </dl>
-          <div className="session-workflow__actions">
-            <Button
-              type="button"
-              variant="primary"
-              disabled={busy || !canStart}
-              onClick={() => void runAction(() => sessionStartRecording(session.id))}
-            >
-              {t('liveSession.startRecording')}
-            </Button>
-            <Button
-              type="button"
-              disabled={busy || !canStop}
-              onClick={() => void runAction(() => sessionStopRecording(session.id))}
-            >
-              {t('liveSession.stopRecording')}
-            </Button>
-          </div>
-        </li>
-
-        <li className={stepClass(transcribeState)}>
-          <div className="session-workflow__step-head">
-            <span className="session-workflow__step-index">3</span>
-            <span className="session-workflow__step-title">{t('sessionDetail.stepTranscribe')}</span>
-          </div>
-          <p className="session-workflow__step-hint">{t('sessionDetail.stepTranscribeHint')}</p>
-          <dl className="session-workflow__meta">
-            <div>
-              <dt>{t('liveSession.hasRawTranscript')}</dt>
-              <dd>{pipeline?.hasRawTranscript ? t('liveSession.valueYes') : t('liveSession.valueNo')}</dd>
-            </div>
-          </dl>
-          <Button
-            type="button"
-            disabled={busy || !canTranscribe}
-            onClick={() => void runAction(() => sessionRunTranscription(session.id))}
-          >
-            {t('liveSession.runTranscription')}
-          </Button>
-        </li>
-
-        <li className={stepClass('disabled')}>
-          <div className="session-workflow__step-head">
-            <span className="session-workflow__step-index">4</span>
-            <span className="session-workflow__step-title">{t('sessionDetail.stepRefine')}</span>
-          </div>
-          <p className="session-workflow__step-hint">{t('sessionDetail.stepRefineHint')}</p>
-        </li>
-      </ol>
+            {refineReady || refineState === 'done' ? (
+              <dl className="session-workflow__meta">
+                <div>
+                  <dt>{t('sessionDetail.hasRefinedTranscript')}</dt>
+                  <dd>
+                    {hasRefinedTranscript ? t('liveSession.valueYes') : t('liveSession.valueNo')}
+                  </dd>
+                </div>
+              </dl>
+            ) : null}
+          </li>
+        </ol>
+      )}
     </section>
   );
 }

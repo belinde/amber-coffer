@@ -11,11 +11,11 @@ Amber Coffer è un monorepo con app desktop (Tauri), web (Discord Activity), pac
 
 - **pnpm workspaces** per gestione dipendenze e linking interno
 - **Turborepo** per orchestrazione build/lint/test con cache
-- **ESLint 9 flat config** + **Prettier** per qualità codice
+- **ESLint 9 flat config** centralizzato in `eslint.config.mjs` (root) + **Prettier** per qualità codice
 - **Vitest** per test unitari TypeScript
 - **Husky** + **lint-staged** + **commitlint** (Conventional Commits)
 - **Changesets** per versioning futuro dei pacchetti
-- Config condivisa in `packages/tsconfig` e `packages/eslint-config`
+- Regole ESLint in `packages/eslint-config`; unico entrypoint `eslint.config.mjs` in root; TypeScript in `packages/tsconfig`
 
 ## Conseguenze
 

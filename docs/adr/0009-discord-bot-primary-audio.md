@@ -12,15 +12,15 @@ La decisione di prodotto (2026-05-17) allinea l'implementazione al bot Discord c
 ## Decisione
 
 1. **`discord_capture` è la sorgente audio primaria** per le sessioni live: processo `apps/discord-bot` (Node + discord.js + @discordjs/voice) orchestrato dal master-app.
-2. **Layout file** sotto `$APPDATA/amber-coffer/campaigns/<campaignId>/sessions/<sessionNumber>/`:
+2. **Layout file** sotto `$APPDATA/amber-coffer/worlds/<storageUuid>/sessions/<sessionNumber>/` (vedi [ADR 0002](./0002-local-first-storage.md)):
    - `audio/discord/<discordUserId>/<NNNN>.ogg` — chunk Opus per burst vocale / riconnessione (manifest v2, `sessionOffsetMs`)
    - `audio/manifest.json` — metadati a fine registrazione (`version: 2`, array `chunks`)
    - Legacy v1: singolo `<discordUserId>.wav` per partecipante (ancora leggibile da Whisper)
    - `transcripts/raw-merged.txt` — trascrizione grezza merged (in attesa di refinement)
    - `transcripts/segments.json` — segmenti strutturati Whisper
-3. **Token bot** in `tauri-plugin-store` (`discord.botToken`), mai in repository.
-4. **Canale vocale** da `campaign.discord_channel_id`; join one-click dal master-app.
-5. **STT offline** via sidecar `tools/sidecars/whisper/`; speaker identity da traccia Discord (no pyannote nel MVP).
+3. **Token bot** (BYOB del GM) in `tauri-plugin-store` (`discord.botToken`), globale per dispositivo, mai in repository. **Non** è il token dell’Application Amber Coffer del prodotto ([ADR 0012](./0012-amber-discord-application.md)).
+4. **Canale vocale** da `campaign.discordChannelId` in `campaign.json`; configurazione guidata in Impostazioni → Discord (OAuth utente Amber + invito bot GM + picker canali vocali), con fallback ID manuale; join one-click dal master-app.
+5. **STT offline** via sidecar `tools/sidecars/whisper/`; speaker identity da traccia Discord (no pyannote nel MVP). Pesi Whisper scaricati dal GM in Impostazioni → Modelli locali ([ADR 0010](./0010-local-model-artifacts-and-updates.md)); in sviluppo resta il venv monorepo.
 6. **Mic GM locale** (`gm_mic`): fuori scope di questo ADR; stesso contratto `AudioSource` quando verrà aggiunto.
 
 ## Conseguenze
@@ -49,5 +49,7 @@ La sezione «MVP solo mic GM» di ADR 0004 è **sostituita** da questo ADR per q
 ## Riferimenti
 
 - [0004-audio-source-extensibility.md](./0004-audio-source-extensibility.md)
+- [0010-local-model-artifacts-and-updates.md](./0010-local-model-artifacts-and-updates.md)
+- [0012-amber-discord-application.md](./0012-amber-discord-application.md) — OAuth wizard e Activity (client ID prodotto)
 - [poc-workflows.md](../migration/poc-workflows.md) §2
-- `apps/discord-bot/`, `tools/sidecars/whisper/`
+- `apps/discord-bot/`, `apps/master-app/src-tauri/src/services/discord_setup.rs`, `tools/sidecars/whisper/`

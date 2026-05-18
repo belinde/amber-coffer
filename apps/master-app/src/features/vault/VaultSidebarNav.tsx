@@ -10,7 +10,12 @@ import {
 } from './vault-nav-items.js';
 import { useVaultNavigationContext } from './VaultNavigationContext.js';
 
-export function VaultSidebarNav(): ReactElement {
+type Props = {
+  vaultNavActive: boolean;
+  onNavigate: () => void;
+};
+
+export function VaultSidebarNav({ vaultNavActive, onNavigate }: Props): ReactElement {
   const { t } = useTranslation();
   const { current, goTo } = useVaultNavigationContext();
 
@@ -18,7 +23,7 @@ export function VaultSidebarNav(): ReactElement {
     <nav className="sidebar-vault-nav" aria-label={t('vault.sidebarNav')}>
       <ul className="sidebar-vault-nav__list">
         {VAULT_SIDEBAR_NAV_ITEMS.map((item) => {
-          const active = isVaultNavItemActive(item, current);
+          const active = vaultNavActive && isVaultNavItemActive(item, current);
           return (
             <li key={item.id}>
               <Button
@@ -26,7 +31,10 @@ export function VaultSidebarNav(): ReactElement {
                 className={active ? 'sidebar-vault-nav__btn is-active' : 'sidebar-vault-nav__btn'}
                 icon={item.icon}
                 aria-current={active ? 'page' : undefined}
-                onClick={() => goTo(vaultViewForTarget(item.target))}
+                onClick={() => {
+                  onNavigate();
+                  goTo(vaultViewForTarget(item.target));
+                }}
               >
                 {t(item.labelKey)}
               </Button>

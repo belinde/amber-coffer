@@ -5,12 +5,15 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
+import { POC_CAMPAIGN_NAME } from '@amber/shared';
+
 import { extractCampaign } from './extract.js';
+import { resolveCampaignIdByName } from './resolve-campaign-id.js';
 import type { ExtractError, ExtractWarning } from './types.js';
 
 type CliArgs = {
   source: string;
-  campaignId: string;
+  campaignId: string | undefined;
   output: string;
   strict: boolean;
 };
@@ -18,19 +21,17 @@ type CliArgs = {
 const TOOL_ROOT = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
 
 function defaultPocSource(): string | undefined {
-  const candidates = [
-    resolve(TOOL_ROOT, '../../_readonly/campagna-poc'),
-    '/home/belinde/Campagna',
-  ];
+  const candidates = [resolve(TOOL_ROOT, '../../_readonly/campagna-poc'), '/home/belinde/Campagna'];
   return candidates.find((path) => existsSync(path));
 }
 
-function parseCliArgs(argv: string[]): CliArgs {
+async function parseCliArgs(argv: string[]): Promise<CliArgs> {
   const { values } = parseArgs({
     args: argv,
     options: {
       source: { type: 'string' },
       'campaign-id': { type: 'string' },
+      'campaign-name': { type: 'string' },
       output: { type: 'string' },
       strict: { type: 'boolean', default: false },
     },
@@ -38,22 +39,43 @@ function parseCliArgs(argv: string[]): CliArgs {
   });
 
   const sourceRaw = values.source ?? process.env.AMBER_POC_SOURCE ?? defaultPocSource();
-  const campaignId = values['campaign-id'] ?? process.env.AMBER_CAMPAIGN_ID;
+  let campaignId = values['campaign-id'] ?? process.env.AMBER_CAMPAIGN_ID;
+  const campaignName =
+    values['campaign-name'] ?? process.env.AMBER_CAMPAIGN_NAME ?? POC_CAMPAIGN_NAME;
   const outputRaw = values.output ?? process.env.AMBER_DUMP_OUTPUT ?? 'campaign-dump.json';
 
-  if (!sourceRaw || !campaignId) {
+  if (!sourceRaw) {
     process.stderr.write(
       [
-        'Usage: amber-migrate-from-poc --source <path> --campaign-id <uuid-v7> [--output <file>] [--strict]',
+        'Usage: amber-migrate-from-poc --source <path> [--campaign-id <uuid-v7> | --campaign-name <name>] [--output <file>] [--strict]',
         '',
         'Defaults:',
         '  --output ./campaign-dump.json (relative to cwd)',
         '  --source $AMBER_POC_SOURCE or _readonly/campagna-poc when present',
-        '  --campaign-id $AMBER_CAMPAIGN_ID',
+        '  --campaign-name $AMBER_CAMPAIGN_NAME or "La corsa al Nuovo Mondo"',
+        '  --campaign-id $AMBER_CAMPAIGN_ID (overrides --campaign-name)',
+        '',
+        'If only --campaign-name is set, reads ~/.local/share/click.belinde.ambercoffer/worlds/*/campaign.json.',
+        'Create the campaign first via master-app ensurePocCampaign() when missing.',
         '',
       ].join('\n'),
     );
     process.exit(2);
+  }
+
+  if (!campaignId) {
+    campaignId = await resolveCampaignIdByName(campaignName);
+    if (!campaignId) {
+      process.stderr.write(
+        [
+          `No campaign named "${campaignName}" found in master-app storage.`,
+          'Run ensurePocCampaign() in the master-app (or create the campaign manually), then re-run extract.',
+          '',
+        ].join('\n'),
+      );
+      process.exit(2);
+    }
+    process.stderr.write(`Resolved campaign id from name "${campaignName}": ${campaignId}\n`);
   }
 
   return {
@@ -75,10 +97,10 @@ function printIssues(label: string, issues: ExtractWarning[] | ExtractError[]): 
 
 async function main(): Promise<void> {
   const argv = process.argv.slice(2).filter((arg) => arg !== '--');
-  const args = parseCliArgs(argv);
+  const args = await parseCliArgs(argv);
   const dump = await extractCampaign({
     rootPath: args.source,
-    campaignId: args.campaignId,
+    campaignId: args.campaignId!,
     strict: args.strict,
   });
 
@@ -91,6 +113,7 @@ async function main(): Promise<void> {
   );
   process.stdout.write(`Wrote ${args.output}\n`);
   process.stdout.write(`Source: ${args.source}\n`);
+  process.stdout.write(`Campaign id: ${args.campaignId}\n`);
   process.stdout.write(`Entities: ${JSON.stringify(totals)}\n`);
   process.stdout.write(`Assets: ${dump.assets.length}\n`);
   process.stdout.write(`Warnings: ${warnings.length}, errors: ${errors.length}\n`);

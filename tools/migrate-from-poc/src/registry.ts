@@ -37,6 +37,13 @@ export class EntityRegistry {
     return this.bySlug.get(slug);
   }
 
+  private entryForId(id: string): RegistryEntry | undefined {
+    for (const entry of this.bySlug.values()) {
+      if (entry.id === id) return entry;
+    }
+    return undefined;
+  }
+
   /** Maps a recap label (e.g. "Il Mississippi") to a canonical entity id. */
   registerAlias(alias: string, id: string): void {
     this.aliasToId.set(normalizeName(alias), id);
@@ -50,6 +57,12 @@ export class EntityRegistry {
     const normalized = normalizeName(name);
     const aliasId = this.aliasToId.get(normalized);
     if (aliasId) {
+      if (kinds) {
+        const entry = this.entryForId(aliasId);
+        if (!entry || !kinds.includes(entry.kind)) {
+          return undefined;
+        }
+      }
       return aliasId;
     }
 

@@ -7,6 +7,7 @@ pub struct Session {
     pub campaign_id: String,
     pub number: i32,
     pub title: Option<String>,
+    pub play_state: String,
     pub status: String,
     pub started_at: Option<i64>,
     pub ended_at: Option<i64>,

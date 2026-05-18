@@ -1,6 +1,10 @@
 {
+  "product": {
+    "masterScreen": "Master Screen",
+    "gameTable": "Game table"
+  },
   "app": {
-    "title": "Amber Coffer — The Amber",
-    "subtitle": "Tactical tabletop for players"
+    "title": "Amber Coffer — Game table",
+    "subtitle": "Game table for players"
   }
 }

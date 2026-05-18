@@ -19,6 +19,8 @@ POC Markdown tree
    SQLite locale + asset L1
 ```
 
+La campagna target è **«La corsa al Nuovo Mondo»** (`POC_CAMPAIGN_NAME` in `@amber/shared`). Lo stadio 2 la trova per nome o la crea; lo stadio 1 richiede lo stesso `campaignId` nel dump.
+
 ## Uso
 
 ```bash
@@ -29,24 +31,28 @@ pnpm install
 pnpm --filter @amber/shared build
 pnpm --filter @amber/migrate-from-poc build
 
-# Genera un campaignId (UUID v7)
-pnpm --filter @amber/shared exec node -e "import('@amber/shared').then(m => console.log(m.generateUuidV7()))"
+# 1a. In master-app (DevTools / bridge): crea o trova la campagna POC
+#     const { campaignId } = await ensurePocCampaign();
 
-# 1. Crea la campagna nel master-app con quell'id, poi estrai (scrivi sempre campaign-dump.json in tools/migrate-from-poc/):
-export AMBER_CAMPAIGN_ID=<uuid-v7>
-pnpm --filter @amber/migrate-from-poc run extract -- --source /home/belinde/Campagna
+# 1b. Estrai (risolve l'id da nome se omesso --campaign-id):
+pnpm --filter @amber/migrate-from-poc run extract -- \
+  --source /home/belinde/Campagna \
+  --output ./campaign-dump.json
 
-# Oppure tutto esplicito:
+# Oppure con id esplicito:
 pnpm --filter @amber/migrate-from-poc run extract -- \
   --source /home/belinde/Campagna \
   --campaign-id <uuid-v7> \
   --output ./campaign-dump.json
 
-# 2. Import in SQLite (da master-app / DevTools o bridge):
-# importCampaignDump({ dumpPath: '...', campaignId: '<uuid>' })
+# 2. Import in SQLite (master-app bridge):
+# importCampaignDump({ dumpPath: '/path/to/campaign-dump.json' })
+# → find/create «La corsa al Nuovo Mondo», import, report.campaignCreated
 ```
 
-Opzioni: `--strict` abortisce se `errors[]` non è vuoto.
+Opzioni extract: `--campaign-name` (default `La corsa al Nuovo Mondo`), `--strict` (abort se `errors[]` non vuoto).
+
+`playerDiscordId` sui PG resta `null` dopo l'import: assegnare gli ID Discord a mano in master-app (`Giocatore` nel POC è solo informativo).
 
 ## Output
 
@@ -56,18 +62,11 @@ Opzioni: `--strict` abortisce se `errors[]` non è vuoto.
   "sourceMeta": { "rootPath": "...", "extractedAt": 0, "files": 47 },
   "campaignId": "...",
   "entities": {
-    "characters": [],
-    "npcs": [],
-    "locations": [],
-    "factions": [],
-    "loreNotes": [],
-    "narrativeSeeds": [],
-    "sessions": [],
-    "campaignImages": []
+    /* ... */
   },
-  "assets": [{ "entityKind": "npc", "entityId": "...", "sourcePath": "...", "relativeLocal": "..." }],
+  "assets": [],
   "warnings": [],
-  "errors": []
+  "errors": [],
 }
 ```
 

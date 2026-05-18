@@ -57,6 +57,15 @@ pub fn validate_faction_kind(kind: Option<&str>) -> Result<(), AppError> {
     }
 }
 
+pub fn validate_session_play_state(play_state: &str) -> Result<(), AppError> {
+    const STATES: &[&str] = &["preparing", "live", "ended"];
+    if STATES.contains(&play_state) {
+        Ok(())
+    } else {
+        Err(enum_invalid(&["playState"]))
+    }
+}
+
 pub fn validate_session_status(status: &str) -> Result<(), AppError> {
     const STATUSES: &[&str] = &[
         "planned",

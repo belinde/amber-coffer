@@ -1,13 +1,13 @@
 # Amber Coffer
 
-Narrative OS local-first per Game Master: desktop app (The Coffer), Discord Activity (The Amber), sincronizzazione cloud via AWS IoT Core.
+Narrative OS local-first per Game Master: **Amber Coffer** — Schermo del master (desktop GM), Tavolo di gioco (Discord Activity), sincronizzazione cloud via AWS IoT Core.
 
 ## Requisiti
 
 - Node.js 22 LTS (`nvm use` — vedi `.nvmrc`)
 - pnpm 9+
 - Rust stable (per `apps/master-app`)
-- Python 3.11+ (per sidecar Whisper, fase successiva)
+- Python 3.11+ (solo **sviluppo** del sidecar Whisper in `tools/sidecars/whisper/`; gli utenti dell'app distribuita scaricano i modelli da Impostazioni — vedi [ADR 0010](docs/adr/0010-local-model-artifacts-and-updates.md))
 - **Linux (Tauri)**: dipendenze di sistema per GTK/WebKit, es. su Debian/Ubuntu:
   `sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libssl-dev libayatana-appindicator3-dev librsvg2-dev`
 
@@ -51,7 +51,7 @@ amber-coffer/
     tsconfig/         # Config TypeScript condivisa
     eslint-config/    # Config ESLint condivisa
   infrastructure/     # AWS CDK (TypeScript)
-  tools/sidecars/     # Whisper STT (Python)
+  tools/sidecars/     # Whisper STT (dev: Python; release: binario + pesi via Model Manager)
   docs/               # Documentazione di progetto (italiano)
 ```
 

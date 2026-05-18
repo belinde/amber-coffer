@@ -6,7 +6,8 @@ export const mapSchema = z.object({
   id: mapIdSchema,
   campaignId: campaignIdSchema,
   name: z.string().min(1),
-  imagePath: z.string().min(1),
+  /** Empty until a map background image is assigned (Rust stores `''` for new maps). */
+  imagePath: z.string(),
   widthPx: z.number().int().positive(),
   heightPx: z.number().int().positive(),
   gridSizePx: z.number().int().positive().default(50),

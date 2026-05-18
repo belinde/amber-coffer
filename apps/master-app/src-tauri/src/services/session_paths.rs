@@ -1,30 +1,22 @@
 use std::path::{Path, PathBuf};
 
 use tauri::AppHandle;
-use tauri::Manager;
 
 use crate::error::{AppError, AppResult};
+use crate::services::campaign_storage;
 
 /// Monorepo root (three levels above `src-tauri`).
 pub fn monorepo_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../..")
 }
 
-pub fn app_data_dir(handle: &AppHandle) -> AppResult<PathBuf> {
-    handle
-        .path()
-        .app_data_dir()
-        .map_err(|e| AppError::Internal(e.to_string()))
-}
-
-pub fn campaigns_root(handle: &AppHandle) -> AppResult<PathBuf> {
-    Ok(app_data_dir(handle)?.join("campaigns"))
+pub fn campaign_root(handle: &AppHandle, campaign_id: &str) -> AppResult<PathBuf> {
+    campaign_storage::resolve_storage_folder(handle, campaign_id)
 }
 
 /// Absolute directory for a session workspace.
 pub fn session_dir(handle: &AppHandle, campaign_id: &str, session_number: i32) -> AppResult<PathBuf> {
-    Ok(campaigns_root(handle)?
-        .join(campaign_id)
+    Ok(campaign_root(handle, campaign_id)?
         .join("sessions")
         .join(session_number.to_string()))
 }
@@ -46,13 +38,9 @@ pub fn relative_to_campaign(campaign_root: &Path, absolute: &Path) -> AppResult<
     let rel = absolute
         .strip_prefix(campaign_root)
         .map_err(|_| AppError::Internal("path outside campaign root".into()))?;
-  Ok(rel
+    Ok(rel
         .to_string_lossy()
         .replace('\\', "/"))
-}
-
-pub fn campaign_root(handle: &AppHandle, campaign_id: &str) -> AppResult<PathBuf> {
-    Ok(campaigns_root(handle)?.join(campaign_id))
 }
 
 pub fn ensure_session_dirs(handle: &AppHandle, campaign_id: &str, session_number: i32) -> AppResult<PathBuf> {

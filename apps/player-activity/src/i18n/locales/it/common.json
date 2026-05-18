@@ -1,6 +1,10 @@
 {
+  "product": {
+    "masterScreen": "Lo schermo del master",
+    "gameTable": "Tavolo di gioco"
+  },
   "app": {
-    "title": "Amber Coffer — L'Ambra",
-    "subtitle": "Tavolo tattico per giocatori"
+    "title": "Amber Coffer — Tavolo di gioco",
+    "subtitle": "Tavolo di gioco per i giocatori"
   }
 }

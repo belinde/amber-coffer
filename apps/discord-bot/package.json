@@ -11,8 +11,10 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "start": "node dist/cli.js",
-    "lint": "eslint src",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "generate:announcements": "node scripts/generate-announcements.mjs",
+    "lint": "pnpm -w exec eslint apps/discord-bot/src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@amber/shared": "workspace:*",
@@ -24,10 +26,9 @@
     "sodium-native": "^4.3.3"
   },
   "devDependencies": {
-    "@amber/eslint-config": "workspace:*",
     "@amber/tsconfig": "workspace:*",
     "@types/node": "^22.13.4",
-    "eslint": "^9.18.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.4"
   }
 }

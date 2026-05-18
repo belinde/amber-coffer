@@ -11,6 +11,7 @@ import {
   Eye,
   Flag,
   FloppyDisk,
+  Globe,
   IdentificationCard,
   Images,
   Lightbulb,
@@ -21,6 +22,8 @@ import {
   Palette,
   PencilSimple,
   Plus,
+  Record,
+  Stop,
   Target,
   Tag,
   Trash,
@@ -28,6 +31,7 @@ import {
   X,
   MaskHappy,
   MapTrifold,
+  GearSix,
 } from '@phosphor-icons/react';
 
 import type { SectionId } from '../../features/vault/entity-sections.config.js';
@@ -43,6 +47,8 @@ export const ActionIcons = {
   edit: PencilSimple,
   dismiss: X,
   create: Plus,
+  record: Record,
+  stop: Stop,
 } as const;
 
 export function iconForVaultCategory(category: VaultCategory): Icon {
@@ -56,7 +62,7 @@ export function iconForVaultCategory(category: VaultCategory): Icon {
     case 'factions':
       return Flag;
     case 'lore_notes':
-      return BookOpen;
+      return Globe;
     case 'narrative_seeds':
       return Lightbulb;
     default: {
@@ -109,4 +115,10 @@ export function iconForSection(sectionId: SectionId): Icon {
   }
 }
 
-export { Link as ConnectionsIcon, CalendarBlank as SessionsIcon, Images as ImagesIcon };
+export {
+  GearSix as SettingsIcon,
+  Link as ConnectionsIcon,
+  CalendarBlank as SessionsIcon,
+  Images as ImagesIcon,
+  BookOpen as CampaignVaultIcon,
+};

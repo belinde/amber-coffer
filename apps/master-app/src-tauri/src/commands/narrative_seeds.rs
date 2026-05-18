@@ -1,4 +1,4 @@
-use tauri::State;
+use tauri::{AppHandle, State};
 use uuid::Uuid;
 
 use crate::commands::vault_validate::validate_seed_status;
@@ -20,14 +20,16 @@ const NARRATIVE_SEED_SELECT: &str = r#"
 #[tauri::command]
 pub async fn list_narrative_seeds(
     campaign_id: String,
+    app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<Vec<NarrativeSeed>, AppError> {
+    let pool = state.pool_for_campaign(&app, &campaign_id).await?;
     let query = format!(
         "{NARRATIVE_SEED_SELECT} WHERE campaign_id = ? ORDER BY title COLLATE NOCASE"
     );
     let rows = sqlx::query_as::<_, NarrativeSeedRow>(&query)
         .bind(&campaign_id)
-        .fetch_all(state.pool())
+        .fetch_all(&pool)
         .await?;
 
     Ok(rows.into_iter().map(NarrativeSeed::from_row).collect())
@@ -36,12 +38,14 @@ pub async fn list_narrative_seeds(
 #[tauri::command]
 pub async fn get_narrative_seed(
     id: String,
+    app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<Option<NarrativeSeed>, AppError> {
+    let pool = state.pool_for_entity_id(&app, &id).await?;
     let query = format!("{NARRATIVE_SEED_SELECT} WHERE id = ?");
     let row = sqlx::query_as::<_, NarrativeSeedRow>(&query)
         .bind(&id)
-        .fetch_optional(state.pool())
+        .fetch_optional(&pool)
         .await?;
 
     Ok(row.map(NarrativeSeed::from_row))
@@ -50,6 +54,7 @@ pub async fn get_narrative_seed(
 #[tauri::command]
 pub async fn create_narrative_seed(
     input: CreateNarrativeSeedInput,
+    app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<NarrativeSeed, AppError> {
     let title = input.title.trim();
@@ -57,8 +62,10 @@ pub async fn create_narrative_seed(
         return Err(required_field(&["title"]));
     }
     validate_seed_status(&input.status)?;
-    ensure_campaign_exists(state.pool(), &input.campaign_id).await?;
+    ensure_campaign_exists(&app, &input.campaign_id).await?;
 
+
+    let pool = state.pool_for_campaign(&app, &input.campaign_id).await?;
     let id = Uuid::now_v7().to_string();
     let now = now_ms();
     let tags_json = serde_json::to_string(&input.tags)?;
@@ -84,10 +91,10 @@ pub async fn create_narrative_seed(
     .bind(&input.first_session_id)
     .bind(now)
     .bind(now)
-    .execute(state.pool())
+    .execute(&pool)
     .await?;
 
-    get_narrative_seed(id, state).await?.ok_or_else(|| {
+    get_narrative_seed(id, app, state).await?.ok_or_else(|| {
         AppError::Internal("narrative seed insert succeeded but row missing".into())
     })
 }
@@ -95,6 +102,7 @@ pub async fn create_narrative_seed(
 #[tauri::command]
 pub async fn update_narrative_seed(
     input: UpdateNarrativeSeedInput,
+    app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<NarrativeSeed, AppError> {
     let title = input.title.trim();
@@ -103,10 +111,11 @@ pub async fn update_narrative_seed(
     }
     validate_seed_status(&input.status)?;
 
-    let existing = get_narrative_seed(input.id.clone(), state.clone())
+    let existing = get_narrative_seed(input.id.clone(), app.clone(), state.clone())
         .await?
         .ok_or_else(|| AppError::NotFound("narrative_seed".into()))?;
 
+    let pool = state.pool_for_campaign(&app, &existing.campaign_id).await?;
     let now = now_ms();
     let tags_json = serde_json::to_string(&input.tags)?;
     let linked_entities_json = serde_json::to_string(&input.linked_entities)?;
@@ -130,23 +139,27 @@ pub async fn update_narrative_seed(
     .bind(now)
     .bind(next_version)
     .bind(&input.id)
-    .execute(state.pool())
+    .execute(&pool)
     .await?;
 
     if updated.rows_affected() == 0 {
         return Err(AppError::NotFound("narrative_seed".into()));
     }
 
-    get_narrative_seed(input.id, state).await?.ok_or_else(|| {
+    get_narrative_seed(input.id, app, state).await?.ok_or_else(|| {
         AppError::Internal("narrative seed update succeeded but row missing".into())
     })
 }
 
 #[tauri::command]
-pub async fn delete_narrative_seed(id: String, state: State<'_, AppState>) -> Result<(), AppError> {
+pub async fn delete_narrative_seed(
+    id: String,
+    app: AppHandle,
+    state: State<'_, AppState>) -> Result<(), AppError> {
+    let pool = state.pool_for_entity_id(&app, &id).await?;
     let result = sqlx::query("DELETE FROM narrative_seeds WHERE id = ?")
         .bind(&id)
-        .execute(state.pool())
+        .execute(&pool)
         .await?;
 
     if result.rows_affected() == 0 {

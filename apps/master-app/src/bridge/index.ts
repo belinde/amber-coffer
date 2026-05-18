@@ -23,7 +23,24 @@ export {
  * Business logic lives in Rust; this module is the sole IPC boundary from the renderer.
  */
 
-export { importCampaignDump, type ImportCampaignReport } from './migrate.js';
+export {
+  ensurePocCampaign,
+  importCampaignDump,
+  type EnsurePocCampaignResult,
+  type ImportCampaignDumpInput,
+  type ImportCampaignReport,
+} from './migrate.js';
+export {
+  discordIsBotInGuild,
+  discordListAdminGuilds,
+  discordListVoiceChannels,
+  discordOauthClear,
+  discordOauthStart,
+  discordOpenBotInvite,
+  discordParseBotApplicationId,
+  type DiscordGuildOption,
+  type DiscordVoiceChannelOption,
+} from './discord-setup.js';
 
 export async function ping(): Promise<string> {
   return invoke<string>('ping');

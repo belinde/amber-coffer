@@ -1,7 +1,63 @@
 {
+  "product": {
+    "masterScreen": "Pantalla del master",
+    "gameTable": "Mesa de juego"
+  },
   "app": {
-    "title": "Amber Coffer — The Coffer",
+    "title": "Amber Coffer — Pantalla del master",
     "subtitle": "Narrative OS para directores de juego"
+  },
+  "settings": {
+    "title": "Discord",
+    "sidebarLink": "Discord",
+    "discordPageHint": "Configura tu bot de grabación en este equipo. Vincula servidor y canal de voz por campaña en Vault › Campaña › Discord.",
+    "discord": {
+      "needCampaign": "Crea o selecciona una campaña para conectarla a Discord. El token del bot de arriba aplica a todas las campañas en este equipo.",
+      "infoAside": {
+        "title": "Bot de grabación",
+        "identityTitle": "Tú en el servidor",
+        "identityBody": "Un solo bot para esta instalación de Amber Coffer, para todas las campañas. Es tu presencia como master en el servidor: el nombre que eliges. Otro ordenador = otro bot.",
+        "whyTitle": "Tus responsabilidades",
+        "whyBody": "Crear el bot es tu decisión. Invítalo solo a servidores donde puedas grabar e informa al grupo si hace falta. El token es secreto: no lo compartas; quien lo tenga actúa como tu bot. Si se filtra, regénéralo en el portal. Amber Coffer no escucha a los jugadores en nuestros servidores: el audio pasa por tu bot en tu Discord.",
+        "howTitle": "Crearlo en el portal",
+        "step1": "Abre el portal de desarrolladores (botón a la izquierda) con tu cuenta de Discord.",
+        "step2": "Crea una aplicación nueva y ponle un nombre reconocible (p. ej. Narrador).",
+        "step3": "Abre la pestaña Bot y añade el bot si Discord lo pide.",
+        "step4": "Copia el token, pégalo a la izquierda y guarda. No se lo envíes a nadie.",
+        "step5": "Para grabar solo voz suele no hacer falta cambiar nada más en la pestaña Bot.",
+        "wizardNote": "Luego guarda el token si falta y vincula servidor y canal de voz en la página Campaña del Vault."
+      },
+      "botSetup": {
+        "title": "Bot de grabación (este dispositivo)",
+        "hint": "Crea tu bot de Discord una vez; el token permanece en este equipo y no se sincroniza.",
+        "openPortal": "Abrir portal de desarrolladores de Discord",
+        "stepCreate": "New Application → nombre → pestaña Bot.",
+        "stepBotToken": "Reset Token → copiar → pegar abajo → Guardar token.",
+        "stepIntents": "En Bot, activa intents privilegiados solo si Discord lo pide; para solo voz suele bastar el predeterminado.",
+        "applicationId": "ID de aplicación detectado: {{id}}"
+      },
+      "campaignWizard": {
+        "title": "Conectar campaña a Discord",
+        "hint": "Inicia sesión en Discord para elegir el servidor e invitar tu bot.",
+        "needToken": "Guarda primero el token del bot en la sección superior.",
+        "configureToken": "Ir al token del bot",
+        "loginDiscord": "Iniciar sesión con Discord",
+        "selectGuild": "Servidor",
+        "guildPlaceholder": "Elige un servidor que administres…",
+        "botPresent": "bot ya invitado",
+        "inviteHint": "Invita tu bot a «{{name}}» y continúa.",
+        "inviteBot": "Abrir invitación en el navegador",
+        "continue": "Continuar",
+        "botNotInGuild": "El bot aún no está en ese servidor. Completa la invitación e inténtalo de nuevo.",
+        "botMaybePresent": "Si ya invitaste el bot, pulsa Continuar.",
+        "selectChannel": "Canal de voz",
+        "channelPlaceholder": "Elige un canal de voz…",
+        "stage": "escenario",
+        "saveChannel": "Guardar canal de voz",
+        "advanced": "Avanzado: pegar ID de canal manualmente",
+        "currentChannel": "ID de canal de voz actual: {{id}}"
+      }
+    }
   },
   "nav": {
     "characters": "Personajes jugadores",
@@ -22,7 +78,9 @@
     "none": "— Ninguno —"
   },
   "validation": {
-    "generic": { "invalid": "Valor no válido" },
+    "generic": {
+      "invalid": "Valor no válido"
+    },
     "string": {
       "min_length": "Introduce al menos {{min}} caracteres",
       "max_length": "Máximo {{max}} caracteres",
@@ -33,9 +91,16 @@
       "min_length": "Al menos {{min}} elementos",
       "max_length": "Máximo {{max}} elementos"
     },
-    "number": { "min": "Mínimo: {{min}}", "max": "Máximo: {{max}}" },
-    "type": { "invalid": "Tipo no válido" },
-    "enum": { "invalid": "Opción no válida" },
+    "number": {
+      "min": "Mínimo: {{min}}",
+      "max": "Máximo: {{max}}"
+    },
+    "type": {
+      "invalid": "Tipo no válido"
+    },
+    "enum": {
+      "invalid": "Opción no válida"
+    },
     "image": {
       "unsupported_format": "Formato de imagen no admitido (usa JPEG, PNG, WebP o GIF)"
     }
@@ -62,7 +127,50 @@
     "none": "— Seleccionar —",
     "create": "Nueva campaña",
     "createPrompt": "Nombre de la campaña:",
-    "selectHint": "Crea o selecciona una campaña para gestionar los datos del mundo."
+    "createName": "Nombre de la campaña",
+    "createConfirm": "Crear campaña",
+    "selectHint": "Crea o selecciona una campaña para gestionar los datos del mundo.",
+    "createDisabledLive": "No se puede crear una campaña durante una sesión en juego.",
+    "sectionNav": "Secciones de campaña",
+    "tabs": {
+      "general": "General",
+      "discord": "Discord"
+    },
+    "metadataTitle": "Datos de campaña",
+    "nameLabel": "Nombre",
+    "catchphraseLabel": "Catchphrase",
+    "playLanguage": "Idioma de juego",
+    "playLanguageHint": "Idioma en el que jugáis en la mesa. Se usa para los avisos de grabación en Discord y la transcripción.",
+    "playLanguageSave": "Guardar idioma de juego",
+    "playLanguageOptions": {
+      "it": "Italiano",
+      "en": "Inglés",
+      "fr": "Francés",
+      "es": "Español"
+    },
+    "discord": {
+      "title": "Conectar campaña a Discord",
+      "hint": "Inicia sesión con Discord para elegir un servidor e invitar tu bot de grabación.",
+      "needToken": "Configura primero el token del bot en Discord (barra lateral).",
+      "configureToken": "Ir al token del bot",
+      "loginDiscord": "Iniciar sesión con Discord",
+      "selectGuild": "Servidor",
+      "guildPlaceholder": "Elige un servidor que administres…",
+      "botPresent": "bot ya invitado",
+      "inviteHint": "Invita al bot a «{{name}}» y continúa.",
+      "inviteBot": "Abrir invitación en el navegador",
+      "continue": "Continuar",
+      "botNotInGuild": "El bot aún no está en ese servidor. Completa la invitación e inténtalo de nuevo.",
+      "botMaybePresent": "Si ya invitaste al bot, haz clic en Continuar.",
+      "selectChannel": "Canal de voz",
+      "channelPlaceholder": "Elige un canal de voz…",
+      "stage": "escenario",
+      "saveChannel": "Guardar canal de voz",
+      "advanced": "Avanzado: pegar ID del canal manualmente",
+      "currentChannel": "Canal de voz actual: {{id}}",
+      "manualChannelId": "ID del canal de voz",
+      "manualChannelPlaceholder": "ID numérico del canal"
+    }
   },
   "character": {
     "listTitle": "Personajes jugadores",
@@ -184,7 +292,7 @@
   "liveSession": {
     "pipelineTitle": "Audio y transcripción",
     "pipelineHint": "Invita el bot de la campaña al canal de voz de Discord, graba la sesión y ejecuta la transcripción sin conexión. El texto en bruto se guarda en la carpeta de la sesión.",
-    "missingBotToken": "Configura el token del bot de Discord abajo antes de grabar.",
+    "missingBotToken": "Configura el token del bot de Discord en Ajustes → Discord antes de grabar.",
     "recordingActive": "Grabación",
     "trackCount": "Pistas de audio",
     "hasRawTranscript": "Archivo de transcripción en bruto",
@@ -203,7 +311,18 @@
     "botTokenReplacePlaceholder": "Pegar nuevo token",
     "botTokenConfigured": "Hay un token guardado en este dispositivo.",
     "botTokenMissing": "Aún no hay token del bot.",
-    "saveBotToken": "Guardar token"
+    "saveBotToken": "Guardar token",
+    "discordSetupHelpButton": "Cómo obtener esta información",
+    "discordSetupAlertWhyTitle": "POR QUÉ necesitas tu propio bot",
+    "discordSetupAlertWhy": "Amber Coffer graba el audio de la sesión desde tu canal de voz de Discord mediante un bot que controlas tú. No usamos un bot centralizado del proyecto porque el token da acceso a tu servidor (solo en este equipo, nunca sincronizado), cada campaña tiene su propio canal de voz y los permisos de Discord varían según el servidor. Tú mantienes el control de tus datos y de tu servidor.",
+    "discordSetupAlertStepsTitle": "PROCEDIMIENTO",
+    "discordSetupAlertStep1": "1. Abre https://discord.com/developers/applications e inicia sesión con tu cuenta de Discord.",
+    "discordSetupAlertStep2": "2. Haz clic en «New Application», elige un nombre (p. ej. «Bot de campaña») y confirma.",
+    "discordSetupAlertStep3": "3. Pestaña «Bot» → «Reset Token» (o «View Token») → copia el token → pégalo arriba y pulsa «Guardar token». No lo compartas con nadie.",
+    "discordSetupAlertStep4": "4. En «Bot», activa los intents privilegiados que pida Discord si hace falta (para solo grabación de voz normalmente no hace falta «Message Content»).",
+    "discordSetupAlertStep5": "5. Pestaña «OAuth2» → «URL Generator»: scope «bot», permisos «Connect» y «Use Voice Activity» (opcional «Speak») → copia la URL → ábrela en el navegador e invita al bot a tu servidor de campaña.",
+    "discordSetupAlertStep6": "6. En Discord (app o web): Ajustes de usuario → «Avanzado» → activa «Modo desarrollador». Clic derecho en el canal de voz de la sesión → «Copiar ID del canal» → pégalo arriba y pulsa «Guardar canal».",
+    "discordSetupAlertStep7": "7. Al iniciar la grabación, el bot entra en ese canal y guarda una pista de audio por participante para la transcripción offline."
   },
   "session": {
     "listTitle": "Sesiones de campaña",
@@ -232,6 +351,11 @@
       "refined": "Refinada",
       "validating": "En validación",
       "published": "Publicada"
+    },
+    "playState": {
+      "preparing": "Preparación",
+      "live": "En juego",
+      "ended": "Finalizada"
     }
   },
   "sessionDetail": {
@@ -239,21 +363,67 @@
     "metadataSave": "Guardar",
     "workflowTitle": "Flujo de sesión",
     "stepPrepare": "Preparación",
-    "stepPrepareHint": "Configura el token del bot y el canal de voz en la lista de sesiones antes de grabar.",
-    "configureDiscord": "Volver a ajustes de Discord",
+    "stepPrepareHint": "Configura el token del bot y el canal de voz en Ajustes → Discord antes de grabar.",
+    "configureDiscord": "Abrir ajustes de Discord",
+    "workflowDiscordRequiredTitle": "Configura el bot de Discord",
+    "workflowDiscordRequiredHint": "Para grabar y transcribir necesitas el token del bot y el canal de voz en Ajustes → Discord.",
     "stepRecord": "Grabación",
     "stepRecordHint": "Inicia y detén cuando haga falta. Puedes grabar varias veces; el audio nuevo se añade a la sesión.",
     "stepTranscribe": "Transcripción",
     "stepTranscribeHint": "Ejecuta Whisper solo con la grabación detenida y archivos de audio presentes.",
+    "transcriptionStarting": "Iniciando transcripción…",
+    "transcriptionRunning": "Transcripción en curso… {{percent}}%",
+    "transcriptionFinalizing": "Finalizando transcripción…",
+    "transcriptionNotStarted": "No se pudo iniciar la transcripción. Comprueba la configuración de Whisper.",
+    "transcriptionStalled": "La transcripción se detuvo inesperadamente. Puedes intentarlo de nuevo.",
+    "retryTranscription": "Reintentar transcripción",
     "stepRefine": "Refinado",
-    "stepRefineHint": "Próximamente: refinar la transcripción en notas estructuradas.",
+    "stepRefineHint": "Disponible cuando exista una transcripción en bruto.",
+    "stepRefineReadyHint": "Transcripción en bruto lista: aquí prepararás resumen y eventos estructurados (próximamente).",
+    "hasRefinedTranscript": "Texto refinado",
     "tabletopTitle": "Mesa del master",
     "noMaps": "No hay mapas en esta campaña.",
     "createDefaultMap": "Crear mapa predeterminado",
     "selectMap": "Mapa",
     "notFound": "Sesión no encontrada.",
     "loadingTitle": "Sesión",
-    "createAndOpen": "Crear y abrir"
+    "createAndOpen": "Crear y abrir",
+    "returnToSession": "Volver a {{label}}",
+    "campaignLockedHint": "No se puede cambiar de campaña con una sesión en juego.",
+    "editDetails": "Editar detalles",
+    "editDetailsClose": "Cerrar detalles",
+    "editDetailsHint": "Numero e date di solito sono impostati automaticamente. Modificali solo per correggere import o casi eccezionali.",
+    "numberRareHint": "Di solito assegnato in creazione; modifica solo se necessario.",
+    "startedAtRareHint": "Di solito impostato con «Inizia sessione».",
+    "endedAtRareHint": "Di solito impostato con «Termina sessione».",
+    "datesNotStarted": "Non ancora iniziata",
+    "datesInProgress": "Inizio {{start}} — in corso",
+    "datesSummary": "{{start}} — {{end}}",
+    "beginPlay": "Iniciar sesión",
+    "endPlay": "Terminar sesión",
+    "endPlayConfirm": "Terminare la sessione in gioco? Se la registrazione è attiva verrà fermata.",
+    "phasePreparing": "Preparación",
+    "phaseLive": "En juego",
+    "phasePost": "Post-sesión",
+    "prepTitle": "Preparazione sessione",
+    "prepGmNotes": "Note e promemoria del GM",
+    "prepPinnedNpcs": "PNG in programma",
+    "prepPinnedLocations": "Luoghi in programma",
+    "prepSeeds": "Spunti narrativi pianificati",
+    "prepHandoutsPlaceholder": "I handout di sessione (condivisi con i giocatori durante il gioco) saranno gestiti qui.",
+    "prepOpenVaultNpcs": "Sfoglia PNG",
+    "prepOpenVaultLocations": "Sfoglia luoghi",
+    "prepOpenImages": "Immagini di campagna",
+    "liveRecordingTitle": "Registrazione",
+    "liveMaterials": "Materiali preparati",
+    "liveMaterialsHint": "{{npcCount}} PNG e {{locationCount}} luoghi in evidenza. Apri il vault per tutta la campagna.",
+    "openCampaignCatalog": "Abrir catálogo de campaña",
+    "liveInGameTitle": "Consultazione in gioco",
+    "liveInGamePlaceholder": "La ricerca rapida sul canone durante il gioco arriverà presto (PG, PNG, luoghi, ambientazione).",
+    "postShowTabletop": "Mostra tabletop",
+    "postHideTabletop": "Nascondi tabletop",
+    "deleteSession": "Elimina sessione",
+    "editDetailsLockedLive": "Termina la sessione in gioco prima di modificare le date o eliminare."
   },
   "images": {
     "listTitle": "Imágenes de campaña",
@@ -313,9 +483,11 @@
     }
   },
   "vault": {
-    "homeTitle": "El Arcón",
+    "catalogTitle": "Catálogo de campaña",
     "homeHint": "Browse and enrich your campaign world by narrative sections—not spreadsheet rows.",
-    "sidebarNav": "Secciones del Arcón",
+    "sidebarNav": "Secciones de campaña",
+    "campaignTitle": "Campaña",
+    "campaignBlurb": "Nombre, catchphrase y canal de Discord",
     "back": "Volver",
     "search": "Search catalog",
     "sectionNav": "Sheet sections",
@@ -456,9 +628,9 @@
       "public_canon": "Public canon"
     },
     "visibilityHint": {
-      "gm_only": "Visible only in the Coffer.",
-      "shared": "Syncable to the Activity during play.",
-      "public_canon": "Eligible for the public Amber site."
+      "gm_only": "Visible solo en la Pantalla del master.",
+      "shared": "Sincronizable con la Mesa de juego durante la partida.",
+      "public_canon": "Apto para el sitio del canon público."
     },
     "recordKind": {
       "canonical": "Canonical",

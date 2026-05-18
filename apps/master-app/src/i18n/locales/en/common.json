@@ -1,7 +1,63 @@
 {
+  "product": {
+    "masterScreen": "Master Screen",
+    "gameTable": "Game table"
+  },
   "app": {
-    "title": "Amber Coffer — The Coffer",
+    "title": "Amber Coffer — Master Screen",
     "subtitle": "Narrative OS for Game Masters"
+  },
+  "settings": {
+    "title": "Discord",
+    "sidebarLink": "Discord",
+    "discordPageHint": "Set up your recording bot on this device. Link a server and voice channel for each campaign under Vault › Campaign › Discord.",
+    "discord": {
+      "needCampaign": "Create or select a campaign to connect it to Discord. The bot token above applies to all campaigns on this device.",
+      "infoAside": {
+        "title": "Recording bot",
+        "identityTitle": "You on the server",
+        "identityBody": "One bot for this Amber Coffer install, for all campaigns. It is your presence as Master on the server: the name you choose. Another computer needs another bot.",
+        "whyTitle": "Your responsibilities",
+        "whyBody": "Creating the bot is your choice. Invite it only on servers where you may record, and tell your group if needed. The token is secret — do not share it; anyone with it acts as your bot. If it leaks, regenerate it in the portal. Amber Coffer does not listen to players on our servers; audio goes through your bot on your Discord.",
+        "howTitle": "Create it in the portal",
+        "step1": "Open the Developer Portal (button on the left) with your Discord account.",
+        "step2": "Create a new application and give it a name players will recognize (e.g. Narrator).",
+        "step3": "Open the Bot tab and add the bot if Discord asks.",
+        "step4": "Copy the token, paste it on the left, and save. Do not send it to anyone.",
+        "step5": "For voice-only recording you usually do not need to change anything else on the Bot tab.",
+        "wizardNote": "Then save the token if needed and connect server and voice channel on the Campaign page in the Vault."
+      },
+      "botSetup": {
+        "title": "Recording bot (this device)",
+        "hint": "Create your own Discord bot once; the token stays on this computer and is never synced.",
+        "openPortal": "Open Discord Developer Portal",
+        "stepCreate": "New Application → choose a name → open the Bot tab.",
+        "stepBotToken": "Reset Token (or View Token) → copy → paste below → Save token.",
+        "stepIntents": "On the Bot tab, enable privileged intents only if Discord asks; voice-only recording usually needs no extra intents.",
+        "applicationId": "Detected application ID: {{id}}"
+      },
+      "campaignWizard": {
+        "title": "Connect campaign to Discord",
+        "hint": "Sign in with Discord to pick a server and invite your bot.",
+        "needToken": "Save your bot token above before connecting a campaign.",
+        "configureToken": "Go to bot token section",
+        "loginDiscord": "Sign in with Discord",
+        "selectGuild": "Server",
+        "guildPlaceholder": "Choose a server you manage…",
+        "botPresent": "bot already invited",
+        "inviteHint": "Invite your bot to «{{name}}», then continue.",
+        "inviteBot": "Open invite in browser",
+        "continue": "Continue",
+        "botNotInGuild": "The bot is not on that server yet. Complete the invite, then try again.",
+        "botMaybePresent": "If you already invited the bot, click Continue.",
+        "selectChannel": "Voice channel",
+        "channelPlaceholder": "Choose a voice channel…",
+        "stage": "stage",
+        "saveChannel": "Save voice channel",
+        "advanced": "Advanced: paste channel ID manually",
+        "currentChannel": "Current voice channel ID: {{id}}"
+      }
+    }
   },
   "nav": {
     "characters": "Player Characters",
@@ -71,7 +127,50 @@
     "none": "— Select —",
     "create": "New campaign",
     "createPrompt": "Campaign name:",
-    "selectHint": "Create or select a campaign to manage world data."
+    "createName": "Campaign name",
+    "createConfirm": "Create campaign",
+    "selectHint": "Create or select a campaign to manage world data.",
+    "createDisabledLive": "Cannot create a campaign during a live session.",
+    "sectionNav": "Campaign sections",
+    "tabs": {
+      "general": "General",
+      "discord": "Discord"
+    },
+    "metadataTitle": "Campaign data",
+    "nameLabel": "Name",
+    "catchphraseLabel": "Catchphrase",
+    "playLanguage": "Table language",
+    "playLanguageHint": "Language your group plays in. Used for Discord recording announcements and transcription.",
+    "playLanguageSave": "Save table language",
+    "playLanguageOptions": {
+      "it": "Italian",
+      "en": "English",
+      "fr": "French",
+      "es": "Spanish"
+    },
+    "discord": {
+      "title": "Connect campaign to Discord",
+      "hint": "Sign in with Discord to pick a server and invite your recording bot.",
+      "needToken": "Set up the bot token first in Discord settings (sidebar).",
+      "configureToken": "Go to bot token",
+      "loginDiscord": "Sign in with Discord",
+      "selectGuild": "Server",
+      "guildPlaceholder": "Choose a server you manage…",
+      "botPresent": "bot already invited",
+      "inviteHint": "Invite your bot to «{{name}}», then continue.",
+      "inviteBot": "Open invite in browser",
+      "continue": "Continue",
+      "botNotInGuild": "The bot is not on that server yet. Complete the invite, then try again.",
+      "botMaybePresent": "If you already invited the bot, click Continue.",
+      "selectChannel": "Voice channel",
+      "channelPlaceholder": "Choose a voice channel…",
+      "stage": "stage",
+      "saveChannel": "Save voice channel",
+      "advanced": "Advanced: paste channel ID manually",
+      "currentChannel": "Current voice channel: {{id}}",
+      "manualChannelId": "Voice channel ID",
+      "manualChannelPlaceholder": "Numeric channel ID"
+    }
   },
   "character": {
     "listTitle": "Player Characters",
@@ -193,7 +292,7 @@
   "liveSession": {
     "pipelineTitle": "Audio & transcription",
     "pipelineHint": "Invite the campaign bot to your Discord voice channel, record the session, then run offline STT. Raw text is saved under the session folder for later refinement.",
-    "missingBotToken": "Configure the Discord bot token in the settings below before recording.",
+    "missingBotToken": "Configure the Discord bot token under Settings → Discord before recording.",
     "recordingActive": "Recording",
     "trackCount": "Audio tracks",
     "hasRawTranscript": "Raw transcript file",
@@ -212,7 +311,18 @@
     "botTokenReplacePlaceholder": "Paste new token to replace",
     "botTokenConfigured": "A bot token is saved on this device.",
     "botTokenMissing": "No bot token configured yet.",
-    "saveBotToken": "Save token"
+    "saveBotToken": "Save token",
+    "discordSetupHelpButton": "How to get this information",
+    "discordSetupAlertWhyTitle": "WHY you need your own bot",
+    "discordSetupAlertWhy": "Amber Coffer records session audio from your Discord voice channel using a bot you control. We do not use a single shared project bot because the token grants access to your server (it stays on this computer only, never synced), each campaign has its own voice channel, and Discord permissions differ per server. You stay in control of your data and your server.",
+    "discordSetupAlertStepsTitle": "STEP-BY-STEP",
+    "discordSetupAlertStep1": "1. Open https://discord.com/developers/applications and sign in with your Discord account.",
+    "discordSetupAlertStep2": "2. Click \"New Application\", choose a name (e.g. \"Campaign bot\"), and confirm.",
+    "discordSetupAlertStep3": "3. Open the \"Bot\" tab → \"Reset Token\" (or \"View Token\") → copy the token → paste it above and click \"Save token\". Never share it.",
+    "discordSetupAlertStep4": "4. Still under \"Bot\", enable any privileged intents Discord requires (for voice-only recording you usually do not need \"Message Content\").",
+    "discordSetupAlertStep5": "5. Open the \"OAuth2\" tab → \"URL Generator\": scope \"bot\", permissions \"Connect\" and \"Use Voice Activity\" (optional \"Speak\") → copy the URL → open it in your browser and invite the bot to your campaign server.",
+    "discordSetupAlertStep6": "6. In Discord (desktop or web): User Settings → \"Advanced\" → enable \"Developer Mode\". Right-click your session voice channel → \"Copy Channel ID\" → paste it above and click \"Save channel\".",
+    "discordSetupAlertStep7": "7. When you start recording, the bot joins that channel and saves one audio track per participant for offline transcription."
   },
   "session": {
     "listTitle": "Campaign sessions",
@@ -241,6 +351,11 @@
       "refined": "Refined",
       "validating": "Validating",
       "published": "Published"
+    },
+    "playState": {
+      "preparing": "Preparation",
+      "live": "Live",
+      "ended": "Ended"
     }
   },
   "sessionDetail": {
@@ -248,21 +363,67 @@
     "metadataSave": "Save",
     "workflowTitle": "Session workflow",
     "stepPrepare": "Preparation",
-    "stepPrepareHint": "Configure the Discord bot token and voice channel on the sessions list before recording.",
-    "configureDiscord": "Back to Discord settings",
+    "stepPrepareHint": "Configure the Discord bot token and voice channel under Settings → Discord before recording.",
+    "configureDiscord": "Open Discord settings",
+    "workflowDiscordRequiredTitle": "Set up the Discord bot",
+    "workflowDiscordRequiredHint": "Recording and transcription require the bot token and voice channel under Settings → Discord.",
     "stepRecord": "Recording",
     "stepRecordHint": "Start and stop as needed. You can run multiple recording passes; new audio is appended to the session.",
     "stepTranscribe": "Transcription",
     "stepTranscribeHint": "Run offline Whisper only while recording is stopped and audio files exist.",
+    "transcriptionStarting": "Starting transcription…",
+    "transcriptionRunning": "Transcription in progress… {{percent}}%",
+    "transcriptionFinalizing": "Finishing transcription…",
+    "transcriptionNotStarted": "Could not start the transcription process. Check the Whisper setup.",
+    "transcriptionStalled": "Transcription stopped unexpectedly. You can try again.",
+    "retryTranscription": "Retry transcription",
     "stepRefine": "Refinement",
-    "stepRefineHint": "Coming soon: refine the raw transcript into structured session notes.",
+    "stepRefineHint": "Available once a raw transcript exists.",
+    "stepRefineReadyHint": "Raw transcript ready: structured summary and session events will be edited here (coming soon).",
+    "hasRefinedTranscript": "Refined text",
     "tabletopTitle": "Master tabletop",
     "noMaps": "No maps for this campaign yet.",
     "createDefaultMap": "Create default map",
     "selectMap": "Map",
     "notFound": "Session not found.",
     "loadingTitle": "Session",
-    "createAndOpen": "Create and open"
+    "createAndOpen": "Create and open",
+    "returnToSession": "Return to {{label}}",
+    "campaignLockedHint": "Campaign switch is disabled while a session is live. You can still browse this campaign's vault.",
+    "editDetails": "Edit details",
+    "editDetailsClose": "Close details",
+    "editDetailsHint": "Session number and timestamps are normally set automatically. Change them only to fix imports or rare corrections.",
+    "numberRareHint": "Usually assigned at creation; change only if needed.",
+    "startedAtRareHint": "Normally set when you start the session.",
+    "endedAtRareHint": "Normally set when you end the session.",
+    "datesNotStarted": "Not started yet",
+    "datesInProgress": "Started {{start}} — in progress",
+    "datesSummary": "{{start}} — {{end}}",
+    "beginPlay": "Start session",
+    "endPlay": "End session",
+    "endPlayConfirm": "End the live session? Recording will stop if it is still running.",
+    "phasePreparing": "Preparation",
+    "phaseLive": "Live",
+    "phasePost": "Post-session",
+    "prepTitle": "Session preparation",
+    "prepGmNotes": "GM notes and reminders",
+    "prepPinnedNpcs": "NPCs to feature",
+    "prepPinnedLocations": "Locations to feature",
+    "prepSeeds": "Planned narrative seeds",
+    "prepHandoutsPlaceholder": "Session handouts (share with players during play) will be managed here.",
+    "prepOpenVaultNpcs": "Browse NPCs",
+    "prepOpenVaultLocations": "Browse locations",
+    "prepOpenImages": "Campaign images",
+    "liveRecordingTitle": "Recording",
+    "liveMaterials": "Prepared materials",
+    "liveMaterialsHint": "{{npcCount}} pinned NPC(s), {{locationCount}} pinned location(s). Open the vault for full campaign access.",
+    "openCampaignCatalog": "Open campaign catalog",
+    "liveInGameTitle": "In-game lookup",
+    "liveInGamePlaceholder": "Fast canon lookup during play is coming soon (search across characters, NPCs, locations, and lore).",
+    "postShowTabletop": "Show tabletop",
+    "postHideTabletop": "Hide tabletop",
+    "deleteSession": "Delete session",
+    "editDetailsLockedLive": "End the live session before editing dates or deleting."
   },
   "images": {
     "listTitle": "Campaign images",
@@ -322,9 +483,11 @@
     }
   },
   "vault": {
-    "homeTitle": "World Vault",
+    "catalogTitle": "Campaign catalog",
     "homeHint": "Browse and enrich your campaign world by narrative sections—not spreadsheet rows.",
-    "sidebarNav": "Vault sections",
+    "sidebarNav": "Campaign sections",
+    "campaignTitle": "Campaign",
+    "campaignBlurb": "Name, catchphrase, and Discord channel",
     "back": "Back",
     "search": "Search catalog",
     "sectionNav": "Sheet sections",
@@ -465,9 +628,9 @@
       "public_canon": "Public canon"
     },
     "visibilityHint": {
-      "gm_only": "Visible only in the Coffer.",
-      "shared": "Syncable to the Activity during play.",
-      "public_canon": "Eligible for the public Amber site."
+      "gm_only": "Visible only in Master Screen.",
+      "shared": "Syncable to the Game table during play.",
+      "public_canon": "Eligible for the public canon site."
     },
     "recordKind": {
       "canonical": "Canonical",

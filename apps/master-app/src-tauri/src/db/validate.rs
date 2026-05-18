@@ -1,18 +1,15 @@
+use tauri::AppHandle;
+
 use crate::error::AppError;
 use crate::models::vault_json::{EventReference, ImageLink};
+use crate::services::campaign_storage;
 use crate::validation_issue::{enum_invalid, generic_invalid, validation_issues, ValidationIssue};
 
-pub async fn ensure_campaign_exists(pool: &sqlx::SqlitePool, campaign_id: &str) -> Result<(), AppError> {
-    let exists: Option<i64> = sqlx::query_scalar("SELECT 1 FROM campaigns WHERE id = ?")
-        .bind(campaign_id)
-        .fetch_optional(pool)
-        .await?;
-
-    if exists.is_some() {
-        Ok(())
-    } else {
-        Err(AppError::NotFound("campaign".into()))
+pub async fn ensure_campaign_exists(handle: &AppHandle, campaign_id: &str) -> Result<(), AppError> {
+    if !campaign_storage::campaign_exists(handle, campaign_id) {
+        return Err(AppError::NotFound(format!("campaign {campaign_id}")));
     }
+    Ok(())
 }
 
 pub async fn ensure_location_in_campaign(

@@ -18,6 +18,7 @@ import { Field } from '../../components/ui/Field.js';
 import { ActionIcons } from '../../components/ui/icons.js';
 import { SubjectPicker } from '../../components/ui/SubjectPicker.js';
 import { buildTabularRow, type TabularListRow } from '../../components/ui/tabular-list.js';
+import { FormActionErrorOutlet } from '../../context/AppErrorContext.js';
 import { useCampaignSubjects } from '../campaign-subjects/use-campaign-subjects.js';
 import { CrudPanel } from '../crud/CrudPanel.js';
 import { compactJoin, truncatePreview } from '../list-display/format.js';
@@ -169,8 +170,13 @@ function ItemEditor({
         allowEmptyKind
       />
       <Field label={t('item.description')} htmlFor="it-desc" error={fe('description')}>
-        <textarea id="it-desc" value={description} onChange={(e) => setDescription(e.target.value)} />
+        <textarea
+          id="it-desc"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
       </Field>
+      <FormActionErrorOutlet />
       <div className="form-actions">
         <Button type="submit" variant="primary" icon={ActionIcons.save} disabled={saving}>
           {saving ? t('common.saving') : t('common.save')}

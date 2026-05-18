@@ -10,6 +10,7 @@ import {
   recordingManifestV2Schema,
   type RecordingManifestChunk,
 } from '@amber/shared';
+import { parsePlayLanguage } from '@amber/shared';
 import {
   EndBehaviorType,
   entersState,
@@ -21,11 +22,14 @@ import { Client, GatewayIntentBits, type GuildMember, type VoiceBasedChannel } f
 import ffmpegStatic from 'ffmpeg-static';
 import prism from 'prism-media';
 
+import { playRecordingAnnouncement } from './play-announcement.js';
+
 type RecordOptions = {
   token: string;
   channelId: string;
   sessionId: string;
   outputDir: string;
+  locale: string;
 };
 
 type ActiveSegment = {
@@ -104,6 +108,7 @@ function teardownPipeline(segment: ActiveSegment): void {
 }
 
 export async function runRecordSession(opts: RecordOptions): Promise<void> {
+  const playLanguage = parsePlayLanguage(opts.locale);
   const audioDiscordDir = join(opts.outputDir, 'audio', 'discord');
   await mkdir(audioDiscordDir, { recursive: true });
 
@@ -199,6 +204,7 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
   };
 
   const onSpeakingStart = (userId: string): void => {
+    if (userId === client.user?.id) return;
     void (async () => {
       if (activeSegments.has(userId)) {
         await finalizeSegment(userId);
@@ -236,6 +242,11 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
     await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
 
     if (connection) {
+      try {
+        await playRecordingAnnouncement(connection, client, playLanguage, 'recording-stop');
+      } catch (err: unknown) {
+        console.error('recording stop announcement failed:', err);
+      }
       connection.destroy();
       connection = null;
     }
@@ -277,6 +288,12 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
   });
 
   await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
+
+  try {
+    await playRecordingAnnouncement(connection, client, playLanguage, 'recording-start');
+  } catch (err: unknown) {
+    console.error('recording start announcement failed:', err);
+  }
 
   const receiver = connection.receiver;
   receiver.speaking.on('start', onSpeakingStart);

@@ -17,11 +17,13 @@ const STANDARD_SECTIONS = new Set([
   'aspetto',
   'riferimento visivo',
   'personalità',
+  'equipaggiamento notevole',
   'eventi interessanti',
   'note dm',
   'scheda di gioco',
   'legami con i pg',
   'legami con i personaggi giocanti',
+  'legami con gli altri pg',
 ]);
 
 export function nowTimestamps(): { createdAt: number; updatedAt: number } {
@@ -45,6 +47,26 @@ export function buildAppearance(parsed: ParsedMarkdownFile): Appearance {
 
 export function buildGmNotes(parsed: ParsedMarkdownFile): string {
   return sectionBody(parsed, 'Note DM');
+}
+
+/** Bullet lines from `## Equipaggiamento notevole` (markdown stripped to plain text). */
+export function parseNotableEquipment(parsed: ParsedMarkdownFile): string[] {
+  const body = sectionBody(parsed, 'Equipaggiamento notevole');
+  if (!body.trim()) return [];
+
+  const items: string[] = [];
+  for (const line of body.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('-')) continue;
+    const text = trimmed
+      .replace(/^-\s*/, '')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\*([^*]+)\*/g, '$1')
+      .replace(/\s+—\s+.*$/, '')
+      .trim();
+    if (text) items.push(text);
+  }
+  return items;
 }
 
 export function parseRazzaClasse(metadata: Record<string, string>): {
@@ -106,7 +128,9 @@ export function queueImageFromSection(
   });
 }
 
-export function freeformSections(parsed: ParsedMarkdownFile): Array<{ title: string; body: string }> {
+export function freeformSections(
+  parsed: ParsedMarkdownFile,
+): Array<{ title: string; body: string }> {
   return parsed.sections
     .filter((s) => !STANDARD_SECTIONS.has(s.heading.toLowerCase()))
     .map((s) => ({ title: s.heading, body: s.body }));

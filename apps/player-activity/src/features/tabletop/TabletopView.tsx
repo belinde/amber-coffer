@@ -8,46 +8,50 @@ import type { CSSProperties, ReactElement } from 'react';
 
 import { useTabletopState } from './store.js';
 
+const DEFAULT_GRID_SIZE_PX = 50;
+
 /**
  * Read-only tabletop view rendered inside the Discord Activity iframe.
- *
- * Decisions reflected here:
- * - D1 cell coordinates → tokens carry `position` (board or bench)
- * - D2 bench off-board → renderiamo una colonna laterale `tabletop-bench`
- * - D3 player moves own token → not yet wired (sends `token.move.request` via MQTT in a follow-up)
- *
- * The CSS classes (`tabletop-board`, `tabletop-bench`, ...) match the legacy POC so we can
- * iterate on the stylesheet without renaming markup.
  */
 type Props = {
   gridCols: number;
   gridRows: number;
   benchSlots?: number;
+  gridSizePx?: number;
+  /** CSS aspect-ratio value, e.g. `4 / 3` or `1920 / 1080`. */
+  boardAspectRatio?: string;
 };
 
-export function TabletopView({ gridCols, gridRows, benchSlots = BENCH_SLOTS_DEFAULT }: Props): ReactElement {
+export function TabletopView({
+  gridCols,
+  gridRows,
+  benchSlots = BENCH_SLOTS_DEFAULT,
+  gridSizePx = DEFAULT_GRID_SIZE_PX,
+  boardAspectRatio = '4 / 3',
+}: Props): ReactElement {
   const state = useTabletopState();
   const grid = { cols: gridCols, rows: gridRows };
 
   const boardTokens = state.tokens.filter((t) => t.position.zone === 'board');
   const benchTokens = state.tokens.filter((t) => t.position.zone === 'bench');
 
+  const boardStyle = {
+    '--board-aspect-ratio': boardAspectRatio,
+    '--cell-size': `${gridSizePx}px`,
+    '--grid-cols': grid.cols,
+    '--grid-rows': grid.rows,
+  } as CSSProperties;
+
   return (
     <div className="tabletop-wrap">
-      <div
-        className="tabletop-board tabletop-grid"
-        role="application"
-        aria-label="Tabletop"
-        style={
-          {
-            '--grid-cols': grid.cols,
-            '--grid-rows': grid.rows,
-          } as CSSProperties
-        }
-      >
-        {boardTokens.map((token) => (
-          <TokenChip key={token.id} token={token} grid={grid} />
-        ))}
+      <div className="tabletop-board-area">
+        <div className="tabletop-board" style={boardStyle}>
+          <div className="tabletop-board__grid" role="application" aria-label="Tabletop">
+            {boardTokens.map((token) => (
+              <TokenChip key={token.id} token={token} grid={grid} />
+            ))}
+          </div>
+        </div>
       </div>
 
       <aside className="tabletop-bench" aria-label="Off-board tokens">
@@ -71,9 +75,19 @@ export function TabletopView({ gridCols, gridRows, benchSlots = BENCH_SLOTS_DEFA
   );
 }
 
-function TokenChip({ token, grid }: { token: Token; grid: { cols: number; rows: number } }): ReactElement | null {
+function TokenChip({
+  token,
+  grid,
+}: {
+  token: Token;
+  grid: { cols: number; rows: number };
+}): ReactElement | null {
   if (token.position.zone !== 'board') return null;
-  const style = boardCellToPercent({ xCell: token.position.xCell, yCell: token.position.yCell, grid });
+  const style = boardCellToPercent({
+    xCell: token.position.xCell,
+    yCell: token.position.yCell,
+    grid,
+  });
   return (
     <div className="tabletop-token" style={style} role="img" aria-label={`Token ${token.entityId}`}>
       <span className="tabletop-token-dot" />
@@ -81,11 +95,22 @@ function TokenChip({ token, grid }: { token: Token; grid: { cols: number; rows: 
   );
 }
 
-function BenchTokenChip({ token, benchSlots }: { token: Token; benchSlots: number }): ReactElement | null {
+function BenchTokenChip({
+  token,
+  benchSlots,
+}: {
+  token: Token;
+  benchSlots: number;
+}): ReactElement | null {
   if (token.position.zone !== 'bench') return null;
   const style = benchSlotToPercent({ slot: token.position.slot, benchSlots });
   return (
-    <div className="tabletop-token tabletop-token--bench" style={style} role="img" aria-label={`Bench token ${token.entityId}`}>
+    <div
+      className="tabletop-token tabletop-token--bench"
+      style={style}
+      role="img"
+      aria-label={`Bench token ${token.entityId}`}
+    >
       <span className="tabletop-token-dot" />
     </div>
   );

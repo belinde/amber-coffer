@@ -4,6 +4,9 @@ use std::fs;
 use serde::Serialize;
 use tauri::{AppHandle, State};
 
+use crate::commands::campaigns::{
+    find_or_create_campaign_by_name, POC_CAMPAIGN_DESCRIPTION, POC_CAMPAIGN_NAME,
+};
 use crate::db::validate::ensure_campaign_exists;
 use crate::db::AppState;
 use crate::error::AppError;
@@ -17,6 +20,8 @@ use crate::services::import_images::copy_image_to_l1;
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ImportCampaignReport {
+    pub campaign_id: String,
+    pub campaign_created: bool,
     pub imported: usize,
     pub updated: usize,
     pub skipped: usize,
@@ -27,7 +32,8 @@ pub struct ImportCampaignReport {
 #[tauri::command]
 pub async fn import_campaign_dump(
     dump_path: String,
-    campaign_id: String,
+    campaign_id: Option<String>,
+    campaign_name: Option<String>,
     app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<ImportCampaignReport, AppError> {
@@ -41,16 +47,48 @@ pub async fn import_campaign_dump(
             dump.version
         )));
     }
-    if dump.campaign_id != campaign_id {
-        return Err(AppError::Internal(
-            "dump campaignId does not match argument".into(),
-        ));
+
+    let (resolved_id, campaign_created) = match campaign_id {
+        Some(id) => {
+            ensure_campaign_exists(&app, &id).await?;
+            (id, false)
+        }
+        None => {
+            let name = campaign_name
+                .as_deref()
+                .map(str::trim)
+                .filter(|s| !s.is_empty())
+                .unwrap_or(POC_CAMPAIGN_NAME);
+            let catchphrase = if name == POC_CAMPAIGN_NAME {
+                Some(POC_CAMPAIGN_DESCRIPTION.to_string())
+            } else {
+                None
+            };
+            let (campaign, created) = find_or_create_campaign_by_name(
+                name,
+                None,
+                catchphrase,
+                Some(&dump.campaign_id),
+                &app,
+                &state,
+            )
+            .await?;
+            (campaign.id, created)
+        }
+    };
+
+    if dump.campaign_id != resolved_id {
+        return Err(AppError::Internal(format!(
+            "dump campaignId ({}) does not match target campaign ({}); re-run extract with --campaign-id {}",
+            dump.campaign_id, resolved_id, resolved_id
+        )));
     }
 
-    let pool = state.pool();
-    ensure_campaign_exists(pool, &campaign_id).await?;
+    let pool = state.pool_for_campaign(&app, &resolved_id).await?;
 
     let mut report = ImportCampaignReport {
+        campaign_id: resolved_id.clone(),
+        campaign_created,
         imported: 0,
         updated: 0,
         skipped: 0,
@@ -95,7 +133,7 @@ pub async fn import_campaign_dump(
 
     tx.commit().await?;
 
-    let image_refs = apply_assets(&app, &campaign_id, &dump.assets, &mut report);
+    let image_refs = apply_assets(&app, &resolved_id, &dump.assets, &mut report);
 
     let mut tx = pool.begin().await?;
     for (entity_id, image_ref) in image_refs {
@@ -560,19 +598,25 @@ async fn upsert_session(
 ) -> Result<(), AppError> {
     let locations_json = serde_json::to_string(&session.locations_visited)?;
     let npcs_json = serde_json::to_string(&session.npcs_encountered)?;
+    let play_state = if session.ended_at.is_some() {
+        "ended"
+    } else {
+        "preparing"
+    };
 
     sqlx::query(
         r#"
         INSERT INTO sessions (
-            id, campaign_id, number, title, status, started_at, ended_at,
+            id, campaign_id, number, title, play_state, status, started_at, ended_at,
             summary, events_body, gm_notes, public_summary,
             locations_visited_json, npcs_encountered_json, played_at,
             created_at, updated_at, version
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
             campaign_id = excluded.campaign_id,
             number = excluded.number,
             title = excluded.title,
+            play_state = excluded.play_state,
             status = excluded.status,
             started_at = excluded.started_at,
             ended_at = excluded.ended_at,
@@ -591,6 +635,7 @@ async fn upsert_session(
     .bind(&session.campaign_id)
     .bind(session.number)
     .bind(&session.title)
+    .bind(play_state)
     .bind(&session.status)
     .bind(session.started_at)
     .bind(session.ended_at)

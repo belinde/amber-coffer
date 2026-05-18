@@ -4,5 +4,7 @@ packages:
   - 'infrastructure'
   - 'tools/migrate-from-poc'
 
+# New workspace checklist: register here (if needed), add glob + lint script — see .cursor/rules/15-eslint-monorepo.mdc
+
 # Notes:
 # - `packages/*` includes `tabletop-engine` (D7 of tabletop-porting-notes.md).

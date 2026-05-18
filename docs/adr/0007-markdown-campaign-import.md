@@ -23,7 +23,7 @@ Vincoli:
 flowchart LR
     POC[POC Markdown tree] -->|parse + validate| Dump[Intermediate JSON dump]
     Dump -->|invoke import_campaign_dump| MasterApp[Master App\nRust + sqlx]
-    MasterApp --> SQLite[(SQLite locale)]
+    MasterApp --> CampaignDir[worlds/storageUuid\ncampaign.json + database.db]
 ```
 
 1. **Stadio 1 — Estrattore TypeScript** (`tools/migrate-from-poc/`):
@@ -33,12 +33,14 @@ flowchart LR
    - Emette un singolo file JSON di "dump intermedio" con struttura `{ version, sourceMeta, entities: { characters, npcs, locations, factions, loreNotes, narrativeSeeds, sessions } }`.
    - **Niente accesso a SQLite**: il tool è puro estrattore.
 
-2. **Stadio 2 — Importer Tauri** (comando `migrate.import_campaign_dump` in `apps/master-app/src-tauri/src/commands/migrate.rs`):
+2. **Stadio 2 — Importer Tauri** (comando `import_campaign_dump` in `apps/master-app/src-tauri/src/commands/migrate.rs`):
    - Riceve il path del JSON dump.
    - Verifica versione dump e schema.
-   - Applica in transazione SQLite: insert/update idempotente per `id` (UUID v7 generato in stadio 1).
-   - Copia gli asset immagine in L1 (`$APPDATA/amber-coffer/images/<campaignId>/<entityId>/...`).
-   - Restituisce un report (`imported`, `skipped`, `errors`).
+   - Risolve la campagna per nome (default `POC_CAMPAIGN_NAME` = «La corsa al Nuovo Mondo» da `@amber/shared`) con `find_or_create_campaign_by_name`, oppure usa `campaign_id` esplicito (retrocompat).
+   - Comando correlato `ensure_poc_campaign` per ottenere l’id prima dell’extract.
+   - Applica in transazione sul `database.db` della campagna: insert/update idempotente per `id` (UUID v7 generato in stadio 1).
+   - Copia gli asset immagine in L1 (`worlds/<storageUuid>/images/<entityId>/...`).
+   - Restituisce un report (`campaignId`, `campaignCreated`, `imported`, `errors`, …).
 
 ### Perché due stadi
 
@@ -69,16 +71,16 @@ Il dettaglio campo-per-campo è in [entity-templates.md § Mapping POC → Amber
 
 Il file in `ambientazione/concetti/<slug>.md` ha kind dedotto dallo slug:
 
-| Slug contiene | `LoreNote.kind` |
-|---------------|-----------------|
-| `religione`, `religioni` | `religion` |
-| `economia`, `commercio` | `economy` |
-| `geografia` | `concept` (con tag `geography`) |
-| `storia` | `history` |
-| `tecnomagia`, `magia` | `concept` (tag `magic`) |
-| `cultura`, `societa` | `culture` |
-| `cosmologia`, `geometria-planare` | `cosmology` |
-| altro | `custom` |
+| Slug contiene                     | `LoreNote.kind`                 |
+| --------------------------------- | ------------------------------- |
+| `religione`, `religioni`          | `religion`                      |
+| `economia`, `commercio`           | `economy`                       |
+| `geografia`                       | `concept` (con tag `geography`) |
+| `storia`                          | `history`                       |
+| `tecnomagia`, `magia`             | `concept` (tag `magic`)         |
+| `cultura`, `societa`              | `culture`                       |
+| `cosmologia`, `geometria-planare` | `cosmology`                     |
+| altro                             | `custom`                        |
 
 L'utente può rifinire il `kind` dall'UI dopo l'import.
 
@@ -88,7 +90,8 @@ L'utente può rifinire il `kind` dall'UI dopo l'import.
 - **Stadio 2** (`import_campaign_dump` in `apps/master-app/src-tauri`): upsert transazionale SQLite + copia immagini in L1 (`$APPDATA/amber-coffer/images/<campaignId>/<entityId>/`).
 - **Session recap**: campi su `Session` — `summary`, `eventsBody`, `gmNotes`, `publicSummary`, `locationsVisited`, `npcsEncountered`, `playedAt` (migration `20260517000007`).
 - **Appearance**: campo `personality` per `## Personalità` (JSON, senza migration SQL).
-- **Fuori scope**: audio `sessione/audio/`, trascrizioni, auto-creazione `Campaign`.
+- **Fuori scope**: audio `sessione/audio/`, trascrizioni.
+- **Campagna POC**: auto find/create per nome «La corsa al Nuovo Mondo» in stadio 2; stadio 1 legge lo stesso id da storage (`--campaign-name`) o da `ensure_poc_campaign`.
 
 ## Conseguenze
 

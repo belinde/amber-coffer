@@ -1,4 +1,4 @@
-use tauri::State;
+use tauri::{AppHandle, State};
 use uuid::Uuid;
 
 use crate::commands::vault_validate::{validate_faction_kind, validate_visibility};
@@ -23,23 +23,29 @@ const FACTION_SELECT: &str = r#"
 #[tauri::command]
 pub async fn list_factions(
     campaign_id: String,
+    app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<Vec<Faction>, AppError> {
+    let pool = state.pool_for_campaign(&app, &campaign_id).await?;
     let query = format!("{FACTION_SELECT} WHERE campaign_id = ? ORDER BY name COLLATE NOCASE");
     let rows = sqlx::query_as::<_, FactionRow>(&query)
         .bind(&campaign_id)
-        .fetch_all(state.pool())
+        .fetch_all(&pool)
         .await?;
 
     Ok(rows.into_iter().map(Faction::from_row).collect())
 }
 
 #[tauri::command]
-pub async fn get_faction(id: String, state: State<'_, AppState>) -> Result<Option<Faction>, AppError> {
+pub async fn get_faction(
+    id: String,
+    app: AppHandle,
+    state: State<'_, AppState>) -> Result<Option<Faction>, AppError> {
+    let pool = state.pool_for_entity_id(&app, &id).await?;
     let query = format!("{FACTION_SELECT} WHERE id = ?");
     let row = sqlx::query_as::<_, FactionRow>(&query)
         .bind(&id)
-        .fetch_optional(state.pool())
+        .fetch_optional(&pool)
         .await?;
 
     Ok(row.map(Faction::from_row))
@@ -48,6 +54,7 @@ pub async fn get_faction(id: String, state: State<'_, AppState>) -> Result<Optio
 #[tauri::command]
 pub async fn create_faction(
     input: CreateFactionInput,
+    app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<Faction, AppError> {
     let name = input.name.trim();
@@ -56,15 +63,17 @@ pub async fn create_faction(
     }
     validate_visibility(&input.visibility)?;
     validate_faction_kind(input.kind.as_deref())?;
-    ensure_campaign_exists(state.pool(), &input.campaign_id).await?;
+    ensure_campaign_exists(&app, &input.campaign_id).await?;
 
+
+    let pool = state.pool_for_campaign(&app, &input.campaign_id).await?;
     if let Some(ref hq) = input.headquarters_location_id {
-        ensure_location_in_campaign(state.pool(), hq, &input.campaign_id).await?;
+        ensure_location_in_campaign(&pool, hq, &input.campaign_id).await?;
     }
     if let Some(ref parent_id) = input.parent_faction_id {
-        ensure_parent_faction(state.pool(), parent_id, &input.campaign_id, None).await?;
+        ensure_parent_faction(&pool, parent_id, &input.campaign_id, None).await?;
     }
-    validate_events_interesting(state.pool(), &input.campaign_id, &input.events_interesting).await?;
+    validate_events_interesting(&pool, &input.campaign_id, &input.events_interesting).await?;
 
     let id = Uuid::now_v7().to_string();
     let now = now_ms();
@@ -100,10 +109,10 @@ pub async fn create_faction(
     .bind(&input.visibility)
     .bind(now)
     .bind(now)
-    .execute(state.pool())
+    .execute(&pool)
     .await?;
 
-    get_faction(id, state)
+    get_faction(id, app, state)
         .await?
         .ok_or_else(|| AppError::Internal("faction insert succeeded but row missing".into()))
 }
@@ -111,6 +120,7 @@ pub async fn create_faction(
 #[tauri::command]
 pub async fn update_faction(
     input: UpdateFactionInput,
+    app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<Faction, AppError> {
     let name = input.name.trim();
@@ -120,23 +130,24 @@ pub async fn update_faction(
     validate_visibility(&input.visibility)?;
     validate_faction_kind(input.kind.as_deref())?;
 
-    let existing = get_faction(input.id.clone(), state.clone())
+    let existing = get_faction(input.id.clone(), app.clone(), state.clone())
         .await?
         .ok_or_else(|| AppError::NotFound("faction".into()))?;
 
+    let pool = state.pool_for_campaign(&app, &existing.campaign_id).await?;
     if let Some(ref hq) = input.headquarters_location_id {
-        ensure_location_in_campaign(state.pool(), hq, &existing.campaign_id).await?;
+        ensure_location_in_campaign(&pool, hq, &existing.campaign_id).await?;
     }
     if let Some(ref parent_id) = input.parent_faction_id {
         ensure_parent_faction(
-            state.pool(),
+            &pool,
             parent_id,
             &existing.campaign_id,
             Some(&input.id),
         )
         .await?;
     }
-    validate_events_interesting(state.pool(), &existing.campaign_id, &input.events_interesting).await?;
+    validate_events_interesting(&pool, &existing.campaign_id, &input.events_interesting).await?;
 
     let now = now_ms();
     let events_interesting_json = serde_json::to_string(&input.events_interesting)?;
@@ -170,23 +181,27 @@ pub async fn update_faction(
     .bind(now)
     .bind(next_version)
     .bind(&input.id)
-    .execute(state.pool())
+    .execute(&pool)
     .await?;
 
     if updated.rows_affected() == 0 {
         return Err(AppError::NotFound("faction".into()));
     }
 
-    get_faction(input.id, state)
+    get_faction(input.id, app, state)
         .await?
         .ok_or_else(|| AppError::Internal("faction update succeeded but row missing".into()))
 }
 
 #[tauri::command]
-pub async fn delete_faction(id: String, state: State<'_, AppState>) -> Result<(), AppError> {
+pub async fn delete_faction(
+    id: String,
+    app: AppHandle,
+    state: State<'_, AppState>) -> Result<(), AppError> {
+    let pool = state.pool_for_entity_id(&app, &id).await?;
     let result = sqlx::query("DELETE FROM factions WHERE id = ?")
         .bind(&id)
-        .execute(state.pool())
+        .execute(&pool)
         .await?;
 
     if result.rows_affected() == 0 {

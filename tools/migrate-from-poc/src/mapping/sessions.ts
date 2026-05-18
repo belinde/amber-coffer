@@ -19,10 +19,7 @@ import {
   sectionBody,
 } from '../frontmatter.js';
 import { resolveFileId } from '../id-mapping.js';
-import {
-  resolveSessionLocationIds,
-  resolveSessionNpcIds,
-} from '../session-resolve.js';
+import { resolveSessionEncounterIds } from '../session-resolve.js';
 import type { ExtractContext } from '../types.js';
 
 import { fail, nowTimestamps, relPath } from './common.js';
@@ -87,25 +84,23 @@ export async function extractSessions(ctx: ExtractContext): Promise<SessionExtra
       const summary = sectionBody(parsed, 'Riassunto');
       const eventsBody = sectionBody(parsed, 'Eventi principali');
       const gmNotes =
-        sectionBody(parsed, 'Note per la prossima sessione') ||
-        sectionBody(parsed, 'Note DM');
+        sectionBody(parsed, 'Note per la prossima sessione') || sectionBody(parsed, 'Note DM');
 
-      const locationsVisited = resolveSessionLocationIds(
+      const encounters = resolveSessionEncounterIds(
         ctx,
         relFile,
         sectionBody(parsed, 'Luoghi visitati'),
-      ) as Location['id'][];
-      const npcsEncountered = resolveSessionNpcIds(
-        ctx,
-        relFile,
         sectionBody(parsed, 'Personaggi non giocanti incontrati'),
-      ) as Npc['id'][];
+      );
+      const locationsVisited = [...new Set(encounters.locationIds)] as Location['id'][];
+      const npcsEncountered = [...new Set(encounters.npcIds)] as Npc['id'][];
 
       const session: Session = {
         id: id as Session['id'],
         campaignId: ctx.campaignId as Session['campaignId'],
         number,
         title,
+        playState: 'ended',
         status: 'published',
         startedAt: playedAt,
         endedAt: playedAt,
@@ -159,7 +154,12 @@ export async function extractSessions(ctx: ExtractContext): Promise<SessionExtra
         }
       }
     } catch (err) {
-      fail(ctx, relFile, 'Failed to parse session', err instanceof Error ? err.message : String(err));
+      fail(
+        ctx,
+        relFile,
+        'Failed to parse session',
+        err instanceof Error ? err.message : String(err),
+      );
     }
   }
 

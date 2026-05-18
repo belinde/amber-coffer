@@ -1,4 +1,4 @@
-use tauri::State;
+use tauri::{AppHandle, State};
 use uuid::Uuid;
 
 use crate::commands::vault_validate::validate_visibility;
@@ -21,23 +21,29 @@ const LOCATION_SELECT: &str = r#"
 #[tauri::command]
 pub async fn list_locations(
     campaign_id: String,
+    app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<Vec<Location>, AppError> {
+    let pool = state.pool_for_campaign(&app, &campaign_id).await?;
     let query = format!("{LOCATION_SELECT} WHERE campaign_id = ? ORDER BY name COLLATE NOCASE");
     let rows = sqlx::query_as::<_, LocationRow>(&query)
         .bind(&campaign_id)
-        .fetch_all(state.pool())
+        .fetch_all(&pool)
         .await?;
 
     Ok(rows.into_iter().map(Location::from_row).collect())
 }
 
 #[tauri::command]
-pub async fn get_location(id: String, state: State<'_, AppState>) -> Result<Option<Location>, AppError> {
+pub async fn get_location(
+    id: String,
+    app: AppHandle,
+    state: State<'_, AppState>) -> Result<Option<Location>, AppError> {
+    let pool = state.pool_for_entity_id(&app, &id).await?;
     let query = format!("{LOCATION_SELECT} WHERE id = ?");
     let row = sqlx::query_as::<_, LocationRow>(&query)
         .bind(&id)
-        .fetch_optional(state.pool())
+        .fetch_optional(&pool)
         .await?;
 
     Ok(row.map(Location::from_row))
@@ -46,6 +52,7 @@ pub async fn get_location(id: String, state: State<'_, AppState>) -> Result<Opti
 #[tauri::command]
 pub async fn create_location(
     input: CreateLocationInput,
+    app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<Location, AppError> {
     let name = input.name.trim();
@@ -53,12 +60,14 @@ pub async fn create_location(
         return Err(required_field(&["name"]));
     }
     validate_visibility(&input.visibility)?;
-    ensure_campaign_exists(state.pool(), &input.campaign_id).await?;
+    ensure_campaign_exists(&app, &input.campaign_id).await?;
 
+
+    let pool = state.pool_for_campaign(&app, &input.campaign_id).await?;
     if let Some(ref parent_id) = input.parent_id {
-        ensure_parent_location(state.pool(), parent_id, &input.campaign_id, None).await?;
+        ensure_parent_location(&pool, parent_id, &input.campaign_id, None).await?;
     }
-    validate_events_interesting(state.pool(), &input.campaign_id, &input.events_interesting).await?;
+    validate_events_interesting(&pool, &input.campaign_id, &input.events_interesting).await?;
 
     let id = Uuid::now_v7().to_string();
     let now = now_ms();
@@ -102,10 +111,10 @@ pub async fn create_location(
     .bind(&coordinates_json)
     .bind(now)
     .bind(now)
-    .execute(state.pool())
+    .execute(&pool)
     .await?;
 
-    get_location(id, state)
+    get_location(id, app, state)
         .await?
         .ok_or_else(|| AppError::Internal("location insert succeeded but row missing".into()))
 }
@@ -113,6 +122,7 @@ pub async fn create_location(
 #[tauri::command]
 pub async fn update_location(
     input: UpdateLocationInput,
+    app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<Location, AppError> {
     let name = input.name.trim();
@@ -121,20 +131,21 @@ pub async fn update_location(
     }
     validate_visibility(&input.visibility)?;
 
-    let existing = get_location(input.id.clone(), state.clone())
+    let existing = get_location(input.id.clone(), app.clone(), state.clone())
         .await?
         .ok_or_else(|| AppError::NotFound("location".into()))?;
 
+    let pool = state.pool_for_campaign(&app, &existing.campaign_id).await?;
     if let Some(ref parent_id) = input.parent_id {
         ensure_parent_location(
-            state.pool(),
+            &pool,
             parent_id,
             &existing.campaign_id,
             Some(&input.id),
         )
         .await?;
     }
-    validate_events_interesting(state.pool(), &existing.campaign_id, &input.events_interesting).await?;
+    validate_events_interesting(&pool, &existing.campaign_id, &input.events_interesting).await?;
 
     let now = now_ms();
     let appearance_json = serde_json::to_string(&input.appearance)?;
@@ -177,23 +188,27 @@ pub async fn update_location(
     .bind(now)
     .bind(next_version)
     .bind(&input.id)
-    .execute(state.pool())
+    .execute(&pool)
     .await?;
 
     if updated.rows_affected() == 0 {
         return Err(AppError::NotFound("location".into()));
     }
 
-    get_location(input.id, state)
+    get_location(input.id, app, state)
         .await?
         .ok_or_else(|| AppError::Internal("location update succeeded but row missing".into()))
 }
 
 #[tauri::command]
-pub async fn delete_location(id: String, state: State<'_, AppState>) -> Result<(), AppError> {
+pub async fn delete_location(
+    id: String,
+    app: AppHandle,
+    state: State<'_, AppState>) -> Result<(), AppError> {
+    let pool = state.pool_for_entity_id(&app, &id).await?;
     let result = sqlx::query("DELETE FROM locations WHERE id = ?")
         .bind(&id)
-        .execute(state.pool())
+        .execute(&pool)
         .await?;
 
     if result.rows_affected() == 0 {

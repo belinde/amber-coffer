@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-import { campaignIdSchema, locationIdSchema, npcIdSchema, sessionIdSchema } from '../ids/schemas.js';
+import {
+  campaignIdSchema,
+  locationIdSchema,
+  npcIdSchema,
+  sessionIdSchema,
+} from '../ids/schemas.js';
 
 export const sessionStatusSchema = z.enum([
   'planned',
@@ -14,11 +19,14 @@ export const sessionStatusSchema = z.enum([
   'published',
 ]);
 
+export const sessionPlayStateSchema = z.enum(['preparing', 'live', 'ended']);
+
 export const sessionSchema = z.object({
   id: sessionIdSchema,
   campaignId: campaignIdSchema,
   number: z.number().int().positive(),
   title: z.string().nullable(),
+  playState: sessionPlayStateSchema.default('preparing'),
   status: sessionStatusSchema.default('planned'),
   startedAt: z.number().int().nonnegative().nullable(),
   endedAt: z.number().int().nonnegative().nullable(),

@@ -1,13 +1,14 @@
-import {
-  FieldValidationError,
-  validationIssueSchema,
-  type ValidationIssue,
-} from '@amber/shared';
+import { FieldValidationError, validationIssueSchema, type ValidationIssue } from '@amber/shared';
 import { z } from 'zod';
 
 const invokeValidationPayloadSchema = z.object({
   kind: z.literal('validation'),
   issues: z.array(validationIssueSchema),
+});
+
+const invokeMessagePayloadSchema = z.object({
+  kind: z.string(),
+  message: z.string().optional(),
 });
 
 function issuesFromUnknown(raw: unknown): ValidationIssue[] | null {
@@ -53,4 +54,40 @@ export function parseInvokeError(err: unknown): FieldValidationError | null {
   }
 
   return null;
+}
+
+/** User-facing text for Tauri invoke failures (plain objects, not always `Error`). */
+export function formatInvokeErrorMessage(err: unknown): string {
+  if (err instanceof Error) {
+    return err.message;
+  }
+
+  if (typeof err === 'string') {
+    const json = tryParseJsonString(err);
+    if (json && typeof json === 'object' && json !== null && 'message' in json) {
+      const parsed = invokeMessagePayloadSchema.safeParse(json);
+      if (parsed.success && parsed.data.message) {
+        return parsed.data.message;
+      }
+    }
+    return err;
+  }
+
+  if (typeof err === 'object' && err !== null) {
+    const validation = parseInvokeError(err);
+    if (validation) {
+      return 'Validation failed';
+    }
+
+    const parsed = invokeMessagePayloadSchema.safeParse(err);
+    if (parsed.success && parsed.data.message) {
+      return parsed.data.message;
+    }
+
+    if ('message' in err && typeof err.message === 'string') {
+      return (err as { message: string }).message;
+    }
+  }
+
+  return String(err);
 }

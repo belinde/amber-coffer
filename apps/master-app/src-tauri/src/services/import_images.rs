@@ -2,29 +2,21 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use sha2::{Digest, Sha256};
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 
 use crate::error::AppError;
 use crate::models::vault_json::ImageRef;
+use crate::services::campaign_storage;
 
 const ALLOWED_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "webp", "gif"];
 
-pub fn images_root(app: &AppHandle) -> Result<PathBuf, AppError> {
-    let data_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|e| AppError::Internal(e.to_string()))?;
-    Ok(data_dir.join("images"))
-}
-
 pub fn entity_image_dir(
-    app: &AppHandle,
+    handle: &AppHandle,
     campaign_id: &str,
     entity_id: &str,
 ) -> Result<PathBuf, AppError> {
-    Ok(images_root(app)?
-        .join(campaign_id)
-        .join(entity_id))
+    let campaign_folder = campaign_storage::resolve_storage_folder(handle, campaign_id)?;
+    Ok(campaign_storage::images_dir(&campaign_folder).join(entity_id))
 }
 
 fn extension_from_path(path: &Path) -> Option<String> {
@@ -40,7 +32,7 @@ pub fn hash_file(path: &Path) -> Result<String, AppError> {
     Ok(format!("{:x}", digest))
 }
 
-/// Copy source image into L1 storage; returns ImageRef with relative local path and hash.
+/// Copy source image into L1 storage under the campaign folder; returns ImageRef with relative path.
 pub fn copy_image_to_l1(
     app: &AppHandle,
     campaign_id: &str,
@@ -64,7 +56,7 @@ pub fn copy_image_to_l1(
     fs::copy(&source, &dest_file).map_err(|e| AppError::Internal(e.to_string()))?;
 
     let hash = hash_file(&dest_file)?;
-    let local = format!("{campaign_id}/{entity_id}/{file_name}");
+    let local = format!("images/{entity_id}/{file_name}");
 
     Ok(ImageRef {
         local: Some(local),

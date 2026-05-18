@@ -10,17 +10,17 @@ Analisi della distanza architetturale tra il monorepo cloud abbandonato `_readon
 
 ## Mappa architetturale a confronto
 
-| Layer | Legacy cloud (`_amber-coffer`) | Amber Coffer |
-|-------|-------------------------------|--------------|
-| Frontend GM | Webapp SPA (React + Vite) servita da S3/CloudFront, dietro Cognito | **App desktop Tauri 2 (Rust + React)**, locale, single-user |
-| Frontend Player | Stesse rotte della webapp GM, view "Game Mode" | **Discord Activity** dedicata (`apps/player-activity`), stateless |
-| Trasporto real-time | **WebSocket** server Node monolitico (`apps/backend/src/ws.mjs`, 924 righe) + WebRTC P2P + TURN/STUN | **MQTT** managed via AWS IoT Core ([ADR 0003](../adr/0003-mqtt-contract.md)); voce su Discord |
-| DB | SQLite **su EC2** dietro server Node (REST + WS) | **SQLite locale Rust+sqlx** dentro il master-app ([ADR 0002](../adr/0002-rust-sqlx-data-layer.md)) |
-| Auth | Cognito Hosted UI (OAuth2 PKCE) | **Nessuna auth** GM-side (locale); auth Player via Discord SDK |
-| STT pipeline | `apps/stt-sidecar` HTTP, audio caricato in S3, job async | **Sidecar locale** `tools/sidecars/whisper/`, audio sempre locale ([ADR 0004](../adr/0004-audio-source-extensibility.md)) |
-| Cleaning trascrizione | `apps/cleaner-sidecar` LLM cloud | UI interattiva di review nel master-app (futuro Bedrock opzionale) |
-| Storage immagini | S3 totale dietro auth | **Hybrid local-first** ([ADR 0006](../adr/0006-image-storage-strategy.md)) |
-| Infrastruttura | EC2 + RDS + Cognito + S3 + CloudFront + (TURN coturn) | **IoT Core + DynamoDB handshake + S3/CloudFront + Bedrock stub** |
+| Layer                 | Legacy cloud (`_amber-coffer`)                                                                       | Amber Coffer                                                                                                                                                                                                                      |
+| --------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend GM           | Webapp SPA (React + Vite) servita da S3/CloudFront, dietro Cognito                                   | **App desktop Tauri 2 (Rust + React)**, locale, single-user                                                                                                                                                                       |
+| Frontend Player       | Stesse rotte della webapp GM, view "Game Mode"                                                       | **Discord Activity** dedicata (`apps/player-activity`), stateless                                                                                                                                                                 |
+| Trasporto real-time   | **WebSocket** server Node monolitico (`apps/backend/src/ws.mjs`, 924 righe) + WebRTC P2P + TURN/STUN | **MQTT** managed via AWS IoT Core ([ADR 0003](../adr/0003-mqtt-contract.md)); voce su Discord                                                                                                                                     |
+| DB                    | SQLite **su EC2** dietro server Node (REST + WS)                                                     | **SQLite locale Rust+sqlx** dentro il master-app ([ADR 0002](../adr/0002-rust-sqlx-data-layer.md))                                                                                                                                |
+| Auth                  | Cognito Hosted UI (OAuth2 PKCE)                                                                      | **Nessuna auth** GM-side (locale); auth Player via Discord SDK                                                                                                                                                                    |
+| STT pipeline          | `apps/stt-sidecar` HTTP, audio caricato in S3, job async, modelli lato server                        | **Sidecar locale** `tools/sidecars/whisper/`, audio sempre locale; modelli scaricati dal GM in Impostazioni ([ADR 0004](../adr/0004-audio-source-extensibility.md), [ADR 0010](../adr/0010-local-model-artifacts-and-updates.md)) |
+| Cleaning trascrizione | `apps/cleaner-sidecar` LLM cloud                                                                     | UI interattiva di review nel master-app (futuro Bedrock opzionale)                                                                                                                                                                |
+| Storage immagini      | S3 totale dietro auth                                                                                | **Hybrid local-first** ([ADR 0006](../adr/0006-image-storage-strategy.md))                                                                                                                                                        |
+| Infrastruttura        | EC2 + RDS + Cognito + S3 + CloudFront + (TURN coturn)                                                | **IoT Core + DynamoDB handshake + S3/CloudFront + Bedrock stub**                                                                                                                                                                  |
 
 ## Cosa si porta
 
@@ -30,16 +30,16 @@ Il legacy ha ~1.700 righe di codice ben pensato in `apps/web/src/pages/gameMode/
 
 **Da analizzare in Fase 4a**:
 
-| File legacy | Cosa contiene | Riusabilità |
-|-------------|---------------|-------------|
-| `TabletopBoard.tsx` (351 righe) | Rendering canvas, drag&drop token, fog | Alta — sostituire le chiamate WS con bus di stato (Zustand/Redux) e MQTT sub |
-| `gameModeTypes.ts` (95 righe) | Tipi di dominio runtime (token, layer, payload) | Alta — confrontare con `packages/shared/src/world-state/{map,token,fog-of-war}.ts` |
-| `gameRoomReducer.ts` (72 righe) | Reducer dello stato tavolo | Alta — diventa lo stato condiviso del tabletop |
-| `parseTabletopPayload.ts` (116 righe) | Validatori payload realtime | Media — sostituire con Zod schemas già esistenti su `MqttMessage` |
-| `useGameModeWebSocket.ts` (236 righe) | Hook WS | Scartare contenuto, mantenere la **forma**: hook MQTT con stesso shape (`{ status, send, lastMessage, subscribe }`) |
-| `useGameModeSession.ts` (146 righe) | Lifecycle sessione | Alta — adattare a Tauri commands lato GM |
-| `useGameModeMedia.ts` (107 righe) | Media stream WebRTC | Scartare (out of scope) |
-| `gameModeRoom.test.ts` (142 righe) | Test reducer | Alta — riusare come baseline test, adattare envelope |
+| File legacy                           | Cosa contiene                                   | Riusabilità                                                                                                         |
+| ------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `TabletopBoard.tsx` (351 righe)       | Rendering canvas, drag&drop token, fog          | Alta — sostituire le chiamate WS con bus di stato (Zustand/Redux) e MQTT sub                                        |
+| `gameModeTypes.ts` (95 righe)         | Tipi di dominio runtime (token, layer, payload) | Alta — confrontare con `packages/shared/src/world-state/{map,token,fog-of-war}.ts`                                  |
+| `gameRoomReducer.ts` (72 righe)       | Reducer dello stato tavolo                      | Alta — diventa lo stato condiviso del tabletop                                                                      |
+| `parseTabletopPayload.ts` (116 righe) | Validatori payload realtime                     | Media — sostituire con Zod schemas già esistenti su `MqttMessage`                                                   |
+| `useGameModeWebSocket.ts` (236 righe) | Hook WS                                         | Scartare contenuto, mantenere la **forma**: hook MQTT con stesso shape (`{ status, send, lastMessage, subscribe }`) |
+| `useGameModeSession.ts` (146 righe)   | Lifecycle sessione                              | Alta — adattare a Tauri commands lato GM                                                                            |
+| `useGameModeMedia.ts` (107 righe)     | Media stream WebRTC                             | Scartare (out of scope)                                                                                             |
+| `gameModeRoom.test.ts` (142 righe)    | Test reducer                                    | Alta — riusare come baseline test, adattare envelope                                                                |
 
 ### Contratti realtime (Fase 2, già fatto in shared)
 
@@ -107,14 +107,14 @@ Nuovo stack CDK: IoT Core + DynamoDB + S3/CloudFront + Bedrock (`infrastructure/
 
 ## Sintesi numerica
 
-| Categoria | Righe di codice legacy | Decisione |
-|-----------|------------------------|-----------|
-| Tabletop UI + logica | ~1.700 | ADAPT (Fase 4b) |
-| WebSocket server + client | ~1.500 | DISCARD |
-| REST handler backend | ~1.500 | REFERENCE (vocabolario operazioni) |
-| WebRTC + RTC hooks | ~400 | DISCARD |
-| Auth Cognito | ~300 | DISCARD |
-| Sidecar STT + cleaner | (TS wrapper) | REFERENCE (logica concettuale) |
-| Infrastruttura CDK | ~? | REFERENCE (sicurezza, niente import diretto) |
+| Categoria                 | Righe di codice legacy | Decisione                                    |
+| ------------------------- | ---------------------- | -------------------------------------------- |
+| Tabletop UI + logica      | ~1.700                 | ADAPT (Fase 4b)                              |
+| WebSocket server + client | ~1.500                 | DISCARD                                      |
+| REST handler backend      | ~1.500                 | REFERENCE (vocabolario operazioni)           |
+| WebRTC + RTC hooks        | ~400                   | DISCARD                                      |
+| Auth Cognito              | ~300                   | DISCARD                                      |
+| Sidecar STT + cleaner     | (TS wrapper)           | REFERENCE (logica concettuale)               |
+| Infrastruttura CDK        | ~?                     | REFERENCE (sicurezza, niente import diretto) |
 
 Bilancio: il legacy è **prevalentemente da scartare** ma fornisce due asset preziosi — la logica tabletop e il catalogo operazioni di dominio.

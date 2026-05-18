@@ -13,10 +13,10 @@ import {
   buildGmNotes,
   fail,
   nowTimestamps,
+  parseNotableEquipment,
   parseRazzaClasse,
   queueImageFromSection,
   relPath,
-  warn,
 } from './common.js';
 
 export async function extractCharacters(ctx: ExtractContext): Promise<Character[]> {
@@ -37,14 +37,6 @@ export async function extractCharacters(ctx: ExtractContext): Promise<Character[
       const { species, roleHint } = parseRazzaClasse(parsed.metadata);
       const timestamps = nowTimestamps();
 
-      if (parsed.metadata.Giocatore) {
-        warn(
-          ctx,
-          relFile,
-          `Player "${parsed.metadata.Giocatore}" has no Discord ID mapping; playerDiscordId left null`,
-        );
-      }
-
       const character: Character = {
         id: id as Character['id'],
         campaignId: ctx.campaignId as Character['campaignId'],
@@ -56,7 +48,7 @@ export async function extractCharacters(ctx: ExtractContext): Promise<Character[
         appearance: buildAppearance(parsed),
         gameStats: {},
         gameSystemHint: 'dnd5e',
-        notableEquipment: [],
+        notableEquipment: parseNotableEquipment(parsed),
         eventsInteresting: buildEventsInteresting(parsed, ctx.registry, timestamps.createdAt),
         image: null,
         gmNotes: buildGmNotes(parsed),
@@ -66,13 +58,7 @@ export async function extractCharacters(ctx: ExtractContext): Promise<Character[
         version: 1,
       };
 
-      queueImageFromSection(
-        ctx,
-        relFile,
-        'character',
-        id,
-        sectionBody(parsed, 'Immagine'),
-      );
+      queueImageFromSection(ctx, relFile, 'character', id, sectionBody(parsed, 'Immagine'));
 
       ctx.registry.register({
         kind: 'character',
@@ -83,7 +69,12 @@ export async function extractCharacters(ctx: ExtractContext): Promise<Character[
 
       characters.push(characterSchema.parse(character));
     } catch (err) {
-      fail(ctx, relFile, 'Failed to parse character', err instanceof Error ? err.message : String(err));
+      fail(
+        ctx,
+        relFile,
+        'Failed to parse character',
+        err instanceof Error ? err.message : String(err),
+      );
     }
   }
 

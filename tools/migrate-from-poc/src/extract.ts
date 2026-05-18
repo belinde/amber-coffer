@@ -1,3 +1,4 @@
+import { registerEntityAliases } from './entity-aliases.js';
 import { loadMapping, saveMapping } from './id-mapping.js';
 import { extractCharacters } from './mapping/characters.js';
 import { extractFactions } from './mapping/factions.js';
@@ -6,7 +7,6 @@ import { extractLoreNotes } from './mapping/lore-notes.js';
 import { extractNarrativeSeeds } from './mapping/narrative-seeds.js';
 import { extractNpcs } from './mapping/npcs.js';
 import { extractSessions, preregisterSessions } from './mapping/sessions.js';
-import { registerEntityAliases } from './entity-aliases.js';
 import { EntityRegistry } from './registry.js';
 import type { CampaignDump, ExtractContext } from './types.js';
 

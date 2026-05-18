@@ -1,4 +1,9 @@
-import { campaignSchema, type Campaign } from '@amber/shared';
+import {
+  campaignSchema,
+  playLanguageSchema,
+  type Campaign,
+  type PlayLanguage,
+} from '@amber/shared';
 import { invoke } from '@tauri-apps/api/core';
 import { z } from 'zod';
 
@@ -6,9 +11,13 @@ import { parseBridgeInput } from './parse-bridge-input.js';
 
 type CampaignId = Campaign['id'];
 
+export type { PlayLanguage };
+
 const createCampaignInputSchema = z.object({
   name: z.string().min(1),
   description: z.string().nullable().optional(),
+  catchphrase: z.string().nullable().optional(),
+  playLanguage: playLanguageSchema.optional(),
   discordChannelId: z.string().nullable().optional(),
 });
 
@@ -36,7 +45,10 @@ export async function createCampaign(input: CreateCampaignInput): Promise<Campai
 
 const updateCampaignInputSchema = z.object({
   id: z.string().min(1),
-  discordChannelId: z.string().nullable(),
+  name: z.string().min(1).optional(),
+  catchphrase: z.string().nullable().optional(),
+  discordChannelId: z.string().nullable().optional(),
+  playLanguage: playLanguageSchema.optional(),
 });
 
 export type UpdateCampaignInput = z.infer<typeof updateCampaignInputSchema>;

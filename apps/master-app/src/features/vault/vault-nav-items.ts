@@ -1,6 +1,7 @@
 import type { Icon } from '@phosphor-icons/react';
 
 import {
+  CampaignVaultIcon,
   ConnectionsIcon,
   iconForVaultCategory,
   ImagesIcon,
@@ -11,6 +12,7 @@ import type { VaultView } from './useVaultNavigation.js';
 import { VAULT_CATEGORIES, type VaultCategory } from './vault-categories.js';
 
 export type VaultNavTarget =
+  | { kind: 'campaign' }
   | { kind: 'category'; category: VaultCategory }
   | { kind: 'images' }
   | { kind: 'sessions' }
@@ -21,6 +23,7 @@ export type VaultNavItem = {
   target: VaultNavTarget;
   icon: Icon;
   labelKey:
+    | 'vault.campaignTitle'
     | `vault.categories.${VaultCategory}`
     | 'vault.imagesTitle'
     | 'vault.sessionsTitle'
@@ -42,6 +45,12 @@ export function isVaultNavItemActive(item: VaultNavItem, current: VaultView): bo
 }
 
 export const VAULT_SIDEBAR_NAV_ITEMS: VaultNavItem[] = [
+  {
+    id: 'campaign',
+    target: { kind: 'campaign' },
+    icon: CampaignVaultIcon,
+    labelKey: 'vault.campaignTitle',
+  },
   ...VAULT_CATEGORIES.map((category) => ({
     id: category,
     target: { kind: 'category' as const, category },

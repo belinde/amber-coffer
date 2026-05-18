@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 
 import { createMap, listMaps } from '../../bridge/maps.js';
 import { Button } from '../../components/ui/Button.js';
-import { TabletopControlView } from '../tabletop-control/TabletopControlView.js';
 import { listTokens } from '../tabletop-control/bridge.js';
+import { TabletopControlView } from '../tabletop-control/TabletopControlView.js';
 
 const activeMapKey = (campaignId: Campaign['id']) => `amber.activeMap.${campaignId}`;
 
@@ -31,7 +31,8 @@ export function SessionTabletopSection({ campaignId, onError }: Props): ReactEle
       const next = await listMaps(campaignId);
       setMaps(next);
       const stored = localStorage.getItem(activeMapKey(campaignId));
-      const preferred = stored && next.some((m) => m.id === stored) ? stored : next[0]?.id ?? null;
+      const preferred =
+        stored && next.some((m) => m.id === stored) ? stored : (next[0]?.id ?? null);
       setActiveMapId(preferred);
     } catch (err) {
       onError(err instanceof Error ? err.message : String(err));
@@ -84,11 +85,10 @@ export function SessionTabletopSection({ campaignId, onError }: Props): ReactEle
         <h3 id="session-tabletop-heading">{t('sessionDetail.tabletopTitle')}</h3>
         {maps.length > 1 ? (
           <label className="session-tabletop__map-select">
-            <span className="session-tabletop__map-select-label">{t('sessionDetail.selectMap')}</span>
-            <select
-              value={activeMapId ?? ''}
-              onChange={(e) => selectMap(e.target.value)}
-            >
+            <span className="session-tabletop__map-select-label">
+              {t('sessionDetail.selectMap')}
+            </span>
+            <select value={activeMapId ?? ''} onChange={(e) => selectMap(e.target.value)}>
               {maps.map((map) => (
                 <option key={map.id} value={map.id}>
                   {map.name}
@@ -106,7 +106,12 @@ export function SessionTabletopSection({ campaignId, onError }: Props): ReactEle
       {!loading && maps.length === 0 ? (
         <div className="session-tabletop__empty">
           <p>{t('sessionDetail.noMaps')}</p>
-          <Button type="button" variant="primary" disabled={creatingMap} onClick={() => void handleCreateDefaultMap()}>
+          <Button
+            type="button"
+            variant="primary"
+            disabled={creatingMap}
+            onClick={() => void handleCreateDefaultMap()}
+          >
             {creatingMap ? t('common.saving') : t('sessionDetail.createDefaultMap')}
           </Button>
         </div>
@@ -114,7 +119,8 @@ export function SessionTabletopSection({ campaignId, onError }: Props): ReactEle
 
       {!loading && activeMap ? (
         <TabletopControlView
-          grid={{ cols: activeMap.gridCols, rows: activeMap.gridRows, benchSlots: activeMap.benchSlots }}
+          campaignId={campaignId}
+          map={activeMap}
           tokens={tokens}
           canEdit
           onAfterMove={() => void loadTokens()}

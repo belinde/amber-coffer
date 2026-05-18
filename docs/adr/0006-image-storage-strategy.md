@@ -18,11 +18,11 @@ L'utente ha confermato (Q4 inventario): **locale primario; su S3 si caricano sol
 
 ### Tre livelli di storage
 
-| Livello | Locazione | Contenuto | Quando |
-|---------|-----------|-----------|--------|
-| **L1 — locale full-res** | App data dir del master-app (`$APPDATA/amber-coffer/images/<campaignId>/<entityId>/...`) | Originali JPEG/PNG, full resolution | Sempre (sorgente canonica) |
-| **L2 — S3 thumbnail token** | `s3://<bucket>/tokens/<campaignId>/<tokenId>.webp` | Thumbnail 256×256 WebP per i token del tabletop visibili in Player Activity | Quando un token viene piazzato/sincronizzato sul tabletop |
-| **L3 — S3 canon pubblico** | `s3://<bucket>/public/<campaignId>/{characters,npcs,locations,events}/<id>.webp` | Versione normalizzata (max 1600px, sRGB, WebP) per il sito pubblico CloudFront | Quando il GM marca un'entità come `visibility: 'public_canon'` e pubblica |
+| Livello                     | Locazione                                                                        | Contenuto                                                                      | Quando                                                                    |
+| --------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| **L1 — locale full-res**    | Cartella campagna (`$APPDATA/…/worlds/<storageUuid>/images/<entityId>/...`)      | Originali JPEG/PNG, full resolution                                            | Sempre (sorgente canonica)                                                |
+| **L2 — S3 thumbnail token** | `s3://<bucket>/tokens/<campaignId>/<tokenId>.webp`                               | Thumbnail 256×256 WebP per i token del tabletop visibili in Player Activity    | Quando un token viene piazzato/sincronizzato sul tabletop                 |
+| **L3 — S3 canon pubblico**  | `s3://<bucket>/public/<campaignId>/{characters,npcs,locations,events}/<id>.webp` | Versione normalizzata (max 1600px, sRGB, WebP) per il sito pubblico CloudFront | Quando il GM marca un'entità come `visibility: 'public_canon'` e pubblica |
 
 ### Pipeline di normalizzazione
 

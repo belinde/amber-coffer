@@ -7,7 +7,7 @@
     "core:default",
     "dialog:default",
     "fs:default",
-    "shell:allow-open",
+    "opener:default",
     "store:default",
     "window-state:default"
   ]

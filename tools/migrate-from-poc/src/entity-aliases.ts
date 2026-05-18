@@ -4,7 +4,13 @@ import type { EntityRegistry } from './registry.js';
 const ALIASES_BY_SLUG: Record<string, readonly string[]> = {
   'todd-crow': ['secondo fratello crow', 'secondo dei fratelli crow'],
   'silas-drummond': ['lo sceriffo di valdoren', 'sceriffo di valdoren'],
-  'ben-campbell': ['il mississippi', 'mississippi', 'grande fiume'],
+  'ben-campbell': [
+    'il mississippi',
+    'mississippi',
+    'grande fiume',
+    'corridoio delle cabine di lusso',
+    'corridoio cabine di lusso',
+  ],
   'fattoria-mercer': ['fattoria isolata'],
 };
 

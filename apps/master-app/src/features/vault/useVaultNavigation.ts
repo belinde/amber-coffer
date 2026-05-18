@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import type { VaultCategory } from './vault-categories.js';
 
 export type VaultView =
   | { kind: 'home' }
+  | { kind: 'campaign' }
   | { kind: 'images' }
   | { kind: 'connections' }
   | { kind: 'sessions' }
@@ -11,10 +12,10 @@ export type VaultView =
   | { kind: 'category'; category: VaultCategory }
   | { kind: 'detail'; category: VaultCategory; entityId: string };
 
-export function useVaultNavigation(initial: VaultView = { kind: 'home' }) {
+export function useVaultNavigation(initial: VaultView = { kind: 'sessions' }) {
   const [stack, setStack] = useState<VaultView[]>([initial]);
 
-  const current = stack[stack.length - 1] ?? { kind: 'home' };
+  const current = useMemo(() => stack[stack.length - 1] ?? { kind: 'home' }, [stack]);
 
   const pushView = useCallback((view: VaultView) => {
     setStack((prev) => [...prev, view]);
@@ -37,5 +38,8 @@ export function useVaultNavigation(initial: VaultView = { kind: 'home' }) {
     setStack([view]);
   }, []);
 
-  return { current, pushView, popView, resetToHome, goTo };
+  return useMemo(
+    () => ({ current, pushView, popView, resetToHome, goTo }),
+    [current, pushView, popView, resetToHome, goTo],
+  );
 }

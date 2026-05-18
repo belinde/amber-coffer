@@ -16,11 +16,11 @@ Per i tipi corrispondenti, vedi `packages/shared/src/world-state/` e `packages/s
 
 Distinzione cardine che viene dalla rule `personaggio-aspetto.mdc` del POC. Si applica a `Character`, `Npc` e `Location`.
 
-| Concetto | Dove vive nello schema | Esempi |
-|----------|------------------------|--------|
-| **Tratti fissi (permanenti)** | `appearance` (testo narrativo), `visualReference.prompt`, `appearance.permanentMarks[]` | Corporatura, età apparente, capelli, equipaggiamento abituale, cicatrici permanenti, temperamento visivo cronico |
-| **Stato di scena (transitorio)** | `eventsInteresting[]` (riferito a una `Session`), note GM-only, `Recording`/`Transcript` della sessione | Emozioni acute, ferite in corso, pose da combattimento, travestimenti, sangue/polvere da un evento preciso |
-| **Eccezione**: cicatrice o segno permanente promosso da uno stato di scena | Aggiornare `appearance` + `visualReference` **solo** quando il GM approva la promozione | Cicatrice che resta dopo lo scontro, amputazione, nuovo equipaggiamento iconico |
+| Concetto                                                                   | Dove vive nello schema                                                                                  | Esempi                                                                                                           |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Tratti fissi (permanenti)**                                              | `appearance` (testo narrativo), `visualReference.prompt`, `appearance.permanentMarks[]`                 | Corporatura, età apparente, capelli, equipaggiamento abituale, cicatrici permanenti, temperamento visivo cronico |
+| **Stato di scena (transitorio)**                                           | `eventsInteresting[]` (riferito a una `Session`), note GM-only, `Recording`/`Transcript` della sessione | Emozioni acute, ferite in corso, pose da combattimento, travestimenti, sangue/polvere da un evento preciso       |
+| **Eccezione**: cicatrice o segno permanente promosso da uno stato di scena | Aggiornare `appearance` + `visualReference` **solo** quando il GM approva la promozione                 | Cicatrice che resta dopo lo scontro, amputazione, nuovo equipaggiamento iconico                                  |
 
 **Regola di UI/UX**: l'editor di `appearance` non deve mostrare il diff "ultima sessione". Dopo un resoconto la feature `session-recap` può **proporre** patch di `appearance` (es. "Maren ora ha una cicatrice sopra l'occhio") ma il GM le approva esplicitamente.
 
@@ -66,39 +66,54 @@ Ogni entità importante ha `visibility: 'gm_only' | 'shared' | 'public_canon'`:
 
 ## Template per entità
 
+### Campaign
+
+Metadati in `campaign.json` per cartella storage (non riga SQLite dedicata).
+
+| Campo                               | Tipo                           | Note                                                                                                                                                |
+| ----------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                                | `CampaignId`                   | UUID v7                                                                                                                                             |
+| `name`                              | `string`                       |                                                                                                                                                     |
+| `slug`                              | `string`                       | Univoco per installazione                                                                                                                           |
+| `description`                       | `string?`                      | Testo lungo / note import                                                                                                                           |
+| `catchphrase`                       | `string?`                      | Tagline breve della campagna                                                                                                                        |
+| `playLanguage`                      | `'it' \| 'en' \| 'fr' \| 'es'` | **Lingua di gioco** al tavolo: annunci vocali del bot di registrazione Discord e hint per trascrizione STT. Default `it` se assente in JSON legacy. |
+| `discordChannelId`                  | `DiscordChannelId?`            | Canale vocale per `discord_capture`                                                                                                                 |
+| `createdAt`, `updatedAt`, `version` |                                |                                                                                                                                                     |
+
 ### Character (PG)
 
 Sorgente POC: `personaggi/*.md`. Owner: GM, ma legato a un `playerDiscordId` (Discord ID del giocatore).
 
-| Campo | Tipo | Note |
-|-------|------|------|
-| `id` | `CharacterId` (UUID v7) | |
-| `campaignId` | `CampaignId` | |
-| `playerDiscordId` | `DiscordUserId?` | Null se PG non assegnato |
-| `name` | `string` | |
-| `species` | `string?` | Es. "Umano", "Halfling", libero |
-| `roleHint` | `string?` | Es. "Pistolero esploratore", libero |
-| `appearance` | `Appearance` | `description` + `permanentMarks[]` + `visualReference` |
-| `gameStats` | `GameStatsRecord?` | Key/value libero ([ADR 0005](../adr/0005-system-agnostic-domain-model.md)) |
-| `gameSystemHint` | `string?` | `"dnd5e"`, `"pf2e"`, ... — hint UI |
-| `notableEquipment` | `string[]` | Visibile, distintivo |
-| `eventsInteresting` | `EventReference[]` | |
-| `image` | `ImageRef?` | L1 path + L2/L3 URL opt ([ADR 0006](../adr/0006-image-storage-strategy.md)) |
-| `gmNotes` | `string` | GM only |
-| `visibility` | `'gm_only' \| 'shared' \| 'public_canon'` | |
-| `createdAt`, `updatedAt` | `Timestamp` | |
+| Campo                    | Tipo                                      | Note                                                                        |
+| ------------------------ | ----------------------------------------- | --------------------------------------------------------------------------- |
+| `id`                     | `CharacterId` (UUID v7)                   |                                                                             |
+| `campaignId`             | `CampaignId`                              |                                                                             |
+| `playerDiscordId`        | `DiscordUserId?`                          | Null se PG non assegnato                                                    |
+| `name`                   | `string`                                  |                                                                             |
+| `species`                | `string?`                                 | Es. "Umano", "Halfling", libero                                             |
+| `roleHint`               | `string?`                                 | Es. "Pistolero esploratore", libero                                         |
+| `appearance`             | `Appearance`                              | `description` + `permanentMarks[]` + `visualReference`                      |
+| `gameStats`              | `GameStatsRecord?`                        | Key/value libero ([ADR 0005](../adr/0005-system-agnostic-domain-model.md))  |
+| `gameSystemHint`         | `string?`                                 | `"dnd5e"`, `"pf2e"`, ... — hint UI                                          |
+| `notableEquipment`       | `string[]`                                | Visibile, distintivo                                                        |
+| `eventsInteresting`      | `EventReference[]`                        |                                                                             |
+| `image`                  | `ImageRef?`                               | L1 path + L2/L3 URL opt ([ADR 0006](../adr/0006-image-storage-strategy.md)) |
+| `gmNotes`                | `string`                                  | GM only                                                                     |
+| `visibility`             | `'gm_only' \| 'shared' \| 'public_canon'` |                                                                             |
+| `createdAt`, `updatedAt` | `Timestamp`                               |                                                                             |
 
 ### Npc (PNG)
 
 Sorgente POC: `png/*.md`. Riusa quasi tutti i campi di `Character`, aggiunge:
 
-| Campo aggiuntivo | Tipo | Note (dalla rule `campagna.mdc`) |
-|------------------|------|------------------------------------|
-| `region` | `string?` | Macro-area narrativa (ex `**Regione:**`) |
-| `scope` | `string?` | Ancoraggio operativo: luogo, fazione, viaggio, famiglia (ex `**Ambito:**`) |
-| `reminder` | `string?` | Una frase su chi è e perché conta (ex `**Promemoria:**`) |
-| `linksToCharacters` | `LinkToCharacter[]` | Relazioni narrative coi PG |
-| `kind` | `'canonical' \| 'scratch'` | `scratch` = creato durante una sessione live, non ancora canonizzato |
+| Campo aggiuntivo    | Tipo                       | Note (dalla rule `campagna.mdc`)                                           |
+| ------------------- | -------------------------- | -------------------------------------------------------------------------- |
+| `region`            | `string?`                  | Macro-area narrativa (ex `**Regione:**`)                                   |
+| `scope`             | `string?`                  | Ancoraggio operativo: luogo, fazione, viaggio, famiglia (ex `**Ambito:**`) |
+| `reminder`          | `string?`                  | Una frase su chi è e perché conta (ex `**Promemoria:**`)                   |
+| `linksToCharacters` | `LinkToCharacter[]`        | Relazioni narrative coi PG                                                 |
+| `kind`              | `'canonical' \| 'scratch'` | `scratch` = creato durante una sessione live, non ancora canonizzato       |
 
 Campi `region`, `scope`, `reminder` **non sono obbligatori** ma sono **suggeriti** dalla UI (placeholder). Il POC li aveva obbligatori per disciplina; nel prodotto restano opzionali per non bloccare il flusso.
 
@@ -106,21 +121,21 @@ Campi `region`, `scope`, `reminder` **non sono obbligatori** ma sono **suggeriti
 
 Sorgente POC: `ambientazione/luoghi/*.md`. Schema:
 
-| Campo | Tipo | Note |
-|-------|------|------|
-| `id` | `LocationId` | |
-| `campaignId` | `CampaignId` | |
-| `parentLocationId` | `LocationId?` | Gerarchia (regione → città → quartiere) |
-| `name` | `string` | |
-| `region` | `string?` | Es. "Middle West", "East Coast" |
-| `kind` | `string?` | "Città libera", "Fattoria", "Forte", libero |
-| `population` | `string?` | Stima testuale ("~40.000") |
-| `appearance` | `Appearance` | Lungo (per i luoghi nessun limite 2–4 frasi) |
-| `sections` | `LocationSection[]` | Sezioni libere: economia, fazioni e potere, ganci narrativi, storia, abitanti, ecc. |
-| `image` | `ImageRef?` | |
-| `eventsInteresting` | `EventReference[]` | |
-| `visibility` | `'gm_only' \| 'shared' \| 'public_canon'` | |
-| `createdAt`, `updatedAt` | `Timestamp` | |
+| Campo                    | Tipo                                      | Note                                                                                |
+| ------------------------ | ----------------------------------------- | ----------------------------------------------------------------------------------- |
+| `id`                     | `LocationId`                              |                                                                                     |
+| `campaignId`             | `CampaignId`                              |                                                                                     |
+| `parentLocationId`       | `LocationId?`                             | Gerarchia (regione → città → quartiere)                                             |
+| `name`                   | `string`                                  |                                                                                     |
+| `region`                 | `string?`                                 | Es. "Middle West", "East Coast"                                                     |
+| `kind`                   | `string?`                                 | "Città libera", "Fattoria", "Forte", libero                                         |
+| `population`             | `string?`                                 | Stima testuale ("~40.000")                                                          |
+| `appearance`             | `Appearance`                              | Lungo (per i luoghi nessun limite 2–4 frasi)                                        |
+| `sections`               | `LocationSection[]`                       | Sezioni libere: economia, fazioni e potere, ganci narrativi, storia, abitanti, ecc. |
+| `image`                  | `ImageRef?`                               |                                                                                     |
+| `eventsInteresting`      | `EventReference[]`                        |                                                                                     |
+| `visibility`             | `'gm_only' \| 'shared' \| 'public_canon'` |                                                                                     |
+| `createdAt`, `updatedAt` | `Timestamp`                               |                                                                                     |
 
 `sections[]` permette al GM di strutturare la descrizione libera senza fissare lo schema (a differenza del POC che aveva sezioni Markdown standardizzate).
 
@@ -128,43 +143,43 @@ Sorgente POC: `ambientazione/luoghi/*.md`. Schema:
 
 Sorgente POC: `ambientazione/nazioni/*.md`. Campi simili a `Location` con:
 
-| Campo dedicato | Tipo | Note |
-|-----------------|------|------|
-| `kind` | `'state' \| 'kingdom' \| 'company' \| 'guild' \| 'cult' \| 'family' \| 'other'` | Discriminante grossolana |
-| `parentFactionId` | `FactionId?` | Sotto-fazioni |
-| `headquartersLocationId` | `LocationId?` | Sede principale |
-| `goals` | `string` | Obiettivi noti |
-| `secrets` | `string` | GM only |
+| Campo dedicato           | Tipo                                                                            | Note                     |
+| ------------------------ | ------------------------------------------------------------------------------- | ------------------------ |
+| `kind`                   | `'state' \| 'kingdom' \| 'company' \| 'guild' \| 'cult' \| 'family' \| 'other'` | Discriminante grossolana |
+| `parentFactionId`        | `FactionId?`                                                                    | Sotto-fazioni            |
+| `headquartersLocationId` | `LocationId?`                                                                   | Sede principale          |
+| `goals`                  | `string`                                                                        | Obiettivi noti           |
+| `secrets`                | `string`                                                                        | GM only                  |
 
 ### LoreNote (Concetto di ambientazione)
 
 Sorgente POC: `ambientazione/concetti/*.md`. Nuova entità ([ADR 0005](../adr/0005-system-agnostic-domain-model.md)).
 
-| Campo | Tipo | Note |
-|-------|------|------|
-| `id` | `LoreNoteId` | |
-| `campaignId` | `CampaignId` | |
-| `title` | `string` | |
-| `kind` | `'concept' \| 'history' \| 'culture' \| 'economy' \| 'religion' \| 'cosmology' \| 'custom'` | |
-| `body` | `string` | Markdown libero (testo lungo) |
-| `tags` | `string[]` | Filtraggio ricerca |
-| `visibility` | `'gm_only' \| 'shared' \| 'public_canon'` | |
-| `linkedEntities` | `EntityRef[]` | Cross-link |
+| Campo            | Tipo                                                                                        | Note                          |
+| ---------------- | ------------------------------------------------------------------------------------------- | ----------------------------- |
+| `id`             | `LoreNoteId`                                                                                |                               |
+| `campaignId`     | `CampaignId`                                                                                |                               |
+| `title`          | `string`                                                                                    |                               |
+| `kind`           | `'concept' \| 'history' \| 'culture' \| 'economy' \| 'religion' \| 'cosmology' \| 'custom'` |                               |
+| `body`           | `string`                                                                                    | Markdown libero (testo lungo) |
+| `tags`           | `string[]`                                                                                  | Filtraggio ricerca            |
+| `visibility`     | `'gm_only' \| 'shared' \| 'public_canon'`                                                   |                               |
+| `linkedEntities` | `EntityRef[]`                                                                               | Cross-link                    |
 
 ### NarrativeSeed (Spunto narrativo)
 
 Sorgente POC: `spunti/*.md`. Nuova entità ([ADR 0005](../adr/0005-system-agnostic-domain-model.md)).
 
-| Campo | Tipo | Note |
-|-------|------|------|
-| `id` | `NarrativeSeedId` | |
-| `campaignId` | `CampaignId` | |
-| `title` | `string` | |
-| `summary` | `string` | Una frase / paragrafo |
-| `status` | `'idea' \| 'planned' \| 'introduced' \| 'closed' \| 'discarded'` | Workflow seed → canon |
-| `linkedEntities` | `EntityRef[]` | PG, PNG, Luoghi coinvolti |
-| `body` | `string?` | Dettaglio esteso opzionale |
-| `tags` | `string[]` | |
+| Campo            | Tipo                                                             | Note                       |
+| ---------------- | ---------------------------------------------------------------- | -------------------------- |
+| `id`             | `NarrativeSeedId`                                                |                            |
+| `campaignId`     | `CampaignId`                                                     |                            |
+| `title`          | `string`                                                         |                            |
+| `summary`        | `string`                                                         | Una frase / paragrafo      |
+| `status`         | `'idea' \| 'planned' \| 'introduced' \| 'closed' \| 'discarded'` | Workflow seed → canon      |
+| `linkedEntities` | `EntityRef[]`                                                    | PG, PNG, Luoghi coinvolti  |
+| `body`           | `string?`                                                        | Dettaglio esteso opzionale |
+| `tags`           | `string[]`                                                       |                            |
 
 Quando uno spunto diventa `introduced`, deve essere collegato a una `Session` e ai resoconti rilevanti (campo `firstSessionId`).
 
@@ -172,39 +187,39 @@ Quando uno spunto diventa `introduced`, deve essere collegato a una `Session` e 
 
 Sorgente POC: `resoconti/sessione-NNN.md`. Mappato sulla `Session` esistente + record correlati:
 
-| Campo | Note |
-|-------|------|
-| `Session.title` | "Sessione 003" o titolo evocativo |
-| `Session.summary` | `## Riassunto` |
-| `Session.eventsBody` | Corpo markdown di `## Eventi principali` (MVP: testo intero, non `SessionEvent[]` tipizzati) |
-| `Session.locationsVisited[]` | `LocationId[]` da `## Luoghi visitati` |
-| `Session.npcsEncountered[]` | `NpcId[]` da `## Personaggi non giocanti incontrati` |
-| `Session.gmNotes` | `## Note per la prossima sessione` (o `## Note DM` se presente) |
-| `Session.publicSummary?` | Riassunto player-safe (MVP: copia di `summary`) |
-| `Session.playedAt?` | Da `**Data:**` nel header (formato IT `DD/MM/YYYY`) |
-| `CampaignImage` | Scene da `## Immagini salienti` (`###` = titolo, link a `Session`) |
-| `Session.canonDiff` | Futuro: `CanonDiff` in chiusura sessione (non popolato dall'import) |
+| Campo                        | Note                                                                                         |
+| ---------------------------- | -------------------------------------------------------------------------------------------- |
+| `Session.title`              | "Sessione 003" o titolo evocativo                                                            |
+| `Session.summary`            | `## Riassunto`                                                                               |
+| `Session.eventsBody`         | Corpo markdown di `## Eventi principali` (MVP: testo intero, non `SessionEvent[]` tipizzati) |
+| `Session.locationsVisited[]` | `LocationId[]` da `## Luoghi visitati`                                                       |
+| `Session.npcsEncountered[]`  | `NpcId[]` da `## Personaggi non giocanti incontrati`                                         |
+| `Session.gmNotes`            | `## Note per la prossima sessione` (o `## Note DM` se presente)                              |
+| `Session.publicSummary?`     | Riassunto player-safe (MVP: copia di `summary`)                                              |
+| `Session.playedAt?`          | Da `**Data:**` nel header (formato IT `DD/MM/YYYY`)                                          |
+| `CampaignImage`              | Scene da `## Immagini salienti` (`###` = titolo, link a `Session`)                           |
+| `Session.canonDiff`          | Futuro: `CanonDiff` in chiusura sessione (non popolato dall'import)                          |
 
 ## Mapping POC → Amber Coffer
 
-| Sezione Markdown POC | Campo Amber Coffer |
-|----------------------|--------------------|
-| `**Regione:**`, `**Ambito:**`, `**Promemoria:**` (PNG) | `Npc.region`, `Npc.scope`, `Npc.reminder` |
-| `**Razza/Classe:**`, `**Ruolo:**` (PG, PNG) | `species`, `roleHint` (liberi) |
-| `## Immagine` | `image: ImageRef` |
-| `## Aspetto` | `appearance.description` |
-| `## Riferimento visivo` | `appearance.visualReference.prompt` |
-| `## Personalità` | `appearance.personality` |
-| `## Legami con i PG` (PNG) | `Npc.linksToCharacters[]` |
-| `## Note DM` | `gmNotes` (entity-level) |
-| `## Eventi interessanti` | `eventsInteresting[]` |
-| `## Scheda di gioco` (PNG) | `gameStats` (libero, niente schema 5e — [ADR 0005](../adr/0005-system-agnostic-domain-model.md)) |
-| `## Riassunto` (resoconti) | `Session.summary` |
-| `## Ganci narrativi`, `## Segreti e obiettivi nascosti` | `Session.gmNotes` |
-| `## Luoghi visitati` | `Session.locationsVisited` |
-| `## Immagini salienti` (resoconti) | `Session.images[]` con `imageRef` |
-| `**Tipo:**`, `**Popolazione:**` (luoghi) | `Location.kind`, `Location.population` |
-| `## Economia e commercio`, `## Fazioni e potere`, ecc. | `Location.sections[]` (libere) |
+| Sezione Markdown POC                                    | Campo Amber Coffer                                                                               |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `**Regione:**`, `**Ambito:**`, `**Promemoria:**` (PNG)  | `Npc.region`, `Npc.scope`, `Npc.reminder`                                                        |
+| `**Razza/Classe:**`, `**Ruolo:**` (PG, PNG)             | `species`, `roleHint` (liberi)                                                                   |
+| `## Immagine`                                           | `image: ImageRef`                                                                                |
+| `## Aspetto`                                            | `appearance.description`                                                                         |
+| `## Riferimento visivo`                                 | `appearance.visualReference.prompt`                                                              |
+| `## Personalità`                                        | `appearance.personality`                                                                         |
+| `## Legami con i PG` (PNG)                              | `Npc.linksToCharacters[]`                                                                        |
+| `## Note DM`                                            | `gmNotes` (entity-level)                                                                         |
+| `## Eventi interessanti`                                | `eventsInteresting[]`                                                                            |
+| `## Scheda di gioco` (PNG)                              | `gameStats` (libero, niente schema 5e — [ADR 0005](../adr/0005-system-agnostic-domain-model.md)) |
+| `## Riassunto` (resoconti)                              | `Session.summary`                                                                                |
+| `## Ganci narrativi`, `## Segreti e obiettivi nascosti` | `Session.gmNotes`                                                                                |
+| `## Luoghi visitati`                                    | `Session.locationsVisited`                                                                       |
+| `## Immagini salienti` (resoconti)                      | `Session.images[]` con `imageRef`                                                                |
+| `**Tipo:**`, `**Popolazione:**` (luoghi)                | `Location.kind`, `Location.population`                                                           |
+| `## Economia e commercio`, `## Fazioni e potere`, ecc.  | `Location.sections[]` (libere)                                                                   |
 
 Questo mapping è la **specifica** del tool di import markdown che verrà scritto in Fase 5 ([ADR 0007](../adr/) sarà creato lì).
 

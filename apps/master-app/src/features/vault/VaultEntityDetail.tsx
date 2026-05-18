@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { iconForSection, iconForVaultCategory } from '../../components/ui/icons.js';
+import { useAppError } from '../../context/AppErrorContext.js';
 import { applyValidationFailure } from '../validation/apply-validation-failure.js';
 import { sectionHasFieldError } from '../validation/section-for-field-path.js';
 
@@ -43,6 +44,7 @@ export function VaultEntityDetail({
   onOpenImages,
 }: Props): ReactElement {
   const { t } = useTranslation();
+  const { clearError } = useAppError();
   const isNew = entityId === NEW_ENTITY_ID;
   const sections = sectionsForCategory(category);
   const [draft, setDraft] = useState<VaultEntity | null>(null);
@@ -73,6 +75,7 @@ export function VaultEntityDetail({
 
   async function handleSave(): Promise<void> {
     if (!draft) return;
+    clearError();
     setSaving(true);
     setFieldErrors({});
     try {

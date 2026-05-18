@@ -1,8 +1,9 @@
-import { sessionSchema, type Session } from '@amber/shared';
+import type { Session } from '@amber/shared';
 import { invoke } from '@tauri-apps/api/core';
 import { z } from 'zod';
 
 import { parseBridgeInput } from './parse-bridge-input.js';
+import { parseSession } from './parse-session.js';
 
 type SessionId = Session['id'];
 
@@ -10,18 +11,18 @@ const sessionPipelineStateSchema = z.object({
   sessionId: z.string().min(1),
   status: z.string().min(1),
   recordingActive: z.boolean(),
+  transcriptionActive: z.boolean(),
+  transcriptionProgress: z.number().min(0).max(1).nullable(),
   hasBotToken: z.boolean(),
   sessionDir: z.string().nullable(),
   hasManifest: z.boolean(),
   hasRawTranscript: z.boolean(),
+  hasRefinedTranscript: z.boolean(),
+  transcriptionAttempted: z.boolean(),
   recordingCount: z.number().int().nonnegative(),
 });
 
 export type SessionPipelineState = z.infer<typeof sessionPipelineStateSchema>;
-
-function parseSession(raw: unknown): Session {
-  return sessionSchema.parse(raw);
-}
 
 export async function setDiscordBotToken(token: string): Promise<void> {
   return invoke<void>('set_discord_bot_token', { token });

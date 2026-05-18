@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { registerEntityAliases } from './entity-aliases.js';
 import {
   parseBulletNames,
   parseBulletRefs,
@@ -9,9 +10,11 @@ import {
   parseItalianDate,
   parseMarkdown,
 } from './frontmatter.js';
+import { parseNotableEquipment } from './mapping/common.js';
 import { EntityRegistry } from './registry.js';
-import { registerEntityAliases } from './entity-aliases.js';
+import { resolveSessionEncounterIds } from './session-resolve.js';
 import { slugify } from './slug.js';
+import type { ExtractContext } from './types.js';
 
 describe('parseMarkdown', () => {
   it('parses title, metadata, and sections', () => {
@@ -42,9 +45,7 @@ describe('parse utilities', () => {
   });
 
   it('parses session events', () => {
-    const events = parseEventiInteressanti(
-      '- **[Sessione 003]** Did something important.',
-    );
+    const events = parseEventiInteressanti('- **[Sessione 003]** Did something important.');
     expect(events).toEqual([{ sessionNumber: 3, summary: 'Did something important.' }]);
   });
 
@@ -87,5 +88,136 @@ describe('entity aliases', () => {
     });
     registerEntityAliases(registry);
     expect(registry.resolveNpcName('Secondo fratello Crow')).toBe('npc-todd');
+  });
+
+  it('does not resolve location-only aliases as NPCs', () => {
+    const registry = new EntityRegistry();
+    registry.register({
+      kind: 'location',
+      id: 'loc-ben',
+      name: 'Ben Campbell',
+      slug: 'ben-campbell',
+    });
+    registerEntityAliases(registry);
+    expect(registry.resolveLocationName('Il Mississippi')).toBe('loc-ben');
+    expect(registry.resolveNpcName('Il Mississippi')).toBeUndefined();
+  });
+});
+
+describe('parseNotableEquipment', () => {
+  it('parses equipment bullets', () => {
+    const parsed = parseMarkdown(`# PG
+
+## Equipaggiamento notevole
+
+- **Mulo** *Svalka* — pack animal
+`);
+    expect(parseNotableEquipment(parsed)).toEqual(['Mulo Svalka']);
+  });
+});
+
+function minimalCtx(registry: EntityRegistry): ExtractContext {
+  return {
+    rootPath: '/tmp',
+    campaignId: 'camp-1',
+    strict: false,
+    warnings: [],
+    errors: [],
+    registry,
+    mapping: { version: 1, campaignId: 'camp-1', files: {} },
+    assets: [],
+    fileCount: 0,
+  };
+}
+
+describe('session encounter resolution', () => {
+  it('session 001: Mississippi in locations, Ben Campbell steamboat not in NPCs', () => {
+    const registry = new EntityRegistry();
+    registry.register({
+      kind: 'location',
+      id: 'loc-avalon',
+      name: 'New Avalon',
+      slug: 'new-avalon',
+    });
+    registry.register({
+      kind: 'location',
+      id: 'loc-ben',
+      name: 'Ben Campbell',
+      slug: 'ben-campbell',
+    });
+    registerEntityAliases(registry);
+
+    const ctx = minimalCtx(registry);
+    const encounters = resolveSessionEncounterIds(
+      ctx,
+      'resoconti/sessione-001.md',
+      '- **New Avalon** — capital\n- **Il Mississippi** — river',
+      '- **Ben Campbell** *(steamboat)* — packet boat',
+    );
+
+    expect([...new Set(encounters.locationIds)]).toEqual(['loc-avalon', 'loc-ben']);
+    expect(encounters.npcIds).toEqual([]);
+    expect(ctx.warnings).toHaveLength(0);
+  });
+
+  it('session 002: Todd Crow NPC; anonymous signora skipped', () => {
+    const registry = new EntityRegistry();
+    registry.register({
+      kind: 'npc',
+      id: 'npc-sam',
+      name: 'Sam Crow',
+      slug: 'sam-crow',
+    });
+    registry.register({
+      kind: 'npc',
+      id: 'npc-todd',
+      name: 'Todd Crow',
+      slug: 'todd-crow',
+    });
+    registry.register({
+      kind: 'npc',
+      id: 'npc-caldwell',
+      name: 'Thomas Caldwell',
+      slug: 'thomas-caldwell',
+    });
+    registerEntityAliases(registry);
+
+    const ctx = minimalCtx(registry);
+    const { npcIds } = resolveSessionEncounterIds(
+      ctx,
+      'resoconti/sessione-002.md',
+      '',
+      [
+        '- **Sam Crow** — outlaw',
+        '- **Secondo fratello Crow** *(senza nome)* — dead',
+        '- **Thomas Caldwell** — officer',
+        '- **La signora delle cabine di lusso** *(senza nome)* — victim',
+      ].join('\n'),
+    );
+
+    expect(npcIds).toEqual(['npc-sam', 'npc-todd', 'npc-caldwell']);
+    expect(ctx.warnings).toHaveLength(0);
+  });
+
+  it('session 005: scene-only locations do not warn', () => {
+    const registry = new EntityRegistry();
+    registry.register({
+      kind: 'location',
+      id: 'loc-mercer',
+      name: 'Fattoria Mercer',
+      slug: 'fattoria-mercer',
+    });
+    registerEntityAliases(registry);
+
+    const ctx = minimalCtx(registry);
+    const { locationIds } = resolveSessionEncounterIds(
+      ctx,
+      'resoconti/sessione-005.md',
+      '- **Strada e sosta di mezzogiorno** — pause\n- **Fattoria isolata** — farm',
+      '',
+    );
+
+    expect(locationIds).toEqual(['loc-mercer']);
+    expect(ctx.warnings).toHaveLength(0);
   });
 });

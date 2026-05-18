@@ -9,10 +9,10 @@ import { Button } from '../../components/ui/Button.js';
 import { Field } from '../../components/ui/Field.js';
 import { ActionIcons } from '../../components/ui/icons.js';
 import { buildTabularRow, type TabularListRow } from '../../components/ui/tabular-list.js';
+import { FormActionErrorOutlet } from '../../context/AppErrorContext.js';
 import { CrudPanel } from '../crud/CrudPanel.js';
 import { applyValidationFailure } from '../validation/apply-validation-failure.js';
 
-import { fromDatetimeLocalValue } from './session-datetime.js';
 import { formatSessionLabel } from './session-label.js';
 
 type CampaignId = Campaign['id'];
@@ -26,7 +26,7 @@ type Props = {
 function sessionListRow(session: Session, t: TFunction): TabularListRow {
   return buildTabularRow({
     title: formatSessionLabel(session, t),
-    subtitle: t(`session.statusValues.${session.status}`),
+    subtitle: `${t(`session.playState.${session.playState}`)} · ${t(`session.statusValues.${session.status}`)}`,
     details: [
       session.startedAt
         ? t('session.startedAtValue', { value: formatDateTime(session.startedAt) })
@@ -47,6 +47,7 @@ export function SessionsPanel({ campaignId, onError, onOpenSession }: Props): Re
       createKey="session.create"
       emptyKey="session.empty"
       deleteConfirmKey="session.deleteConfirm"
+      hideDelete
       openItemKey="sessionDetail.openSession"
       listFn={() => listSessions(campaignId)}
       deleteFn={deleteSession}
@@ -82,8 +83,6 @@ function SessionCreateForm({
 }): ReactElement {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
-  const [startedAt, setStartedAt] = useState('');
-  const [endedAt, setEndedAt] = useState('');
   const [saving, setSaving] = useState(false);
   const [, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -97,8 +96,6 @@ function SessionCreateForm({
           campaignId,
           title: title.trim() || null,
           status: 'planned',
-          startedAt: fromDatetimeLocalValue(startedAt),
-          endedAt: fromDatetimeLocalValue(endedAt),
         }),
       );
     } catch (err) {
@@ -117,22 +114,7 @@ function SessionCreateForm({
       <Field label={t('session.title')} htmlFor="sess-create-title">
         <input id="sess-create-title" value={title} onChange={(e) => setTitle(e.target.value)} />
       </Field>
-      <Field label={t('session.startedAt')} htmlFor="sess-create-started">
-        <input
-          id="sess-create-started"
-          type="datetime-local"
-          value={startedAt}
-          onChange={(e) => setStartedAt(e.target.value)}
-        />
-      </Field>
-      <Field label={t('session.endedAt')} htmlFor="sess-create-ended">
-        <input
-          id="sess-create-ended"
-          type="datetime-local"
-          value={endedAt}
-          onChange={(e) => setEndedAt(e.target.value)}
-        />
-      </Field>
+      <FormActionErrorOutlet />
       <div className="form-actions">
         <Button type="submit" variant="primary" icon={ActionIcons.save} disabled={saving}>
           {saving ? t('common.saving') : t('sessionDetail.createAndOpen')}

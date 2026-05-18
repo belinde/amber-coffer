@@ -16,7 +16,9 @@ mod token;
 mod transcript;
 pub mod vault_json;
 
-pub use campaign::{Campaign, CreateCampaignInput, UpdateCampaignInput};
+pub use campaign::{
+    normalize_play_language, Campaign, CreateCampaignInput, UpdateCampaignInput,
+};
 pub use campaign_image::{
     CampaignImage, CampaignImageRow, CreateCampaignImageInput, UpdateCampaignImageInput,
 };

@@ -1,14 +1,11 @@
-import base from './index.js';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
-  ...base,
+/** React / browser overlay blocks (paths are set by the root eslint.config.js). */
+export const reactOverlays = [
   {
-    files: ['**/*.{ts,tsx}'],
     languageOptions: {
       globals: {
         ...globals.browser,

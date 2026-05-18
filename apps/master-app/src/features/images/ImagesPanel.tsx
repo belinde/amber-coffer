@@ -19,6 +19,7 @@ import { ImagePreviewModal } from '../../components/ui/ImagePreviewModal.js';
 import { pickImageFilePath } from '../../components/ui/pick-image-file.js';
 import { resolveImageDisplayUrlAsync } from '../../components/ui/resolve-local-image-url.js';
 import { buildTabularRow } from '../../components/ui/tabular-list.js';
+import { FormActionErrorOutlet } from '../../context/AppErrorContext.js';
 import { CrudPanel } from '../crud/CrudPanel.js';
 import { applyValidationFailure } from '../validation/apply-validation-failure.js';
 import { fieldErrorAt } from '../validation/field-error-helpers.js';
@@ -52,9 +53,7 @@ export function ImagesPanel({ campaignId, onError }: Props): ReactElement {
           subtitle: img.caption.trim() || undefined,
           image: img.image,
           details:
-            img.links.length > 0
-              ? [t('images.linkCount', { count: img.links.length })]
-              : undefined,
+            img.links.length > 0 ? [t('images.linkCount', { count: img.links.length })] : undefined,
         })
       }
       onError={onError}
@@ -176,12 +175,21 @@ function ImageEditor({
             onClick={() => setFullscreenPreview(true)}
             aria-label={t('list.openPreview', { name: title || t('images.previewAlt') })}
           >
-            <img src={previewUrl ?? ''} alt={title || t('images.previewAlt')} className="image-editor__img" />
+            <img
+              src={previewUrl ?? ''}
+              alt={title || t('images.previewAlt')}
+              className="image-editor__img"
+            />
           </button>
         ) : (
           <p className="empty-state">{t('images.noFile')}</p>
         )}
-        <Button type="button" icon={ActionIcons.edit} disabled={saving} onClick={() => void handleChooseFile()}>
+        <Button
+          type="button"
+          icon={ActionIcons.edit}
+          disabled={saving}
+          onClick={() => void handleChooseFile()}
+        >
           {chooseLabel}
         </Button>
         {pendingFilePath ? (
@@ -228,6 +236,7 @@ function ImageEditor({
         onClose={() => setFullscreenPreview(false)}
       />
 
+      <FormActionErrorOutlet />
       <div className="crud-editor-actions">
         <Button type="button" icon={ActionIcons.cancel} onClick={onCancel} disabled={saving}>
           {t('common.cancel')}

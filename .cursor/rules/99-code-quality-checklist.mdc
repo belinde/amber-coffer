@@ -13,6 +13,7 @@ Prima di considerare un task completo:
 - [ ] **Commenti**: solo il *perché*, non il *cosa* ovvio
 - [ ] **Test**: almeno per utility pure e parser critici
 - [ ] **Lint/typecheck**: `pnpm lint` e `pnpm typecheck` verdi
+- [ ] **Nuovo workspace pnpm**: `pnpm-workspace.yaml`, glob in `eslint.config.mjs`, script `lint` nel `package.json` del pacchetto (vedi [.cursor/rules/15-eslint-monorepo.mdc](mdc:.cursor/rules/15-eslint-monorepo.mdc))
 - [ ] **i18n**: nessuna stringa UI hardcoded nelle app React
 - [ ] **Doc**: ADR se decisione architetturale nuova
 

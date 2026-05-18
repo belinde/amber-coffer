@@ -18,6 +18,7 @@ def main() -> int:
     transcribe.add_argument("--session-dir", required=True, type=Path)
     transcribe.add_argument("--language", default="it")
     transcribe.add_argument("--model", default="base")
+    transcribe.add_argument("--progress-file", type=Path, default=None)
 
     args = parser.parse_args()
 
@@ -26,6 +27,7 @@ def main() -> int:
             session_dir=args.session_dir,
             language=args.language,
             model_name=args.model,
+            progress_file=args.progress_file,
         )
         print(json.dumps(result, indent=2))
         return 0

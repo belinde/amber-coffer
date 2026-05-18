@@ -1,7 +1,7 @@
 import type { ZodError, ZodIssue } from 'zod';
 
-import type { ValidationIssue } from './validation-issue.js';
 import { FieldValidationError } from './field-validation-error.js';
+import type { ValidationIssue } from './validation-issue.js';
 
 function num(value: number | bigint): number {
   return typeof value === 'bigint' ? Number(value) : value;

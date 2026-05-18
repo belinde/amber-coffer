@@ -1,4 +1,4 @@
-use tauri::State;
+use tauri::{AppHandle, State};
 
 use crate::db::AppState;
 use crate::error::{AppError, AppResult};
@@ -22,11 +22,16 @@ fn parse_position(value: serde_json::Value) -> AppResult<TokenPosition> {
 }
 
 #[tauri::command]
-pub async fn list_tokens(map_id: String, state: State<'_, AppState>) -> Result<Vec<Token>, AppError> {
+pub async fn list_tokens(
+    map_id: String,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<Vec<Token>, AppError> {
+    let pool = state.pool_for_entity_id(&app, &map_id).await?;
     let query = format!("{TOKEN_SELECT} WHERE map_id = ? ORDER BY created_at");
     let rows = sqlx::query_as::<_, TokenRow>(&query)
         .bind(&map_id)
-        .fetch_all(state.pool())
+        .fetch_all(&pool)
         .await?;
 
     rows.into_iter()
@@ -40,8 +45,10 @@ pub async fn list_tokens(map_id: String, state: State<'_, AppState>) -> Result<V
 pub async fn move_token(
     token_id: String,
     position_json: serde_json::Value,
+    app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<Token, AppError> {
+    let pool = state.pool_for_entity_id(&app, &token_id).await?;
     let position = parse_position(position_json)?;
     let now = now_ms();
 
@@ -69,7 +76,7 @@ pub async fn move_token(
     .bind(bench_slot)
     .bind(now)
     .bind(&token_id)
-    .execute(state.pool())
+    .execute(&pool)
     .await?;
 
     if updated.rows_affected() == 0 {
@@ -79,7 +86,7 @@ pub async fn move_token(
     let query = format!("{TOKEN_SELECT} WHERE id = ?");
     let row = sqlx::query_as::<_, TokenRow>(&query)
         .bind(&token_id)
-        .fetch_optional(state.pool())
+        .fetch_optional(&pool)
         .await?
         .ok_or_else(|| AppError::NotFound(format!("token {token_id}")))?;
 

@@ -15,7 +15,7 @@ Amber Coffer parte con un MVP molto più contenuto: la voce dei giocatori passa 
 2. **Modello dati estensibile**: ogni `Recording` ha `n` `AudioSource`, ognuno con `id`, `kind`, `label`, `startedAt`, `endedAt`, `path` (storage locale) e `metadata` libero.
    - `kind`: enum aperto `'gm_mic' | 'system_monitor' | 'upload' | 'discord_capture' | string` (string per estensione futura senza migration).
    - Una `Recording` con una sola sorgente è il caso MVP; più sorgenti sono il caso futuro dual-track / multi-mic.
-3. **Sidecar Whisper**: il contratto verso il sidecar accetta una lista `AudioSource[]`, non un singolo file. La diarizzazione si applica solo dove richiesto (flag `diarize: bool` per sorgente). Output: `Transcript` con `segments[]`, ognuno con `sourceId` + `speaker?`.
+3. **Sidecar Whisper**: il contratto verso il sidecar accetta una lista `AudioSource[]`, non un singolo file. La diarizzazione si applica solo dove richiesto (flag `diarize: bool` per sorgente). Output: `Transcript` con `segments[]`, ognuno con `sourceId` + `speaker?`. I pesi del modello sono artifact locali scaricati dall'utente via Model Manager ([ADR 0010](./0010-local-model-artifacts-and-updates.md)), non inclusi nell'installer.
 4. **Niente WebRTC nel MVP**: il legacy cloud aveva WebRTC + TURN come fondamento; Amber Coffer lo esclude. La voce è responsabilità di Discord.
 
 ## Conseguenze
@@ -40,3 +40,4 @@ Amber Coffer parte con un MVP molto più contenuto: la voce dei giocatori passa 
 
 - POC `tools/scripts/transcribe_session_dual.py` (`_readonly/campagna-poc/`) come riferimento implementativo futuro.
 - `tools/sidecars/whisper/` come location target del nuovo sidecar.
+- [0010-local-model-artifacts-and-updates.md](./0010-local-model-artifacts-and-updates.md) — download e aggiornamento modelli STT.

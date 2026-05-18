@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '../../components/ui/Button.js';
 import {
+  CampaignVaultIcon,
   ConnectionsIcon,
   iconForVaultCategory,
   ImagesIcon,
@@ -20,6 +21,7 @@ type Props = {
   onOpenImages: () => void;
   onOpenConnections: () => void;
   onOpenSessions: () => void;
+  onOpenCampaign: () => void;
 };
 
 export function VaultHome({
@@ -28,17 +30,32 @@ export function VaultHome({
   onOpenImages,
   onOpenConnections,
   onOpenSessions,
+  onOpenCampaign,
 }: Props): ReactElement {
   const { t } = useTranslation();
 
   return (
     <div className="vault-home">
       <header className="panel-header">
-        <h2>{t('vault.homeTitle')}</h2>
+        <h2>{t('vault.catalogTitle')}</h2>
         <p className="vault-home-campaign">{campaignName}</p>
       </header>
       <p className="vault-section-help">{t('vault.homeHint')}</p>
       <ul className="vault-category-grid">
+        <li>
+          <Button type="button" className="vault-category-card" onClick={onOpenCampaign}>
+            <span className="vault-category-card__bg" aria-hidden>
+              <CampaignVaultIcon
+                size={VAULT_CARD_BG_ICON_SIZE}
+                weight={VAULT_CARD_BG_ICON_WEIGHT}
+              />
+            </span>
+            <span className="vault-category-card__content">
+              <strong>{t('vault.campaignTitle')}</strong>
+              <span className="vault-category-card__blurb">{t('vault.campaignBlurb')}</span>
+            </span>
+          </Button>
+        </li>
         {VAULT_CATEGORIES.map((category) => {
           const CategoryIcon = iconForVaultCategory(category);
           return (
@@ -62,11 +79,7 @@ export function VaultHome({
           );
         })}
         <li>
-          <Button
-            type="button"
-            className="vault-category-card"
-            onClick={onOpenImages}
-          >
+          <Button type="button" className="vault-category-card" onClick={onOpenImages}>
             <span className="vault-category-card__bg" aria-hidden>
               <ImagesIcon size={VAULT_CARD_BG_ICON_SIZE} weight={VAULT_CARD_BG_ICON_WEIGHT} />
             </span>
@@ -77,11 +90,7 @@ export function VaultHome({
           </Button>
         </li>
         <li>
-          <Button
-            type="button"
-            className="vault-category-card"
-            onClick={onOpenSessions}
-          >
+          <Button type="button" className="vault-category-card" onClick={onOpenSessions}>
             <span className="vault-category-card__bg" aria-hidden>
               <SessionsIcon size={VAULT_CARD_BG_ICON_SIZE} weight={VAULT_CARD_BG_ICON_WEIGHT} />
             </span>
@@ -92,11 +101,7 @@ export function VaultHome({
           </Button>
         </li>
         <li>
-          <Button
-            type="button"
-            className="vault-category-card"
-            onClick={onOpenConnections}
-          >
+          <Button type="button" className="vault-category-card" onClick={onOpenConnections}>
             <span className="vault-category-card__bg" aria-hidden>
               <ConnectionsIcon size={VAULT_CARD_BG_ICON_SIZE} weight={VAULT_CARD_BG_ICON_WEIGHT} />
             </span>

@@ -1,7 +1,7 @@
 import { parseBulletRefs, type BulletRef } from './frontmatter.js';
+import { warn } from './mapping/common.js';
 import { normalizeName } from './slug.js';
 import type { ExtractContext } from './types.js';
-import { warn } from './mapping/common.js';
 
 /** Scene labels in session recaps with no canonical location file — skip warnings. */
 const SCENE_ONLY_LOCATIONS = new Set([
@@ -9,6 +9,11 @@ const SCENE_ONLY_LOCATIONS = new Set([
   normalizeName('Via dei Coloni'),
   normalizeName('Campo di strage dei bisonti'),
 ]);
+
+export type SessionEncounterIds = {
+  locationIds: string[];
+  npcIds: string[];
+};
 
 function resolveFromRef(
   ref: BulletRef,
@@ -52,24 +57,46 @@ export function resolveSessionLocationIds(
   return ids;
 }
 
-export function resolveSessionNpcIds(
+/**
+ * Resolves NPC section bullets. Labels that match a location (e.g. steamboat listed as PNG)
+ * are returned in `locationIds` instead of `npcIds`.
+ */
+export function resolveSessionEncounterIds(
   ctx: ExtractContext,
   relFile: string,
-  sectionBody: string,
-): string[] {
-  const ids: string[] = [];
-  for (const ref of parseBulletRefs(sectionBody)) {
-    const id = resolveFromRef(ref, (name) => {
-      return ctx.registry.resolveNpcName(name) ?? ctx.registry.resolveLocationName(name);
-    });
-    if (id) {
-      ids.push(id);
+  locationSectionBody: string,
+  npcSectionBody: string,
+): SessionEncounterIds {
+  const locationIds = resolveSessionLocationIds(ctx, relFile, locationSectionBody);
+
+  const npcIds: string[] = [];
+  for (const ref of parseBulletRefs(npcSectionBody)) {
+    const npcId = resolveFromRef(ref, (name) => ctx.registry.resolveNpcName(name));
+    if (npcId) {
+      npcIds.push(npcId);
       continue;
     }
+
+    const locationId = resolveFromRef(ref, (name) => ctx.registry.resolveLocationName(name));
+    if (locationId) {
+      locationIds.push(locationId);
+      continue;
+    }
+
     if (shouldSkipUnresolvedNpc(ref)) {
       continue;
     }
     warn(ctx, relFile, `Could not resolve NPC "${ref.primary}"`);
   }
-  return ids;
+
+  return { locationIds, npcIds };
+}
+
+/** @deprecated Use {@link resolveSessionEncounterIds} for recap import. */
+export function resolveSessionNpcIds(
+  ctx: ExtractContext,
+  relFile: string,
+  sectionBody: string,
+): string[] {
+  return resolveSessionEncounterIds(ctx, relFile, '', sectionBody).npcIds;
 }

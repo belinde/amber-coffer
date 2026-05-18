@@ -6,8 +6,8 @@ Documento agent-agnostic (Cursor, Codex, Claude Code, ecc.). La documentazione d
 
 Amber Coffer è un Narrative OS local-first per Game Master:
 
-- **The Coffer** (`apps/master-app`): app desktop Tauri 2 + React. SQLite locale via `sqlx` in Rust. Logica di gioco autoritativa.
-- **The Amber** (`apps/player-activity`): Discord Activity React. Viewer tattico stateless; sync MQTT via AWS IoT Core.
+- **Schermo del master** (`apps/master-app`): app desktop Tauri 2 + React. SQLite locale via `sqlx` in Rust. Logica di gioco autoritativa.
+- **Tavolo di gioco** (`apps/player-activity`): Discord Activity React. Viewer tattico stateless; sync MQTT via AWS IoT Core.
 - **packages/shared**: contratti TypeScript + Zod (World State, MQTT, Discord IDs).
 - **infrastructure**: AWS CDK (IoT Core, DynamoDB handshake, S3/CloudFront, Bedrock stub).
 
@@ -40,19 +40,22 @@ cd infrastructure && pnpm cdk synth
 
 ## Dove cercare cosa
 
-| Argomento | Percorso |
-|-----------|----------|
-| Spec funzionale | `docs/functional-specs.md` |
-| Architettura tecnica | `docs/blueprint.md` |
-| Glossario EN↔IT | `docs/glossary.md` |
-| ADR | `docs/adr/` |
-| Tipi dominio | `packages/shared/src/` |
-| Schema SQL | `apps/master-app/src-tauri/migrations/` |
-| Regole Cursor | `.cursor/rules/` |
-| Contratti MQTT | `packages/shared/src/sync/` |
-| Migrazione legacy (POC + cloud) | `docs/migration/` |
-| Template entità di dominio | `docs/migration/entity-templates.md` |
-| Symlink legacy (read-only) | `_readonly/` (vedi `_readonly/README.md`) |
+| Argomento                            | Percorso                                                                                          |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Spec funzionale                      | `docs/functional-specs.md`                                                                        |
+| Architettura tecnica                 | `docs/blueprint.md`                                                                               |
+| Glossario EN↔IT                      | `docs/glossary.md`                                                                                |
+| ADR                                  | `docs/adr/`                                                                                       |
+| Tipi dominio                         | `packages/shared/src/`                                                                            |
+| Schema SQL                           | `apps/master-app/src-tauri/migrations/`                                                           |
+| Regole Cursor                        | `.cursor/rules/`                                                                                  |
+| ESLint monorepo (glob + lint script) | `eslint.config.mjs`, [.cursor/rules/15-eslint-monorepo.mdc](.cursor/rules/15-eslint-monorepo.mdc) |
+| Contratti MQTT                       | `packages/shared/src/sync/`                                                                       |
+| Migrazione legacy (POC + cloud)      | `docs/migration/`                                                                                 |
+| Template entità di dominio           | `docs/migration/entity-templates.md`                                                              |
+| Symlink legacy (read-only)           | `_readonly/` (vedi `_readonly/README.md`)                                                         |
+| Impostazioni UI (master-app)         | `apps/master-app/src/features/settings/`                                                          |
+| Modelli locali / updater             | [ADR 0010](docs/adr/0010-local-model-artifacts-and-updates.md)                                    |
 
 ## Vocabolario di dominio
 

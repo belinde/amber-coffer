@@ -2,6 +2,7 @@
  * Discord Embedded App SDK wrapper (stub).
  * Real initialization will use @discord/embedded-app-sdk when running inside Discord.
  */
+import { AMBER_DISCORD_APPLICATION_ID } from '@amber/shared';
 
 export interface DiscordClientConfig {
   readonly clientId: string;
@@ -32,6 +33,8 @@ export class DiscordClient {
   }
 }
 
-export function createDiscordClient(clientId: string): DiscordClient {
+export function createDiscordClient(
+  clientId: string = AMBER_DISCORD_APPLICATION_ID,
+): DiscordClient {
   return new DiscordClient({ clientId });
 }

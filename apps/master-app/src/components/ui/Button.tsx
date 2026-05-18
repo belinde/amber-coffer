@@ -11,7 +11,7 @@ function weightForButtonIcon(icon: Icon | undefined): IconWeight {
   return icon === Plus ? BUTTON_PLUS_ICON_WEIGHT : BUTTON_ICON_WEIGHT;
 }
 
-type Variant = 'default' | 'primary' | 'danger';
+type Variant = 'default' | 'primary' | 'danger' | 'success';
 
 type Props = Omit<ComponentPropsWithoutRef<'button'>, 'children'> & {
   variant?: Variant;
@@ -42,11 +42,13 @@ export function Button({
       {IconStart ? (
         <IconStart size={BUTTON_ICON_SIZE} weight={weightForButtonIcon(IconStart)} aria-hidden />
       ) : null}
-      {children != null && children !== ''
-        ? typeof children === 'string' || typeof children === 'number'
-          ? <span className="btn-label">{children}</span>
-          : children
-        : null}
+      {children != null && children !== '' ? (
+        typeof children === 'string' || typeof children === 'number' ? (
+          <span className="btn-label">{children}</span>
+        ) : (
+          children
+        )
+      ) : null}
       {IconEnd ? (
         <IconEnd size={BUTTON_ICON_SIZE} weight={weightForButtonIcon(IconEnd)} aria-hidden />
       ) : null}

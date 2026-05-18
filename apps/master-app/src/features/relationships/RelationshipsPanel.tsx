@@ -17,6 +17,7 @@ import { Field } from '../../components/ui/Field.js';
 import { ActionIcons } from '../../components/ui/icons.js';
 import { SubjectPicker } from '../../components/ui/SubjectPicker.js';
 import { buildTabularRow, type TabularListRow } from '../../components/ui/tabular-list.js';
+import { FormActionErrorOutlet } from '../../context/AppErrorContext.js';
 import { useCampaignSubjects } from '../campaign-subjects/use-campaign-subjects.js';
 import { CrudPanel } from '../crud/CrudPanel.js';
 import { compactJoin, truncatePreview } from '../list-display/format.js';
@@ -32,8 +33,7 @@ function relationshipListRow(
   t: TFunction,
   labelFor: (kind: string, id: string) => string | undefined,
 ): TabularListRow {
-  const from =
-    labelFor(relationship.fromKind, relationship.fromId) ?? relationship.fromId;
+  const from = labelFor(relationship.fromKind, relationship.fromId) ?? relationship.fromId;
   const to = labelFor(relationship.toKind, relationship.toId) ?? relationship.toId;
 
   return buildTabularRow({
@@ -199,7 +199,11 @@ function RelationshipEditor({
           onChange={(e) => setStrength(e.target.value)}
         />
       </Field>
-      <Field label={t('relationship.bidirectional')} htmlFor="rel-bidir" error={fe('bidirectional')}>
+      <Field
+        label={t('relationship.bidirectional')}
+        htmlFor="rel-bidir"
+        error={fe('bidirectional')}
+      >
         <input
           id="rel-bidir"
           type="checkbox"
@@ -208,8 +212,13 @@ function RelationshipEditor({
         />
       </Field>
       <Field label={t('relationship.description')} htmlFor="rel-desc" error={fe('description')}>
-        <textarea id="rel-desc" value={description} onChange={(e) => setDescription(e.target.value)} />
+        <textarea
+          id="rel-desc"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
       </Field>
+      <FormActionErrorOutlet />
       <div className="form-actions">
         <Button type="submit" variant="primary" icon={ActionIcons.save} disabled={saving}>
           {saving ? t('common.saving') : t('common.save')}

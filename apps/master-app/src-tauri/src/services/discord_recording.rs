@@ -8,9 +8,9 @@ use tauri::AppHandle;
 use tauri_plugin_store::StoreExt;
 use uuid::Uuid;
 
-use crate::db::{RecordingRuntime, RecordingState};
+use crate::db::{RecordingRuntime, RecordingState, TranscriptionRuntime, TranscriptionState};
 use crate::error::{AppError, AppResult};
-use crate::models::Session;
+use crate::models::{normalize_play_language, Session};
 use crate::services::session_paths::{
     self, campaign_root, ensure_session_dirs, relative_to_campaign, session_manifest_path,
     session_raw_merged_transcript_path,
@@ -91,7 +91,7 @@ pub fn has_bot_token(handle: &AppHandle) -> AppResult<bool> {
 pub async fn load_session(pool: &SqlitePool, session_id: &str) -> AppResult<Session> {
     sqlx::query_as::<_, Session>(
         r#"
-        SELECT id, campaign_id, number, title, status, started_at, ended_at,
+        SELECT id, campaign_id, number, title, play_state, status, started_at, ended_at,
                summary, events_body, gm_notes, public_summary,
                locations_visited_json, npcs_encountered_json, played_at,
                created_at, updated_at, version
@@ -104,20 +104,22 @@ pub async fn load_session(pool: &SqlitePool, session_id: &str) -> AppResult<Sess
     .ok_or_else(|| AppError::NotFound(format!("session {session_id}")))
 }
 
-async fn load_campaign_channel(pool: &SqlitePool, campaign_id: &str) -> AppResult<String> {
-    let row: Option<(Option<String>,)> =
-        sqlx::query_as("SELECT discord_channel_id FROM campaigns WHERE id = ?")
-            .bind(campaign_id)
-            .fetch_optional(pool)
-            .await?;
+async fn load_campaign_for_recording(
+    app: &AppHandle,
+    campaign_id: &str,
+) -> AppResult<(String, String)> {
+    let folder = crate::services::campaign_storage::resolve_storage_folder(app, campaign_id)?;
+    let campaign = crate::services::campaign_storage::read_campaign_json(&folder)?;
 
-    let channel_id = row
-        .and_then(|(id,)| id)
+    let channel_id = campaign
+        .discord_channel_id
         .filter(|s| !s.trim().is_empty())
         .ok_or_else(|| {
             crate::validation_issue::required_field(&["campaign", "discordChannelId"])
         })?;
-    Ok(channel_id)
+    let play_language = normalize_play_language(&campaign.play_language)
+        .map_err(|msg| AppError::Internal(msg))?;
+    Ok((channel_id, play_language))
 }
 
 pub fn spawn_discord_bot(
@@ -125,6 +127,7 @@ pub fn spawn_discord_bot(
     channel_id: &str,
     session_id: &str,
     output_dir: &std::path::Path,
+    locale: &str,
 ) -> AppResult<Child> {
     let script = session_paths::discord_bot_entry_script();
     if !script.exists() {
@@ -143,6 +146,8 @@ pub fn spawn_discord_bot(
         .arg(session_id)
         .arg("--output-dir")
         .arg(output_dir)
+        .arg("--locale")
+        .arg(locale)
         .env("DISCORD_BOT_TOKEN", token)
         .stdin(Stdio::piped())
         .stdout(Stdio::inherit())
@@ -169,7 +174,7 @@ pub async fn start_recording(
     }
 
     let session = load_session(pool, session_id).await?;
-    const STARTABLE: &[&str] = &["planned", "recording", "recorded", "transcribed"];
+    const STARTABLE: &[&str] = &["planned", "recording", "recorded"];
     if !STARTABLE.contains(&session.status.as_str()) {
         return Err(AppError::Internal(format!(
             "session status does not allow recording, got {}",
@@ -177,11 +182,28 @@ pub async fn start_recording(
         )));
     }
 
-    let channel_id = load_campaign_channel(pool, &session.campaign_id).await?;
+    let session_dir_probe =
+        session_paths::session_dir(handle, &session.campaign_id, session.number).ok();
+    if transcription_was_attempted(pool, session_id, &session.status, session_dir_probe.as_deref())
+        .await?
+    {
+        return Err(AppError::Internal(
+            "recording is locked after transcription has been attempted".into(),
+        ));
+    }
+
+    let (channel_id, play_language) =
+        load_campaign_for_recording(handle, &session.campaign_id).await?;
     let token = read_bot_token(handle)?;
     let session_dir = ensure_session_dirs(handle, &session.campaign_id, session.number)?;
 
-    let child = spawn_discord_bot(&token, &channel_id, session_id, &session_dir)?;
+    let child = spawn_discord_bot(
+        &token,
+        &channel_id,
+        session_id,
+        &session_dir,
+        &play_language,
+    )?;
 
     let now = now_ms();
     sqlx::query(
@@ -233,8 +255,8 @@ pub async fn stop_recording(
         let _ = writeln!(stdin, "stop");
     }
 
-    // Grace period for manifest write
-    std::thread::sleep(Duration::from_millis(2500));
+    // Grace period for stop announcement + manifest write
+    std::thread::sleep(Duration::from_millis(8000));
     let _ = child.kill();
     let _ = child.wait();
 
@@ -342,27 +364,81 @@ async fn ingest_manifest(
     Ok(())
 }
 
-pub async fn run_transcription(
-    handle: &AppHandle,
+const TRANSCRIPTION_PROGRESS_FILE: &str = "transcripts/transcription-progress.json";
+const TRANSCRIPTION_ATTEMPTED_MARKER: &str = "transcripts/.transcription-attempted";
+
+fn transcription_attempted_marker_path(session_dir: &std::path::Path) -> std::path::PathBuf {
+    session_dir.join(TRANSCRIPTION_ATTEMPTED_MARKER)
+}
+
+fn mark_transcription_attempted(session_dir: &std::path::Path) -> AppResult<()> {
+    let path = transcription_attempted_marker_path(session_dir);
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent).map_err(|e| {
+            AppError::Internal(format!("failed to create transcripts dir: {e}"))
+        })?;
+    }
+    fs::write(&path, b"").map_err(|e| {
+        AppError::Internal(format!("failed to write transcription attempted marker: {e}"))
+    })
+}
+
+fn status_implies_transcription_attempted(status: &str) -> bool {
+    matches!(
+        status,
+        "transcribing" | "transcribed" | "refining" | "refined" | "validating" | "published"
+    )
+}
+
+async fn transcription_was_attempted(
     pool: &SqlitePool,
     session_id: &str,
-) -> AppResult<Session> {
-    let session = load_session(pool, session_id).await?;
-    if session.status != "recorded" && session.status != "transcribing" {
-        return Err(AppError::Internal(format!(
-            "session must be recorded before transcription, got {}",
-            session.status
-        )));
+    status: &str,
+    session_dir: Option<&std::path::Path>,
+) -> AppResult<bool> {
+    if status_implies_transcription_attempted(status) {
+        return Ok(true);
     }
 
-    let now = now_ms();
-    sqlx::query("UPDATE sessions SET status = 'transcribing', updated_at = ?, version = version + 1 WHERE id = ?")
-        .bind(now)
-        .bind(session_id)
-        .execute(pool)
-        .await?;
+    let (transcript_count,): (i64,) =
+        sqlx::query_as("SELECT COUNT(*) FROM transcripts WHERE session_id = ?")
+            .bind(session_id)
+            .fetch_one(pool)
+            .await?;
 
-    let session_dir = session_paths::session_dir(handle, &session.campaign_id, session.number)?;
+    if transcript_count > 0 {
+        return Ok(true);
+    }
+
+    let Some(dir) = session_dir else {
+        return Ok(false);
+    };
+
+    Ok(transcription_attempted_marker_path(dir).exists()
+        || session_raw_merged_transcript_path(dir).exists()
+        || transcription_progress_path(dir).exists())
+}
+
+#[derive(Debug, Deserialize)]
+struct TranscriptionProgressFile {
+    current: u64,
+    total: u64,
+}
+
+fn transcription_progress_path(session_dir: &std::path::Path) -> std::path::PathBuf {
+    session_dir.join(TRANSCRIPTION_PROGRESS_FILE)
+}
+
+pub fn read_transcription_progress(session_dir: &std::path::Path) -> Option<f64> {
+    let raw = fs::read_to_string(transcription_progress_path(session_dir)).ok()?;
+    let parsed: TranscriptionProgressFile = serde_json::from_str(&raw).ok()?;
+    if parsed.total == 0 {
+        return None;
+    }
+    Some((parsed.current as f64 / parsed.total as f64).clamp(0.0, 1.0))
+}
+
+fn spawn_whisper_transcription(session_dir: &std::path::Path) -> AppResult<Child> {
     let whisper_root = session_paths::whisper_module_root();
     let python = session_paths::whisper_python_executable();
 
@@ -372,33 +448,48 @@ pub async fn run_transcription(
         ));
     }
 
-    let output = Command::new(&python)
+    let progress_path = transcription_progress_path(session_dir);
+    if let Some(parent) = progress_path.parent() {
+        let _ = fs::create_dir_all(parent);
+    }
+    let _ = fs::remove_file(&progress_path);
+
+    Command::new(&python)
         .arg("-m")
         .arg("amber_whisper")
         .arg("transcribe")
         .arg("--session-dir")
-        .arg(&session_dir)
+        .arg(session_dir)
         .arg("--language")
         .arg("it")
         .arg("--model")
         .arg("base")
+        .arg("--progress-file")
+        .arg(&progress_path)
         .current_dir(&whisper_root)
-        .output()
-        .map_err(|e| AppError::Internal(format!("failed to run whisper sidecar: {e}")))?;
+        .stdout(Stdio::null())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| AppError::Internal(format!("failed to spawn whisper sidecar: {e}")))
+}
 
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        tracing::error!(%stderr, "whisper sidecar failed");
-        return Err(AppError::Internal(format!(
-            "whisper sidecar failed: {stderr}"
-        )));
-    }
+fn session_may_start_transcription(status: &str) -> bool {
+    matches!(status, "recorded" | "transcribing" | "transcribed")
+}
 
+async fn finalize_transcription_success(
+    handle: &AppHandle,
+    pool: &SqlitePool,
+    session_id: &str,
+) -> AppResult<()> {
+    let session = load_session(pool, session_id).await?;
+    let session_dir = session_paths::session_dir(handle, &session.campaign_id, session.number)?;
     let camp_root = campaign_root(handle, &session.campaign_id)?;
     let raw_abs = session_raw_merged_transcript_path(&session_dir);
     let raw_text = fs::read_to_string(&raw_abs).ok();
     let rel_path = relative_to_campaign(&camp_root, &raw_abs).ok();
 
+    let now = now_ms();
     let transcript_id = Uuid::now_v7().to_string();
     let processed = now_ms();
 
@@ -433,7 +524,213 @@ pub async fn run_transcription(
     .execute(pool)
     .await?;
 
-    Ok(load_session(pool, session_id).await?)
+    Ok(())
+}
+
+async fn revert_transcription_to_recorded(pool: &SqlitePool, session_id: &str) -> AppResult<()> {
+    let now = now_ms();
+    sqlx::query(
+        "UPDATE sessions SET status = 'recorded', updated_at = ?, version = version + 1 WHERE id = ? AND status = 'transcribing'",
+    )
+    .bind(now)
+    .bind(session_id)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+fn clear_transcription_slot(transcription_state: &TranscriptionState, session_id: &str) {
+    let Ok(mut guard) = transcription_state.0.lock() else {
+        return;
+    };
+    if guard
+        .as_ref()
+        .is_some_and(|rt| rt.session_id == session_id)
+    {
+        *guard = None;
+    }
+}
+
+fn transcription_child_running(
+    transcription_state: &TranscriptionState,
+    session_id: &str,
+) -> AppResult<bool> {
+    let mut guard = transcription_state
+        .0
+        .lock()
+        .map_err(|_| AppError::Internal("transcription state lock poisoned".into()))?;
+    let Some(rt) = guard.as_mut() else {
+        return Ok(false);
+    };
+    if rt.session_id != session_id {
+        return Ok(false);
+    }
+    let Some(child) = rt.child.as_mut() else {
+        return Ok(true);
+    };
+    match child.try_wait() {
+        Ok(None) => Ok(true),
+        Ok(Some(_status)) => {
+            *guard = None;
+            Ok(false)
+        }
+        Err(e) => Err(AppError::Internal(format!(
+            "failed to poll transcription process: {e}"
+        ))),
+    }
+}
+
+fn spawn_transcription_completion_task(
+    handle: AppHandle,
+    pool: SqlitePool,
+    session_id: String,
+    transcription_state: std::sync::Arc<TranscriptionState>,
+) {
+    let sid = session_id.clone();
+    tauri::async_runtime::spawn(async move {
+        let exit_status = {
+            let child = {
+                let mut guard = match transcription_state.0.lock() {
+                    Ok(g) => g,
+                    Err(_) => return,
+                };
+                let Some(rt) = guard.take() else {
+                    return;
+                };
+                if rt.session_id != sid {
+                    return;
+                }
+                rt.child
+            };
+            let Some(mut child) = child else {
+                return;
+            };
+            child.wait()
+        };
+
+        match exit_status {
+            Ok(status) if status.success() => {
+                if let Err(err) = finalize_transcription_success(&handle, &pool, &sid).await {
+                    tracing::error!(%err, session_id = %sid, "transcription finalize failed");
+                    let _ = revert_transcription_to_recorded(&pool, &sid).await;
+                }
+            }
+            Ok(status) => {
+                tracing::error!(?status, session_id = %sid, "whisper sidecar exited with error");
+                let _ = revert_transcription_to_recorded(&pool, &sid).await;
+            }
+            Err(err) => {
+                tracing::error!(%err, session_id = %sid, "whisper sidecar wait failed");
+                let _ = revert_transcription_to_recorded(&pool, &sid).await;
+            }
+        }
+    });
+}
+
+pub async fn start_transcription(
+    handle: AppHandle,
+    pool: SqlitePool,
+    session_id: String,
+    transcription_state: std::sync::Arc<TranscriptionState>,
+) -> AppResult<Session> {
+    {
+        let guard = transcription_state
+            .0
+            .lock()
+            .map_err(|_| AppError::Internal("transcription state lock poisoned".into()))?;
+        if guard.is_some() {
+            return Err(AppError::Internal(
+                "transcription already active for another session".into(),
+            ));
+        }
+    }
+
+    let session = load_session(&pool, &session_id).await?;
+    if !session_may_start_transcription(&session.status) {
+        return Err(AppError::Internal(format!(
+            "session must be recorded or transcribed before transcription, got {}",
+            session.status
+        )));
+    }
+
+    let session_dir = session_paths::session_dir(&handle, &session.campaign_id, session.number)?;
+    mark_transcription_attempted(&session_dir)?;
+
+    let now = now_ms();
+    sqlx::query(
+        "UPDATE sessions SET status = 'transcribing', updated_at = ?, version = version + 1 WHERE id = ?",
+    )
+    .bind(now)
+    .bind(&session_id)
+    .execute(&pool)
+    .await?;
+
+    {
+        let mut guard = transcription_state
+            .0
+            .lock()
+            .map_err(|_| AppError::Internal("transcription state lock poisoned".into()))?;
+        *guard = Some(TranscriptionRuntime {
+            session_id: session_id.clone(),
+            child: None,
+        });
+    }
+
+    let handle_bg = handle.clone();
+    let pool_bg = pool.clone();
+    let session_id_bg = session_id.clone();
+    let session_dir_bg = session_dir;
+    let transcription_state_bg = transcription_state.clone();
+    tauri::async_runtime::spawn(async move {
+        let child_result = tokio::task::spawn_blocking(move || {
+            spawn_whisper_transcription(&session_dir_bg)
+        })
+        .await;
+
+        let mut child = match child_result {
+            Ok(Ok(child)) => child,
+            Ok(Err(err)) => {
+                tracing::error!(%err, session_id = %session_id_bg, "whisper spawn failed");
+                clear_transcription_slot(&transcription_state_bg, &session_id_bg);
+                let _ = revert_transcription_to_recorded(&pool_bg, &session_id_bg).await;
+                return;
+            }
+            Err(err) => {
+                tracing::error!(%err, session_id = %session_id_bg, "whisper spawn task join failed");
+                clear_transcription_slot(&transcription_state_bg, &session_id_bg);
+                let _ = revert_transcription_to_recorded(&pool_bg, &session_id_bg).await;
+                return;
+            }
+        };
+
+        {
+            let mut guard = match transcription_state_bg.0.lock() {
+                Ok(g) => g,
+                Err(_) => {
+                    let _ = child.kill();
+                    return;
+                }
+            };
+            let Some(rt) = guard.as_mut() else {
+                let _ = child.kill();
+                return;
+            };
+            if rt.session_id != session_id_bg {
+                let _ = child.kill();
+                return;
+            }
+            rt.child = Some(child);
+        }
+
+        spawn_transcription_completion_task(
+            handle_bg,
+            pool_bg,
+            session_id_bg,
+            transcription_state_bg,
+        );
+    });
+
+    load_session(&pool, &session_id).await
 }
 
 #[derive(serde::Serialize)]
@@ -442,10 +739,14 @@ pub struct SessionPipelineState {
     pub session_id: String,
     pub status: String,
     pub recording_active: bool,
+    pub transcription_active: bool,
+    pub transcription_progress: Option<f64>,
     pub has_bot_token: bool,
     pub session_dir: Option<String>,
     pub has_manifest: bool,
     pub has_raw_transcript: bool,
+    pub has_refined_transcript: bool,
+    pub transcription_attempted: bool,
     pub recording_count: i64,
 }
 
@@ -454,6 +755,7 @@ pub async fn pipeline_state(
     pool: &SqlitePool,
     session_id: &str,
     recording_active: bool,
+    transcription_state: &TranscriptionState,
 ) -> AppResult<SessionPipelineState> {
     let session = load_session(pool, session_id).await?;
     let session_dir = session_paths::session_dir(handle, &session.campaign_id, session.number).ok();
@@ -466,20 +768,49 @@ pub async fn pipeline_state(
         .map(|d| session_raw_merged_transcript_path(d).exists())
         .unwrap_or(false);
 
+    let transcription_active = transcription_child_running(transcription_state, session_id)?;
+    let transcription_progress = session_dir
+        .as_ref()
+        .and_then(|d| read_transcription_progress(d));
+
     let (recording_count,): (i64,) =
         sqlx::query_as("SELECT COUNT(*) FROM recordings WHERE session_id = ?")
             .bind(session_id)
             .fetch_one(pool)
             .await?;
 
+    let transcription_attempted = transcription_was_attempted(
+        pool,
+        session_id,
+        &session.status,
+        session_dir.as_deref(),
+    )
+    .await?;
+
+    let (has_refined,): (i64,) = sqlx::query_as(
+        r#"
+        SELECT COUNT(*) FROM transcripts
+        WHERE session_id = ?
+          AND refined_text IS NOT NULL
+          AND TRIM(refined_text) != ''
+        "#,
+    )
+    .bind(session_id)
+    .fetch_one(pool)
+    .await?;
+
     Ok(SessionPipelineState {
         session_id: session_id.to_string(),
         status: session.status,
         recording_active,
+        transcription_active,
+        transcription_progress,
         has_bot_token: has_bot_token(handle)?,
         session_dir: session_dir.map(|p| p.to_string_lossy().to_string()),
         has_manifest,
         has_raw_transcript: has_raw,
+        has_refined_transcript: has_refined > 0,
+        transcription_attempted,
         recording_count,
     })
 }

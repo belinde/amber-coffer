@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/Button.js';
 import { ActionIcons } from '../../components/ui/icons.js';
 import { buildTabularRow, type TabularListRow } from '../../components/ui/tabular-list.js';
 import { TabularList } from '../../components/ui/TabularList.js';
+import { ErrorOutlet } from '../../context/AppErrorContext.js';
 
 type View = 'list' | 'create' | 'edit';
 
@@ -15,6 +16,7 @@ type Props<T extends { id: string }> = {
   createKey: string;
   emptyKey: string;
   deleteConfirmKey: string;
+  hideDelete?: boolean;
   listFn: () => Promise<T[]>;
   deleteFn: (id: T['id']) => Promise<void>;
   getLabel: (item: T) => string;
@@ -39,6 +41,7 @@ export function CrudPanel<T extends { id: string }>({
   createKey,
   emptyKey,
   deleteConfirmKey,
+  hideDelete = false,
   listFn,
   deleteFn,
   getLabel,
@@ -139,10 +142,16 @@ export function CrudPanel<T extends { id: string }>({
     <section>
       <header className="panel-header">
         <h2>{t(listTitleKey)}</h2>
-        <Button type="button" variant="primary" icon={ActionIcons.add} onClick={() => setView('create')}>
+        <Button
+          type="button"
+          variant="primary"
+          icon={ActionIcons.add}
+          onClick={() => setView('create')}
+        >
           {t(createKey)}
         </Button>
       </header>
+      <ErrorOutlet region="main" />
 
       {loading ? <p className="empty-state">{t('common.loading')}</p> : null}
       {!loading && items.length === 0 ? <p className="empty-state">{t(emptyKey)}</p> : null}
@@ -186,14 +195,16 @@ export function CrudPanel<T extends { id: string }>({
                     {t('common.edit')}
                   </Button>
                 )}
-                <Button
-                  type="button"
-                  variant="danger"
-                  icon={ActionIcons.delete}
-                  onClick={() => void handleDelete(item)}
-                >
-                  {t('common.delete')}
-                </Button>
+                {hideDelete ? null : (
+                  <Button
+                    type="button"
+                    variant="danger"
+                    icon={ActionIcons.delete}
+                    onClick={() => void handleDelete(item)}
+                  >
+                    {t('common.delete')}
+                  </Button>
+                )}
               </>
             );
           }}

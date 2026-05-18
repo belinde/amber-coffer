@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { DEFAULT_PLAY_LANGUAGE, playLanguageSchema } from '../i18n/play-language.js';
 import { campaignIdSchema, discordChannelIdSchema } from '../ids/schemas.js';
 
 export const campaignSchema = z.object({
@@ -7,6 +8,10 @@ export const campaignSchema = z.object({
   name: z.string().min(1),
   slug: z.string().min(1),
   description: z.string().nullable(),
+  /** Short tagline shown in campaign branding (distinct from long-form description). */
+  catchphrase: z.string().nullable().default(null),
+  /** Language the table plays in (bot VC announcements, transcription hint). */
+  playLanguage: playLanguageSchema.default(DEFAULT_PLAY_LANGUAGE),
   discordChannelId: discordChannelIdSchema.nullable(),
   createdAt: z.number().int().nonnegative(),
   updatedAt: z.number().int().nonnegative(),

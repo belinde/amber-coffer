@@ -128,10 +128,19 @@ def _iter_audio_sources(session_dir: Path, manifest: dict[str, Any] | None) -> I
         )
 
 
+def _write_progress(progress_file: Path | None, current: int, total: int) -> None:
+    if progress_file is None:
+        return
+    progress_file.parent.mkdir(parents=True, exist_ok=True)
+    payload = {"current": current, "total": total, "phase": "transcribing"}
+    progress_file.write_text(json.dumps(payload), encoding="utf-8")
+
+
 def transcribe_session_dir(
     session_dir: Path,
     language: str = "it",
     model_name: str = "base",
+    progress_file: Path | None = None,
 ) -> dict[str, Any]:
     session_dir = session_dir.resolve()
     manifest = _load_manifest(session_dir)
@@ -148,8 +157,10 @@ def transcribe_session_dir(
 
     model = WhisperModel(model_name, device="cpu", compute_type="int8")
     all_segments: list[dict[str, Any]] = []
+    total_sources = len(sources)
+    _write_progress(progress_file, 0, total_sources)
 
-    for source in sources:
+    for index, source in enumerate(sources, start=1):
         segments, _info = model.transcribe(
             str(source.path),
             language=language,
@@ -165,6 +176,7 @@ def transcribe_session_dir(
                     "sourceId": source.source_id,
                 }
             )
+        _write_progress(progress_file, index, total_sources)
 
     transcripts_dir = session_dir / TRANSCRIPTS_DIR
     transcripts_dir.mkdir(parents=True, exist_ok=True)
