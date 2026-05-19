@@ -5,8 +5,6 @@ import { Button } from '../../components/ui/Button.js';
 import { useActiveSession } from '../../context/ActiveSessionContext.js';
 import { useVaultNavigationContext } from '../vault/VaultNavigationContext.js';
 
-import { formatSessionLabel } from './session-label.js';
-
 type Props = {
   onOpenVault: () => void;
 };
@@ -31,9 +29,7 @@ export function ReturnToSessionSidebar({ onOpenVault }: Props): ReactElement | n
           goTo({ kind: 'sessionDetail', sessionId: activeSession.id });
         }}
       >
-        {t('sessionDetail.returnToSession', {
-          label: formatSessionLabel(activeSession, t),
-        })}
+        {t('sessionDetail.returnToSession')}
       </Button>
       <p className="sidebar-return-session__hint">{t('sessionDetail.campaignLockedHint')}</p>
     </div>

@@ -1,10 +1,61 @@
 {
   "product": {
-    "masterScreen": "Écran du maître",
+    "masterScreen": "Écran du maître de jeu",
     "gameTable": "Table de jeu"
   },
   "app": {
     "title": "Amber Coffer — Table de jeu",
     "subtitle": "Table de jeu pour les joueurs"
+  },
+  "session": {
+    "connecting": "Connexion à la table de jeu…",
+    "waiting": "En attente du snapshot de session…",
+    "waitingSnapshot": "En attente que le MJ publie la table…",
+    "ended": "Session terminée.",
+    "error": "Échec de connexion à la table.",
+    "retry": "Réessayer",
+    "noMap": "Aucune carte active dans le snapshot.",
+    "errors": {
+      "channelNotLinked": {
+        "title": "Canal non relié à la campagne",
+        "detail": "Lancez l’Activity depuis le canal vocal de session. ID Discord actuel : {{channelId}}. Enregistrez-le dans DynamoDB (script seed-handshake-channel). « Launch in DM » n’utilise pas le canal vocal."
+      },
+      "channelUnavailable": {
+        "title": "Canal Discord indisponible",
+        "detail": "Rejoignez un canal vocal du serveur et lancez l’Activity depuis celui-ci (pas depuis les MP ni un salon texte)."
+      },
+      "voiceChannelRequired": {
+        "title": "Canal vocal requis",
+        "detail": "Lancez l’Activity depuis le canal vocal de jeu (ID actuel : {{channelId}}). Les messages privés ne sont pas pris en charge."
+      },
+      "syncFailed": {
+        "title": "Échec de la synchronisation",
+        "detail": "Impossible de charger l’état de jeu depuis l’API. Vérifiez la connexion et réessayez."
+      }
+    }
+  },
+  "tabletop": {
+    "boardAria": "Carte tactique",
+    "benchAria": "Jetons hors scène",
+    "handoutsAria": "Documents partagés",
+    "tokenOwned": "Jeton contrôlé {{id}}",
+    "tokenLocked": "Jeton verrouillé {{id}}"
+  },
+  "discord": {
+    "loading": "Discord…",
+    "embedded": "Activity Discord",
+    "standalone": "Mode local"
+  },
+  "dev": {
+    "panelAria": "Contrôles de développement",
+    "panelTitle": "Harness sync (dev)",
+    "playerLabel": "Joueur simulé",
+    "playerA": "Joueur A",
+    "playerB": "Joueur B",
+    "loadSnapshot": "Charger snapshot démo",
+    "moveTokenGm": "Déplacer jeton PJ (MJ)",
+    "showHandout": "Afficher handout",
+    "hideHandout": "Masquer handout",
+    "endSession": "Terminer la session"
   }
 }

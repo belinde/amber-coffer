@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-import { mapIdSchema, tokenEntityKindSchema, tokenIdSchema } from '../ids/schemas.js';
+import {
+  discordUserIdSchema,
+  mapIdSchema,
+  tokenEntityKindSchema,
+  tokenIdSchema,
+} from '../ids/schemas.js';
 
 /**
  * Token position uses cell coordinates with two zones:
@@ -36,6 +41,8 @@ export const tokenSchema = z.object({
   entityId: z.string().min(1),
   position: tokenPositionSchema,
   visibleToPlayers: z.boolean().default(true),
+  /** Discord user allowed to drag this token in the Player Activity (PG or delegated summon). */
+  controlledByPlayerDiscordId: discordUserIdSchema.nullable().default(null),
   createdAt: z.number().int().nonnegative(),
   updatedAt: z.number().int().nonnegative(),
   version: z.number().int().positive().default(1),

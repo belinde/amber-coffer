@@ -7,15 +7,23 @@ import { createMap, listMaps } from '../../bridge/maps.js';
 import { Button } from '../../components/ui/Button.js';
 import { listTokens } from '../tabletop-control/bridge.js';
 import { TabletopControlView } from '../tabletop-control/TabletopControlView.js';
+import { useTabletopSyncPoll } from '../tabletop-control/useTabletopSyncPoll.js';
 
 const activeMapKey = (campaignId: Campaign['id']) => `amber.activeMap.${campaignId}`;
 
 type Props = {
   campaignId: Campaign['id'];
+  sessionId: string;
+  syncEnabled: boolean;
   onError: (message: string) => void;
 };
 
-export function SessionTabletopSection({ campaignId, onError }: Props): ReactElement {
+export function SessionTabletopSection({
+  campaignId,
+  sessionId,
+  syncEnabled,
+  onError,
+}: Props): ReactElement {
   const { t } = useTranslation();
   const [maps, setMaps] = useState<Map[]>([]);
   const [activeMapId, setActiveMapId] = useState<string | null>(null);
@@ -24,6 +32,14 @@ export function SessionTabletopSection({ campaignId, onError }: Props): ReactEle
   const [creatingMap, setCreatingMap] = useState(false);
 
   const activeMap = maps.find((m) => m.id === activeMapId) ?? null;
+
+  useTabletopSyncPoll({
+    enabled: syncEnabled,
+    campaignId,
+    sessionId,
+    activeMapId,
+    onError,
+  });
 
   const loadMaps = useCallback(async () => {
     setLoading(true);

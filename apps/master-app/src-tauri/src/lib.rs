@@ -43,6 +43,7 @@ pub fn run() {
                 app_state.refresh_index(&handle)?;
                 handle.manage(app_state);
                 handle.manage(Arc::new(services::discord_setup::DiscordOAuthState::default()));
+                services::discord_secrets::migrate_bot_token_from_store(&handle)?;
                 handle.manage(Arc::new(RecordingState::new()));
                 handle.manage(Arc::new(TranscriptionState::new()));
                 Ok::<(), error::AppError>(())
@@ -118,6 +119,11 @@ pub fn run() {
             commands::has_discord_bot_token,
             commands::discord_oauth_start,
             commands::discord_oauth_clear,
+            commands::discord_oauth_status,
+            commands::discord_oauth_logout,
+            commands::discord_ensure_user_oauth,
+            commands::discord_list_guild_members,
+            commands::discord_search_guild_members,
             commands::discord_list_admin_guilds,
             commands::discord_open_bot_invite,
             commands::discord_is_bot_in_guild,
@@ -127,11 +133,15 @@ pub fn run() {
             commands::session_stop_recording,
             commands::session_run_transcription,
             commands::get_session_pipeline_state,
+            commands::list_session_recordings,
             commands::import_campaign_dump,
+            commands::repair_campaign_image_portraits,
+            commands::repair_poc_campaign_portraits,
             commands::list_maps,
             commands::create_map,
             commands::list_tokens,
-            commands::publish_sync_message,
+            commands::discord_user_access_token,
+            commands::build_tabletop_snapshot_json,
             commands::place_token,
             commands::move_token,
             commands::resolve_token_move_request,

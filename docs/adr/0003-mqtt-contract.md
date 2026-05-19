@@ -1,6 +1,6 @@
 # ADR 0003: Contratto sincronizzazione MQTT
 
-**Stato**: Accettato  
+**Stato**: Superseded — vedi [ADR 0014](./0014-session-http-polling-sync.md) (trasporto HTTP poll; payload invariato)  
 **Data**: 2026-05-17
 
 ## Contesto

@@ -15,6 +15,11 @@ use crate::models::import_dump::{
     ImportLocation, ImportLoreNote, ImportNarrativeSeed, ImportNpc, ImportSession,
 };
 use crate::models::vault_json::ImageRef;
+use crate::services::campaign_portrait_sync::{
+    finalize_imported_portraits,
+    repair_campaign_image_portraits as repair_portraits_in_db,
+    RepairCampaignPortraitsReport,
+};
 use crate::services::import_images::copy_image_to_l1;
 
 #[derive(Debug, Serialize)]
@@ -26,6 +31,8 @@ pub struct ImportCampaignReport {
     pub updated: usize,
     pub skipped: usize,
     pub images_copied: usize,
+    pub portraits_synced: usize,
+    pub portraits_repaired: usize,
     pub errors: Vec<String>,
 }
 
@@ -93,6 +100,8 @@ pub async fn import_campaign_dump(
         updated: 0,
         skipped: 0,
         images_copied: 0,
+        portraits_synced: 0,
+        portraits_repaired: 0,
         errors: vec![],
     };
 
@@ -136,15 +145,63 @@ pub async fn import_campaign_dump(
     let image_refs = apply_assets(&app, &resolved_id, &dump.assets, &mut report);
 
     let mut tx = pool.begin().await?;
-    for (entity_id, image_ref) in image_refs {
-        if let Some(err) = update_entity_image_ref(&mut tx, &dump.assets, &entity_id, &image_ref).await
-        {
+    for asset in &dump.assets {
+        if asset.entity_kind != "campaign_image" {
+            continue;
+        }
+        let Some(image_ref) = image_refs.get(&asset.entity_id) else {
+            continue;
+        };
+        if let Some(err) = update_campaign_image_ref(&mut tx, &asset.entity_id, image_ref).await {
             report.errors.push(err);
         }
     }
     tx.commit().await?;
 
+    let portrait_bindings: Vec<(String, String, String)> = dump
+        .portrait_bindings
+        .iter()
+        .map(|b| {
+            (
+                b.entity_kind.clone(),
+                b.entity_id.clone(),
+                b.campaign_image_id.clone(),
+            )
+        })
+        .collect();
+    let (portraits_synced, _) =
+        finalize_imported_portraits(&pool, &resolved_id, &portrait_bindings, &image_refs).await?;
+    report.portraits_synced = portraits_synced;
+
+    let repair = repair_portraits_in_db(&app, &resolved_id, &pool).await?;
+    report.portraits_repaired = repair.migrated_to_archive;
+    report.errors.extend(repair.errors);
+
     Ok(report)
+}
+
+#[tauri::command]
+pub async fn repair_campaign_image_portraits(
+    campaign_id: String,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<RepairCampaignPortraitsReport, AppError> {
+    ensure_campaign_exists(&app, &campaign_id).await?;
+    let pool = state.pool_for_campaign(&app, &campaign_id).await?;
+    repair_portraits_in_db(&app, &campaign_id, &pool).await
+}
+
+#[tauri::command]
+pub async fn repair_poc_campaign_portraits(
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<RepairCampaignPortraitsReport, AppError> {
+    use crate::services::campaign_storage;
+
+    let campaign = campaign_storage::find_campaign_by_name(&app, POC_CAMPAIGN_NAME)?
+        .ok_or_else(|| AppError::NotFound(format!("campaign named {POC_CAMPAIGN_NAME}")))?;
+    let pool = state.pool_for_campaign(&app, &campaign.id).await?;
+    repair_portraits_in_db(&app, &campaign.id, &pool).await
 }
 
 fn apply_assets(
@@ -171,69 +228,27 @@ fn apply_assets(
     refs
 }
 
-async fn update_entity_image_ref(
+async fn update_campaign_image_ref(
     tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
-    assets: &[ImportDumpAsset],
-    entity_id: &str,
+    campaign_image_id: &str,
     image_ref: &ImageRef,
 ) -> Option<String> {
-    let kind = assets
-        .iter()
-        .find(|a| a.entity_id == entity_id)
-        .map(|a| a.entity_kind.as_str())?;
     let json = match serde_json::to_string(image_ref) {
         Ok(j) => j,
         Err(e) => return Some(format!("serialize image ref: {e}")),
     };
 
-    let result = match kind {
-        "character" => {
-            sqlx::query("UPDATE characters SET image_ref_json = ?, updated_at = ? WHERE id = ?")
-                .bind(&json)
-                .bind(chrono_now())
-                .bind(entity_id)
-                .execute(&mut **tx)
-                .await
-        }
-        "npc" => {
-            sqlx::query("UPDATE npcs SET image_ref_json = ?, updated_at = ? WHERE id = ?")
-                .bind(&json)
-                .bind(chrono_now())
-                .bind(entity_id)
-                .execute(&mut **tx)
-                .await
-        }
-        "location" => {
-            sqlx::query("UPDATE locations SET image_ref_json = ?, updated_at = ? WHERE id = ?")
-                .bind(&json)
-                .bind(chrono_now())
-                .bind(entity_id)
-                .execute(&mut **tx)
-                .await
-        }
-        "faction" => {
-            sqlx::query("UPDATE factions SET image_ref_json = ?, updated_at = ? WHERE id = ?")
-                .bind(&json)
-                .bind(chrono_now())
-                .bind(entity_id)
-                .execute(&mut **tx)
-                .await
-        }
-        "campaign_image" => {
-            sqlx::query(
-                "UPDATE campaign_images SET image_ref_json = ?, updated_at = ? WHERE id = ?",
-            )
-            .bind(&json)
-            .bind(chrono_now())
-            .bind(entity_id)
-            .execute(&mut **tx)
-            .await
-        }
-        _ => return Some(format!("unknown asset entity kind: {kind}")),
-    };
+    let result = sqlx::query(
+        "UPDATE campaign_images SET image_ref_json = ?, updated_at = ? WHERE id = ?",
+    )
+    .bind(&json)
+    .bind(chrono_now())
+    .bind(campaign_image_id)
+    .execute(&mut **tx)
+    .await;
 
     if let Err(e) = result {
-        return Some(format!("update image ref for {entity_id}: {e}"));
+        return Some(format!("update campaign image ref for {campaign_image_id}: {e}"));
     }
     None
 }

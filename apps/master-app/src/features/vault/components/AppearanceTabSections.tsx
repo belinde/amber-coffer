@@ -1,36 +1,35 @@
-import type { Appearance, Campaign, ImageRef } from '@amber/shared';
-import type { ReactElement, ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
+import type { Appearance, Campaign, ImageLinkKind, ImageRef } from '@amber/shared';
+import type { ReactElement } from 'react';
 
-import { ImageRefField } from './ImageRefField.js';
 import { RichTextArea } from './RichTextArea.js';
 import { SectionPanel } from './SectionPanel.js';
+import { SubjectImageGallery } from './SubjectImageGallery.js';
 import { VisualPromptEditor } from './VisualPromptEditor.js';
 
 type Props = {
   campaignId: Campaign['id'];
+  linkKind: ImageLinkKind;
+  entityId: string;
   appearance: Appearance;
   image: ImageRef | null | undefined;
   fieldErrors?: Readonly<Record<string, string>> | undefined;
-  linkedImages: ReactNode;
   onAppearanceChange: (appearance: Appearance) => void;
   onImageChange: (image: ImageRef | null | undefined) => void;
-  onOpenImages?: (() => void) | undefined;
+  onError?: (message: string) => void;
 };
 
-/** Appearance tab: description, visual reference, and linked images as sub-panels. */
+/** Appearance tab: description, visual reference, and linked image gallery. */
 export function AppearanceTabSections({
   campaignId,
+  linkKind,
+  entityId,
   appearance,
   image,
   fieldErrors,
-  linkedImages,
   onAppearanceChange,
   onImageChange,
-  onOpenImages,
+  onError,
 }: Props): ReactElement {
-  const { t } = useTranslation();
-
   return (
     <div className="vault-appearance-tab">
       <SectionPanel titleKey="vault.sections.appearance" helpKey="vault.appearanceHint">
@@ -53,16 +52,15 @@ export function AppearanceTabSections({
             })
           }
         />
-        <ImageRefField
+        <SubjectImageGallery
           campaignId={campaignId}
-          fieldErrors={fieldErrors}
-          value={image}
-          onChange={onImageChange}
-          {...(onOpenImages ? { onOpenImages } : {})}
+          linkKind={linkKind}
+          entityId={entityId}
+          portraitImage={image}
+          onPortraitChange={onImageChange}
+          {...(onError ? { onError } : {})}
         />
-        <p className="vault-section-help">{t('vault.portraitVsArchiveHint')}</p>
       </SectionPanel>
-      {linkedImages}
     </div>
   );
 }

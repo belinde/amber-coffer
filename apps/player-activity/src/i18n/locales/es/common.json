@@ -6,5 +6,56 @@
   "app": {
     "title": "Amber Coffer — Mesa de juego",
     "subtitle": "Mesa de juego para jugadores"
+  },
+  "session": {
+    "connecting": "Conectando a la mesa de juego…",
+    "waiting": "Esperando snapshot de sesión…",
+    "waitingSnapshot": "Esperando que el master publique la mesa…",
+    "ended": "Sesión terminada.",
+    "error": "Error al conectar con la mesa.",
+    "retry": "Reintentar",
+    "noMap": "No hay mapa activo en el snapshot.",
+    "errors": {
+      "channelNotLinked": {
+        "title": "Canal no vinculado a la campaña",
+        "detail": "Inicia la Activity desde el canal de voz de la sesión. ID de canal Discord actual: {{channelId}}. Regístralo en DynamoDB (script seed-handshake-channel). «Launch in DM» no usa el canal de voz."
+      },
+      "channelUnavailable": {
+        "title": "Canal de Discord no disponible",
+        "detail": "Únete a un canal de voz del servidor e inicia la Activity desde ahí (no desde MD ni un canal de texto)."
+      },
+      "voiceChannelRequired": {
+        "title": "Se requiere canal de voz",
+        "detail": "Inicia la Activity estando en el canal de voz de juego (ID actual: {{channelId}}). Los mensajes directos no están soportados."
+      },
+      "syncFailed": {
+        "title": "Error de sincronización",
+        "detail": "No se pudo cargar el estado de juego desde la API. Comprueba la conexión e inténtalo de nuevo."
+      }
+    }
+  },
+  "tabletop": {
+    "boardAria": "Mapa táctico",
+    "benchAria": "Fichas fuera de escena",
+    "handoutsAria": "Documentos compartidos",
+    "tokenOwned": "Ficha controlada {{id}}",
+    "tokenLocked": "Ficha bloqueada {{id}}"
+  },
+  "discord": {
+    "loading": "Discord…",
+    "embedded": "Activity de Discord",
+    "standalone": "Modo local"
+  },
+  "dev": {
+    "panelAria": "Controles de desarrollo",
+    "panelTitle": "Harness sync (dev)",
+    "playerLabel": "Jugador simulado",
+    "playerA": "Jugador A",
+    "playerB": "Jugador B",
+    "loadSnapshot": "Cargar snapshot demo",
+    "moveTokenGm": "Mover ficha PJ (MJ)",
+    "showHandout": "Mostrar handout",
+    "hideHandout": "Ocultar handout",
+    "endSession": "Terminar sesión"
   }
 }

@@ -13,7 +13,7 @@ import {
   fail,
   freeformSections,
   nowTimestamps,
-  queueImageFromSection,
+  queuePortraitAsCampaignImage,
   relPath,
 } from './common.js';
 
@@ -53,13 +53,25 @@ export async function extractLocations(ctx: ExtractContext): Promise<Location[]>
         version: 1,
       };
 
-      queueImageFromSection(ctx, relFile, 'location', id, sectionBody(parsed, 'Immagine'));
+      queuePortraitAsCampaignImage(
+        ctx,
+        relFile,
+        'location',
+        id,
+        parsed.title,
+        sectionBody(parsed, 'Immagine'),
+      );
 
       ctx.registry.register({ kind: 'location', id, name: parsed.title, slug });
 
       locations.push(locationSchema.parse(location));
     } catch (err) {
-      fail(ctx, relFile, 'Failed to parse location', err instanceof Error ? err.message : String(err));
+      fail(
+        ctx,
+        relFile,
+        'Failed to parse location',
+        err instanceof Error ? err.message : String(err),
+      );
     }
   }
 

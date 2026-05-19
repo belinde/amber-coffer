@@ -1,0 +1,14 @@
+{
+  "extends": "../../packages/tsconfig/node.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "types": ["node", "aws-lambda"]
+  },
+  "include": [
+    "session-handshake/src/**/*.ts",
+    "session-master-token/src/**/*.ts",
+    "session-sync/src/**/*.ts",
+    "shared/**/*.ts"
+  ]
+}

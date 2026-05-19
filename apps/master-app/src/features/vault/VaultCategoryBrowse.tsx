@@ -19,12 +19,7 @@ type Props = {
   onError: (message: string) => void;
 };
 
-const IMAGE_CATEGORIES = new Set<VaultCategory>([
-  'characters',
-  'npcs',
-  'locations',
-  'factions',
-]);
+const IMAGE_CATEGORIES = new Set<VaultCategory>(['characters', 'npcs', 'locations', 'factions']);
 
 export function VaultCategoryBrowse({
   campaignId,
@@ -42,6 +37,8 @@ export function VaultCategoryBrowse({
     () => ({
       visibility: (code: string) => t(`vault.visibility.${code}`),
       characterStatus: (code: string) => t(`character.statusValues.${code}`),
+      characterDiscordPlayer: (playerDiscordId: string | null) =>
+        playerDiscordId ? t('character.listDiscordLinked') : undefined,
       npcStatus: (code: string) => t(`npc.statusValues.${code}`),
       npcDisposition: (code: string) => t(`npc.dispositionValues.${code}`),
       npcRecordKind: (code: string) => t(`vault.recordKind.${code}`),
@@ -75,12 +72,7 @@ export function VaultCategoryBrowse({
     if (!q) return items;
     return items.filter((item) => {
       const { row } = item;
-      const haystack = [
-        row.title,
-        row.subtitle,
-        row.badge,
-        ...(row.details ?? []),
-      ]
+      const haystack = [row.title, row.subtitle, row.badge, ...(row.details ?? [])]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();

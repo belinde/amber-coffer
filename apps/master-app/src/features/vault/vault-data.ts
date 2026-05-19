@@ -24,6 +24,7 @@ export type VaultListItem = {
 export type VaultListLabels = {
   visibility: (code: string) => string;
   characterStatus: (code: string) => string;
+  characterDiscordPlayer: (playerDiscordId: string | null) => string | undefined;
   npcStatus: (code: string) => string;
   npcDisposition: (code: string) => string;
   npcRecordKind: (code: string) => string;
@@ -54,9 +55,12 @@ export async function listVaultEntities(
           title: r.name,
           subtitle: compactJoin([r.species, r.roleHint]),
           details: [
+            labels.characterDiscordPlayer(r.playerDiscordId),
             labels.characterStatus(r.status),
             r.gameSystemHint,
-            r.notableEquipment.length > 0 ? labels.equipCount(r.notableEquipment.length) : undefined,
+            r.notableEquipment.length > 0
+              ? labels.equipCount(r.notableEquipment.length)
+              : undefined,
           ].filter((d): d is string => Boolean(d)),
           image: pickDisplayImageRef(r.image, linkIndex.get(imageLinkKey('character', r.id)) ?? []),
           badge: labels.visibility(r.visibility),
@@ -112,10 +116,9 @@ export async function listVaultEntities(
         row: buildTabularRow({
           title: r.name,
           subtitle: r.kind ? labels.factionKind(r.kind) : undefined,
-          details: [
-            truncatePreview(r.goals),
-            truncatePreview(r.description),
-          ].filter((d): d is string => Boolean(d)),
+          details: [truncatePreview(r.goals), truncatePreview(r.description)].filter(
+            (d): d is string => Boolean(d),
+          ),
           image: r.image,
           badge: labels.visibility(r.visibility),
         }),

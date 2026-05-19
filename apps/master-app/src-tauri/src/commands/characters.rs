@@ -7,7 +7,7 @@ use crate::db::validate::{
 };
 use crate::db::AppState;
 use crate::error::AppError;
-use crate::validation_issue::{enum_invalid, required_field};
+use crate::validation_issue::{enum_invalid, required_field, validation_issues, ValidationIssue};
 use crate::models::{Character, CharacterRow, CreateCharacterInput, UpdateCharacterInput};
 use crate::util::now_ms;
 
@@ -121,7 +121,8 @@ pub async fn create_character(
     .bind(now)
     .bind(now)
     .execute(&pool)
-    .await?;
+    .await
+    .map_err(map_character_player_discord_error)?;
 
     get_character(id, app, state)
         .await?
@@ -193,7 +194,8 @@ pub async fn update_character(
     .bind(next_version)
     .bind(&input.id)
     .execute(&pool)
-    .await?;
+    .await
+    .map_err(map_character_player_discord_error)?;
 
     if updated.rows_affected() == 0 {
         return Err(AppError::NotFound("character".into()));
@@ -229,4 +231,16 @@ fn validate_status(status: &str) -> Result<(), AppError> {
     } else {
         Err(enum_invalid(&["status"]))
     }
+}
+
+fn map_character_player_discord_error(err: sqlx::Error) -> AppError {
+    if let sqlx::Error::Database(db_err) = &err {
+        if db_err.is_unique_violation() {
+            return validation_issues(vec![ValidationIssue::new(
+                &["playerDiscordId"],
+                "player_discord_id.duplicate",
+            )]);
+        }
+    }
+    AppError::Database(err)
 }

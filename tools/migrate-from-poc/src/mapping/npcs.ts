@@ -14,7 +14,7 @@ import {
   fail,
   nowTimestamps,
   parseRazzaClasse,
-  queueImageFromSection,
+  queuePortraitAsCampaignImage,
   relPath,
   warn,
 } from './common.js';
@@ -96,7 +96,14 @@ export async function extractNpcs(ctx: ExtractContext): Promise<Npc[]> {
         version: 1,
       };
 
-      queueImageFromSection(ctx, relFile, 'npc', id, sectionBody(parsed, 'Immagine'));
+      queuePortraitAsCampaignImage(
+        ctx,
+        relFile,
+        'npc',
+        id,
+        parsed.title,
+        sectionBody(parsed, 'Immagine'),
+      );
 
       ctx.registry.register({ kind: 'npc', id, name: parsed.title, slug });
 

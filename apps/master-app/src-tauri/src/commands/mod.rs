@@ -14,7 +14,6 @@ mod npcs;
 mod relationships;
 mod session_pipeline;
 mod sessions;
-mod sync;
 mod tabletop;
 mod vault_validate;
 
@@ -34,7 +33,6 @@ pub use npcs::*;
 pub use relationships::*;
 pub use session_pipeline::*;
 pub use sessions::*;
-pub use sync::*;
 pub use tabletop::*;
 
 /// Health-check command for renderer ↔ Rust IPC.

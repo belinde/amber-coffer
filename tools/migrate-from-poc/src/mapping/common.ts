@@ -1,6 +1,15 @@
 import { join, relative } from 'node:path';
 
-import type { Appearance, EventReference } from '@amber/shared';
+import {
+  campaignImageSchema,
+  type Appearance,
+  type CampaignImage,
+  type Character,
+  type EventReference,
+  type ImageLink,
+  type Location,
+  type Npc,
+} from '@amber/shared';
 
 import {
   parseEventiInteressanti,
@@ -9,8 +18,9 @@ import {
   type ParsedMarkdownFile,
   sectionBody,
 } from '../frontmatter.js';
+import { resolvePortraitImageId } from '../id-mapping.js';
 import type { EntityRegistry } from '../registry.js';
-import type { DumpAsset, ExtractContext, ExtractError } from '../types.js';
+import type { DumpAssetEntityKind, ExtractContext, ExtractError } from '../types.js';
 
 const STANDARD_SECTIONS = new Set([
   'immagine',
@@ -105,26 +115,69 @@ export function buildEventsInteresting(
   return result;
 }
 
-export function queueImageFromSection(
+type PortraitEntityKind = Exclude<DumpAssetEntityKind, 'campaign_image'>;
+
+function portraitLink(entityKind: PortraitEntityKind, entityId: string): ImageLink | null {
+  switch (entityKind) {
+    case 'character':
+      return { kind: 'character', id: entityId as Character['id'] };
+    case 'npc':
+      return { kind: 'npc', id: entityId as Npc['id'] };
+    case 'location':
+      return { kind: 'location', id: entityId as Location['id'] };
+    case 'faction':
+      return null;
+    default:
+      return null;
+  }
+}
+
+/**
+ * Portrait from `## Immagine` → archive `CampaignImage` + L1 asset on that row.
+ * Entity `image` is set at import time via `portraitBindings` (same `ImageRef` as the archive).
+ */
+export function queuePortraitAsCampaignImage(
   ctx: ExtractContext,
-  _relFile: string,
-  entityKind: DumpAsset['entityKind'],
+  entityRelFile: string,
+  entityKind: PortraitEntityKind,
   entityId: string,
+  entityTitle: string,
   sectionBodyText: string,
 ): void {
-  const image = parseImageMarkdown(sectionBodyText);
-  if (!image?.path) return;
+  const parsed = parseImageMarkdown(sectionBodyText);
+  if (!parsed?.path) return;
 
-  const pocPath = image.path.startsWith('/') ? image.path.slice(1) : image.path;
+  const imageId = resolvePortraitImageId(ctx.mapping, entityRelFile);
+  const pocPath = parsed.path.startsWith('/') ? parsed.path.slice(1) : parsed.path;
   const sourcePath = join(ctx.rootPath, pocPath);
   const ext = pocPath.includes('.') ? pocPath.slice(pocPath.lastIndexOf('.')) : '.jpg';
-  const relativeLocal = `${ctx.campaignId}/${entityId}/original${ext}`;
+  const link = portraitLink(entityKind, entityId);
+  const timestamps = nowTimestamps();
 
-  ctx.assets.push({
+  const campaignImage: CampaignImage = {
+    id: imageId as CampaignImage['id'],
+    campaignId: ctx.campaignId as CampaignImage['campaignId'],
+    title: entityTitle,
+    caption: parsed.alt.trim(),
+    image: null,
+    links: link ? [link] : [],
+    visibility: 'gm_only',
+    ...timestamps,
+    version: 1,
+  };
+
+  ctx.portraitCampaignImages.push(campaignImageSchema.parse(campaignImage));
+  ctx.portraitBindings.push({
     entityKind,
     entityId,
+    campaignImageId: imageId,
+  });
+
+  ctx.assets.push({
+    entityKind: 'campaign_image',
+    entityId: imageId,
     sourcePath,
-    relativeLocal,
+    relativeLocal: `${ctx.campaignId}/${imageId}/original${ext}`,
   });
 }
 

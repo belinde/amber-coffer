@@ -99,7 +99,7 @@ export function VaultShell({
 
   return (
     <VaultEntityDetail
-      campaignId={campaign.id}
+      campaign={campaign}
       category={current.category}
       entityId={current.entityId}
       onBack={popView}
@@ -107,6 +107,7 @@ export function VaultShell({
       onError={onError}
       onOpenSessions={() => pushView({ kind: 'sessions' })}
       onOpenImages={() => pushView({ kind: 'images' })}
+      onConfigureDiscord={() => goTo({ kind: 'campaign' })}
     />
   );
 }

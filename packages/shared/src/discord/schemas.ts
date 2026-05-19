@@ -20,3 +20,21 @@ export const discordVoiceChannelOptionSchema = z.object({
 });
 
 export type DiscordVoiceChannelOption = z.infer<typeof discordVoiceChannelOptionSchema>;
+
+export const discordGuildMemberOptionSchema = z.object({
+  id: z.string().min(1),
+  username: z.string(),
+  globalName: z.string().nullable(),
+  nick: z.string().nullable(),
+  avatar: z.string().nullable(),
+  displayName: z.string(),
+});
+
+export type DiscordGuildMemberOption = z.infer<typeof discordGuildMemberOptionSchema>;
+
+export const discordOauthStatusSchema = z.object({
+  connected: z.boolean(),
+  expiresAt: z.number().int().nullable().optional(),
+});
+
+export type DiscordOauthStatus = z.infer<typeof discordOauthStatusSchema>;

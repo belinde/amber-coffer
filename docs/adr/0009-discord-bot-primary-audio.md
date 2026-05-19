@@ -18,7 +18,7 @@ La decisione di prodotto (2026-05-17) allinea l'implementazione al bot Discord c
    - Legacy v1: singolo `<discordUserId>.wav` per partecipante (ancora leggibile da Whisper)
    - `transcripts/raw-merged.txt` — trascrizione grezza merged (in attesa di refinement)
    - `transcripts/segments.json` — segmenti strutturati Whisper
-3. **Token bot** (BYOB del GM) in `tauri-plugin-store` (`discord.botToken`), globale per dispositivo, mai in repository. **Non** è il token dell’Application Amber Coffer del prodotto ([ADR 0012](./0012-amber-discord-application.md)).
+3. **Token bot** (BYOB del GM) in **keyring OS** (`amber-coffer` / `discord-bot-token`), con migrazione one-shot da `amber-settings.json` se presente. Globale per dispositivo, mai in repository. **Non** è il token dell’Application Amber Coffer del prodotto ([ADR 0012](./0012-amber-discord-application.md)).
 4. **Canale vocale** da `campaign.discordChannelId` in `campaign.json`; configurazione guidata in Impostazioni → Discord (OAuth utente Amber + invito bot GM + picker canali vocali), con fallback ID manuale; join one-click dal master-app.
 5. **STT offline** via sidecar `tools/sidecars/whisper/`; speaker identity da traccia Discord (no pyannote nel MVP). Pesi Whisper scaricati dal GM in Impostazioni → Modelli locali ([ADR 0010](./0010-local-model-artifacts-and-updates.md)); in sviluppo resta il venv monorepo.
 6. **Mic GM locale** (`gm_mic`): fuori scope di questo ADR; stesso contratto `AudioSource` quando verrà aggiunto.

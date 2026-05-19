@@ -44,7 +44,12 @@ function CampaignImageOptionThumb({
   }, [campaignId, image]);
 
   if (!src) {
-    return <span className="campaign-image-picker__thumb campaign-image-picker__thumb--empty" aria-hidden />;
+    return (
+      <span
+        className="campaign-image-picker__thumb campaign-image-picker__thumb--empty"
+        aria-hidden
+      />
+    );
   }
 
   return <img src={src} alt="" className="campaign-image-picker__thumb" />;
@@ -67,10 +72,7 @@ export function CampaignImagePicker({
   const rootRef = useRef<HTMLDivElement>(null);
 
   const matched = useMemo(() => findCampaignImageByRef(images, value), [images, value]);
-  const filtered = useMemo(
-    () => filterCampaignImagesByQuery(images, query),
-    [images, query],
-  );
+  const filtered = useMemo(() => filterCampaignImagesByQuery(images, query), [images, query]);
 
   const selectedLabel = matched?.title;
   const hasUnknownRef = Boolean(value && imageRefHasDisplaySource(value) && !matched);
@@ -119,9 +121,7 @@ export function CampaignImagePicker({
               aria-controls={listboxId}
               aria-autocomplete="list"
               disabled={loading}
-              placeholder={
-                loading ? t('subject.loading') : t('vault.imageRefSearchPlaceholder')
-              }
+              placeholder={loading ? t('subject.loading') : t('vault.imageRefSearchPlaceholder')}
               value={inputValue}
               onChange={(ev) => {
                 setQuery(ev.target.value);
@@ -182,14 +182,18 @@ export function CampaignImagePicker({
           ) : null}
         </div>
       </Field>
-      {hasUnknownRef ? (
-        <p className="vault-section-help campaign-image-picker__orphan">{t('vault.imageRefUnknown')}</p>
-      ) : null}
-      {matched?.image ? (
+      {value && imageRefHasDisplaySource(value) ? (
         <div className="campaign-image-picker__preview">
-          <CampaignImageOptionThumb campaignId={campaignId} image={matched.image} />
-          <span className="campaign-image-picker__preview-label">{matched.title}</span>
+          <CampaignImageOptionThumb campaignId={campaignId} image={value} />
+          <span className="campaign-image-picker__preview-label">
+            {matched?.title ?? t('vault.imageRefDirectPortrait')}
+          </span>
         </div>
+      ) : null}
+      {hasUnknownRef ? (
+        <p className="vault-section-help campaign-image-picker__orphan">
+          {t('vault.imageRefUnknown')}
+        </p>
       ) : null}
     </div>
   );

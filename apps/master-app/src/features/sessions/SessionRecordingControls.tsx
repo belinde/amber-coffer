@@ -10,6 +10,10 @@ import {
   sessionStopRecording,
   type SessionPipelineState,
 } from '../../bridge/session-pipeline.js';
+import {
+  listSessionRecordings,
+  type SessionRecordingView,
+} from '../../bridge/session-recordings.js';
 import { Button } from '../../components/ui/Button.js';
 import { ActionIcons } from '../../components/ui/icons.js';
 
@@ -18,6 +22,7 @@ type Props = {
   onSessionUpdated: (session: Session) => void;
   onError: (message: string) => void;
   onConfigureDiscord?: (() => void) | undefined;
+  onOpenCharacters?: (() => void) | undefined;
   compact?: boolean;
 };
 
@@ -26,15 +31,22 @@ export function SessionRecordingControls({
   onSessionUpdated,
   onError,
   onConfigureDiscord,
+  onOpenCharacters,
   compact = false,
 }: Props): ReactElement {
   const { t } = useTranslation();
   const [pipeline, setPipeline] = useState<SessionPipelineState | null>(null);
+  const [recordings, setRecordings] = useState<SessionRecordingView[]>([]);
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
-      setPipeline(await getSessionPipelineState(session.id));
+      const [pipe, tracks] = await Promise.all([
+        getSessionPipelineState(session.id),
+        listSessionRecordings(session.id),
+      ]);
+      setPipeline(pipe);
+      setRecordings(tracks);
     } catch (err) {
       onError(formatInvokeErrorMessage(err));
     }
@@ -118,6 +130,38 @@ export function SessionRecordingControls({
           <dd>{pipeline.recordingCount}</dd>
         </div>
       </dl>
+      {recordings.length > 0 ? (
+        <section
+          className="session-recording-tracks"
+          aria-labelledby="session-recording-tracks-heading"
+        >
+          <h5 id="session-recording-tracks-heading">{t('sessionDetail.recordingTracksTitle')}</h5>
+          <ul className="session-recording-tracks__list">
+            {recordings.map((track) => (
+              <li key={track.id} className="session-recording-tracks__item">
+                <span className="session-recording-tracks__speaker">
+                  {t('sessionDetail.recordingTrackDiscord', { id: track.userDiscordId })}
+                </span>
+                {track.characterName ? (
+                  <span className="session-recording-tracks__character">{track.characterName}</span>
+                ) : (
+                  <span className="session-recording-tracks__unassigned">
+                    {t('sessionDetail.recordingTrackUnassigned')}
+                    {onOpenCharacters ? (
+                      <>
+                        {' '}
+                        <Button type="button" variant="default" onClick={onOpenCharacters}>
+                          {t('sessionDetail.recordingTrackAssign')}
+                        </Button>
+                      </>
+                    ) : null}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       {showRecordingActions ? (
         <div className="session-workflow__actions">
           {recordingActive ? (

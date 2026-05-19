@@ -10,6 +10,7 @@ import { useSyncExternalStore } from 'react';
 class TabletopStore {
   private state: TabletopState = initialTabletopState;
   private readonly listeners = new Set<() => void>();
+  private readonly sessionEndedListeners = new Set<() => void>();
 
   getState = (): TabletopState => this.state;
 
@@ -17,6 +18,13 @@ class TabletopStore {
     this.listeners.add(listener);
     return () => {
       this.listeners.delete(listener);
+    };
+  };
+
+  subscribeSessionEnded = (listener: () => void): (() => void) => {
+    this.sessionEndedListeners.add(listener);
+    return () => {
+      this.sessionEndedListeners.delete(listener);
     };
   };
 
@@ -37,6 +45,7 @@ class TabletopStore {
         this.dispatch({
           type: 'snapshot.applied',
           activeMapId: payload.activeMapId,
+          maps: payload.maps,
           tokens: payload.tokens,
           visibleHandouts: payload.visibleHandouts,
         });
@@ -48,7 +57,11 @@ class TabletopStore {
         this.dispatch({ type: 'token.created', token: payload.token });
         return;
       case 'token.moved':
-        this.dispatch({ type: 'token.moved', tokenId: payload.tokenId, position: payload.position });
+        this.dispatch({
+          type: 'token.moved',
+          tokenId: payload.tokenId,
+          position: payload.position,
+        });
         return;
       case 'token.removed':
         this.dispatch({ type: 'token.removed', tokenId: payload.tokenId });
@@ -61,6 +74,7 @@ class TabletopStore {
         return;
       case 'session.ended':
         this.dispatch({ type: 'session.ended' });
+        for (const listener of this.sessionEndedListeners) listener();
         return;
       default:
         return;
@@ -71,5 +85,9 @@ class TabletopStore {
 export const tabletopStore = new TabletopStore();
 
 export function useTabletopState(): TabletopState {
-  return useSyncExternalStore(tabletopStore.subscribe, tabletopStore.getState, tabletopStore.getState);
+  return useSyncExternalStore(
+    tabletopStore.subscribe,
+    tabletopStore.getState,
+    tabletopStore.getState,
+  );
 }

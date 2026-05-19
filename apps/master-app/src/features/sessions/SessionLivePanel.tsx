@@ -14,6 +14,7 @@ type Props = {
   onSessionUpdated: (session: Session) => void;
   onError: (message: string) => void;
   onConfigureDiscord: () => void;
+  onOpenCharacters?: (() => void) | undefined;
 };
 
 export function SessionLivePanel({
@@ -22,6 +23,7 @@ export function SessionLivePanel({
   onSessionUpdated,
   onError,
   onConfigureDiscord,
+  onOpenCharacters,
 }: Props): ReactElement {
   const { t } = useTranslation();
   const { pushView } = useVaultNavigationContext();
@@ -38,11 +40,17 @@ export function SessionLivePanel({
           onSessionUpdated={onSessionUpdated}
           onError={onError}
           onConfigureDiscord={onConfigureDiscord}
+          onOpenCharacters={onOpenCharacters}
           compact
         />
       </section>
 
-      <SessionTabletopSection campaignId={campaignId} onError={onError} />
+      <SessionTabletopSection
+        campaignId={campaignId}
+        sessionId={session.id}
+        syncEnabled
+        onError={onError}
+      />
 
       <section className="session-live__materials" aria-labelledby="session-live-materials-heading">
         <h3 id="session-live-materials-heading">{t('sessionDetail.liveMaterials')}</h3>

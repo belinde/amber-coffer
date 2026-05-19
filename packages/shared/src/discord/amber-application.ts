@@ -12,7 +12,8 @@ export const AMBER_DISCORD_OAUTH_SCOPES = 'identify guilds';
 
 /**
  * Bot invite permissions for the GM's recording bot (BYOB):
- * VIEW_CHANNEL | CONNECT | SPEAK
+ * VIEW_CHANNEL (1024) | CONNECT (1048576) | SPEAK (2097152) = 3146752
+ * @see GM_BOT_INVITE_PERMISSION_IDS in ./gm-bot-setup.ts
  */
 export const GM_BOT_INVITE_PERMISSIONS = '3146752';
 

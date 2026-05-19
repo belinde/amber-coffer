@@ -12,25 +12,34 @@ Amber Coffer usa Discord in due modi:
 
 Servono **due Application Discord concettuali**:
 
-| Application                 | Ruolo                                                                |
-| --------------------------- | -------------------------------------------------------------------- |
-| **Amber Coffer** (prodotto) | OAuth2 utente (`identify`, `guilds`); client ID per Activity         |
-| **Bot del GM** (BYOB)       | Token in `amber-settings.json`; join canale vocale per registrazione |
+| Application                 | Ruolo                                                                           |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| **Amber Coffer** (prodotto) | OAuth2 utente (`identify`, `guilds`); client ID per Activity                    |
+| **Bot del GM** (BYOB)       | Token in keyring OS (`discord-bot-token`); join canale vocale per registrazione |
 
 ## Decisione
 
 - **Una sola Application** nel [Developer Portal](https://discord.com/developers/applications) per il brand **Amber Coffer** (`AMBER_DISCORD_APPLICATION_ID` in `packages/shared`).
 - **OAuth Master**: PKCE, client ID pubblico in repo, **nessun client secret**; redirect `http://127.0.0.1:<port>/oauth/callback` (listener locale in dev).
-- **Activity**: stesso `client_id`; URL mapping verso deploy `apps/player-activity` (CloudFront / staging).
+- **Activity**: stesso `client_id`; URL mappings verso deploy `apps/player-activity` (CloudFront). L’HTTP API passa dal **proxy Discord** (`/api`) — non da fetch assoluti verso `api.*` in iframe.
 - **Bot registrazione**: resta il bot creato dal GM nel portale; il wizard genera l’URL di invito usando il `client_id` estratto dal token del GM, non l’Application Amber.
+- **OAuth persistito**: sessione utente (access + refresh) in keyring (`discord-user-oauth`); refresh automatico; comandi `discord_oauth_status`, `discord_ensure_user_oauth`, `discord_oauth_logout`. Il wizard non cancella più la sessione al salvataggio del canale.
+- **Collegamento PG ↔ Discord**: `campaign.discordGuildId` + `Character.playerDiscordId`; roster server via REST bot (`GET /guilds/{id}/members` e search); richiede **Server Members Intent** sul bot del GM.
+- **Risoluzione audio**: `recordings.user_discord_id` → personaggio tramite `player_discord_id` (nessuna FK su `recordings`).
 
 ### Checklist Developer Portal
 
 1. Creare Application «Amber Coffer».
 2. Copiare Application ID → `packages/shared/src/discord/amber-application.ts`.
-3. **OAuth2 → Redirects**: aggiungere `http://127.0.0.1:47832/oauth/callback` (`AMBER_DISCORD_OAUTH_REDIRECT_URI` in `packages/shared`; il listener in dev può usare porta effimera — registrare l’URI effettivo usato in callback).
-4. **Activities**: abilitare Embedded App; URL verso build player-activity.
-5. **Bot** (opzionale su Application Amber): per Activity/handshake futuro; **non** per audio BYOB.
+3. **OAuth2 → Redirects**:
+   - `http://127.0.0.1:47832/oauth/callback` — master-app (`AMBER_DISCORD_OAUTH_REDIRECT_URI`)
+   - `https://table.ambercoffer.belinde.click` — URL pubblica Activity (prod)
+   - `https://{APPLICATION_ID}.discordsays.com` — origin iframe in prod (handshake OAuth)
+4. **Activities → URL Mappings** (TARGET senza protocollo; ordine: `/api` prima di `/`):
+   - `/` → `table.ambercoffer.belinde.click` (SPA)
+   - `/api` → `api.ambercoffer.belinde.click` (handshake + sync HTTP)
+   - Script: `infrastructure/scripts/print-discord-url-mappings.sh`
+5. **Bot** (opzionale su Application Amber): per Activity/handshake; **non** per audio BYOB.
 
 ## Conseguenze
 

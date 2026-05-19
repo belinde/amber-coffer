@@ -1,5 +1,13 @@
 import type { Campaign, Visibility } from '@amber/shared';
-import { characterStatusSchema, factionKindSchema, loreNoteKindSchema, narrativeSeedStatusSchema, npcDispositionSchema, npcRecordKindSchema, npcStatusSchema } from '@amber/shared';
+import {
+  characterStatusSchema,
+  factionKindSchema,
+  loreNoteKindSchema,
+  narrativeSeedStatusSchema,
+  npcDispositionSchema,
+  npcRecordKindSchema,
+  npcStatusSchema,
+} from '@amber/shared';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,21 +22,21 @@ import { vaultCategoryToImageLinkKind } from '../images/campaign-image-links.js'
 import { fieldErrorAt } from '../validation/field-error-helpers.js';
 
 import { AppearanceTabSections } from './components/AppearanceTabSections.js';
+import { DiscordPlayerPicker } from './components/DiscordPlayerPicker.js';
 import { EntityRefPicker } from './components/EntityRefPicker.js';
 import { EventsInterestingEditor } from './components/EventsInterestingEditor.js';
 import { GameStatsEditor } from './components/GameStatsEditor.js';
 import { ImageRefField } from './components/ImageRefField.js';
-import { LinkedCampaignImagesPanel } from './components/LinkedCampaignImagesPanel.js';
 import { LocationSectionsEditor } from './components/LocationSectionsEditor.js';
 import { RichTextArea } from './components/RichTextArea.js';
 import { SectionPanel } from './components/SectionPanel.js';
 import { VisibilityControl } from './components/VisibilityControl.js';
 import type { SectionId } from './entity-sections.config.js';
-import type { VaultCategory } from './vault-categories.js';
+import { NEW_ENTITY_ID, type VaultCategory } from './vault-categories.js';
 import type { VaultEntity } from './vault-entity-api.js';
 
 type Props = {
-  campaignId: Campaign['id'];
+  campaign: Campaign;
   category: VaultCategory;
   entityId: string;
   sectionId: SectionId;
@@ -37,10 +45,12 @@ type Props = {
   onChange: (next: VaultEntity) => void;
   onOpenSessions?: (() => void) | undefined;
   onOpenImages?: (() => void) | undefined;
+  onConfigureDiscord?: (() => void) | undefined;
+  onError?: (message: string) => void;
 };
 
 export function VaultEntitySections({
-  campaignId,
+  campaign,
   category,
   entityId,
   sectionId,
@@ -49,29 +59,14 @@ export function VaultEntitySections({
   onChange,
   onOpenSessions,
   onOpenImages,
+  onConfigureDiscord,
+  onError,
 }: Props): ReactElement | null {
+  const campaignId = campaign.id;
   const { t } = useTranslation();
   const fe = (fieldPath: string) => fieldErrorAt(fieldErrors, fieldPath);
 
   const linkKind = vaultCategoryToImageLinkKind(category);
-
-  function linkedImagesPanel(): ReactElement | null {
-    if (!linkKind || !entityId) return null;
-    return (
-      <LinkedCampaignImagesPanel
-        campaignId={campaignId}
-        linkKind={linkKind}
-        entityId={entityId}
-        {...(onOpenImages ? { onOpenImages } : {})}
-      />
-    );
-  }
-
-  function linkedImagesSection(): ReactElement | null {
-    const panel = linkedImagesPanel();
-    if (!panel) return null;
-    return <SectionPanel titleKey="vault.sections.linkedImages">{panel}</SectionPanel>;
-  }
 
   if (category === 'characters') {
     const d = draft as CreateCharacterInput;
@@ -83,11 +78,13 @@ export function VaultEntitySections({
               <input value={d.name} onChange={(ev) => onChange({ ...d, name: ev.target.value })} />
             </Field>
             <Field label={t('character.playerDiscordId')} error={fe('playerDiscordId')}>
-              <input
-                value={d.playerDiscordId ?? ''}
-                onChange={(ev) =>
-                  onChange({ ...d, playerDiscordId: ev.target.value || null })
-                }
+              <DiscordPlayerPicker
+                campaign={campaign}
+                characterId={entityId === NEW_ENTITY_ID ? undefined : entityId}
+                value={d.playerDiscordId ?? null}
+                onChange={(playerDiscordId) => onChange({ ...d, playerDiscordId })}
+                error={fe('playerDiscordId')}
+                onConfigureDiscord={onConfigureDiscord}
               />
             </Field>
             <Field label={t('vault.fields.species')} error={fe('species')}>
@@ -124,18 +121,19 @@ export function VaultEntitySections({
           </SectionPanel>
         );
       case 'appearance':
-        return (
+        return linkKind ? (
           <AppearanceTabSections
             campaignId={campaignId}
+            linkKind={linkKind}
+            entityId={entityId}
             appearance={d.appearance}
             image={d.image}
             fieldErrors={fieldErrors}
-            linkedImages={linkedImagesSection()}
             onAppearanceChange={(appearance) => onChange({ ...d, appearance })}
             onImageChange={(image) => onChange({ ...d, image })}
-            {...(onOpenImages ? { onOpenImages } : {})}
+            {...(onError ? { onError } : {})}
           />
-        );
+        ) : null;
       case 'equipment':
         return (
           <SectionPanel titleKey="vault.sections.equipment">
@@ -156,7 +154,11 @@ export function VaultEntitySections({
       case 'gameStats':
         return (
           <SectionPanel titleKey="vault.sections.gameStats">
-            <GameStatsEditor fieldErrors={fieldErrors} value={d.gameStats} onChange={(gameStats) => onChange({ ...d, gameStats })} />
+            <GameStatsEditor
+              fieldErrors={fieldErrors}
+              value={d.gameStats}
+              onChange={(gameStats) => onChange({ ...d, gameStats })}
+            />
           </SectionPanel>
         );
       case 'events':
@@ -280,18 +282,19 @@ export function VaultEntitySections({
           </SectionPanel>
         );
       case 'appearance':
-        return (
+        return linkKind ? (
           <AppearanceTabSections
             campaignId={campaignId}
+            linkKind={linkKind}
+            entityId={entityId}
             appearance={d.appearance}
             image={d.image}
             fieldErrors={fieldErrors}
-            linkedImages={linkedImagesSection()}
             onAppearanceChange={(appearance) => onChange({ ...d, appearance })}
             onImageChange={(image) => onChange({ ...d, image })}
-            {...(onOpenImages ? { onOpenImages } : {})}
+            {...(onError ? { onError } : {})}
           />
-        );
+        ) : null;
       case 'characterLinks':
         return (
           <SectionPanel titleKey="vault.sections.characterLinks">
@@ -318,7 +321,11 @@ export function VaultEntitySections({
       case 'gameStats':
         return (
           <SectionPanel titleKey="vault.sections.gameStats">
-            <GameStatsEditor fieldErrors={fieldErrors} value={d.gameStats} onChange={(gameStats) => onChange({ ...d, gameStats })} />
+            <GameStatsEditor
+              fieldErrors={fieldErrors}
+              value={d.gameStats}
+              onChange={(gameStats) => onChange({ ...d, gameStats })}
+            />
           </SectionPanel>
         );
       case 'events':
@@ -385,18 +392,19 @@ export function VaultEntitySections({
           </SectionPanel>
         );
       case 'appearance':
-        return (
+        return linkKind ? (
           <AppearanceTabSections
             campaignId={campaignId}
+            linkKind={linkKind}
+            entityId={entityId}
             appearance={d.appearance}
             image={d.image}
             fieldErrors={fieldErrors}
-            linkedImages={linkedImagesSection()}
             onAppearanceChange={(appearance) => onChange({ ...d, appearance })}
             onImageChange={(image) => onChange({ ...d, image })}
-            {...(onOpenImages ? { onOpenImages } : {})}
+            {...(onError ? { onError } : {})}
           />
-        );
+        ) : null;
       case 'sections':
         return (
           <SectionPanel titleKey="vault.sections.freeSections">
@@ -513,7 +521,10 @@ export function VaultEntitySections({
         return (
           <SectionPanel titleKey="vault.sections.metadata">
             <Field label={t('vault.fields.title')} error={fe('title')}>
-              <input value={d.title} onChange={(ev) => onChange({ ...d, title: ev.target.value })} />
+              <input
+                value={d.title}
+                onChange={(ev) => onChange({ ...d, title: ev.target.value })}
+              />
             </Field>
             <Field label={t('vault.fields.loreKind')} error={fe('kind')}>
               <select
@@ -592,7 +603,10 @@ export function VaultEntitySections({
         return (
           <SectionPanel titleKey="vault.sections.idea">
             <Field label={t('vault.fields.title')} error={fe('title')}>
-              <input value={d.title} onChange={(ev) => onChange({ ...d, title: ev.target.value })} />
+              <input
+                value={d.title}
+                onChange={(ev) => onChange({ ...d, title: ev.target.value })}
+              />
             </Field>
             <Field label={t('vault.fields.seedStatus')} error={fe('status')}>
               <select

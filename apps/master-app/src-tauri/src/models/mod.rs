@@ -35,5 +35,6 @@ pub use npc::{CreateNpcInput, Npc, NpcRow, UpdateNpcInput};
 pub use relationship::{
     CreateRelationshipInput, Relationship, RelationshipRow, UpdateRelationshipInput,
 };
+pub use recording::Recording;
 pub use session::{CreateSessionInput, Session, UpdateSessionInput};
 pub use token::{Token, TokenPosition, TokenRow};

@@ -12,7 +12,7 @@ import {
   buildEventsInteresting,
   fail,
   nowTimestamps,
-  queueImageFromSection,
+  queuePortraitAsCampaignImage,
   relPath,
 } from './common.js';
 
@@ -80,13 +80,25 @@ export async function extractFactions(ctx: ExtractContext): Promise<Faction[]> {
         version: 1,
       };
 
-      queueImageFromSection(ctx, relFile, 'faction', id, sectionBody(parsed, 'Immagine'));
+      queuePortraitAsCampaignImage(
+        ctx,
+        relFile,
+        'faction',
+        id,
+        parsed.title,
+        sectionBody(parsed, 'Immagine'),
+      );
 
       ctx.registry.register({ kind: 'faction', id, name: parsed.title, slug });
 
       factions.push(factionSchema.parse(faction));
     } catch (err) {
-      fail(ctx, relFile, 'Failed to parse faction', err instanceof Error ? err.message : String(err));
+      fail(
+        ctx,
+        relFile,
+        'Failed to parse faction',
+        err instanceof Error ? err.message : String(err),
+      );
     }
   }
 

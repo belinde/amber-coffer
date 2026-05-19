@@ -1,4 +1,4 @@
-import type { Handout, Token } from '@amber/shared';
+import type { Handout, Map, Token } from '@amber/shared';
 
 type HandoutId = Handout['id'];
 type MapId = Token['mapId'];
@@ -14,18 +14,26 @@ type TokenPosition = Token['position'];
  */
 export type TabletopState = {
   activeMapId: MapId | null;
+  maps: Map[];
   tokens: Token[];
   visibleHandouts: Handout[];
 };
 
 export const initialTabletopState: TabletopState = {
   activeMapId: null,
+  maps: [],
   tokens: [],
   visibleHandouts: [],
 };
 
 export type TabletopAction =
-  | { type: 'snapshot.applied'; activeMapId: MapId | null; tokens: Token[]; visibleHandouts: Handout[] }
+  | {
+      type: 'snapshot.applied';
+      activeMapId: MapId | null;
+      maps: Map[];
+      tokens: Token[];
+      visibleHandouts: Handout[];
+    }
   | { type: 'map.activated'; mapId: MapId }
   | { type: 'token.created'; token: Token }
   | { type: 'token.moved'; tokenId: TokenId; position: TokenPosition }
@@ -39,6 +47,7 @@ export function tabletopReducer(state: TabletopState, action: TabletopAction): T
     case 'snapshot.applied':
       return {
         activeMapId: action.activeMapId,
+        maps: action.maps,
         tokens: action.tokens,
         visibleHandouts: action.visibleHandouts,
       };

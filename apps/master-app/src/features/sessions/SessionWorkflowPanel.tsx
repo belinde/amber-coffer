@@ -19,6 +19,7 @@ type Props = {
   onSessionUpdated: (session: Session) => void;
   onError: (message: string) => void;
   onConfigureDiscord?: () => void;
+  onOpenCharacters?: (() => void) | undefined;
 };
 
 type StepState = 'pending' | 'active' | 'done' | 'disabled';
@@ -35,6 +36,7 @@ export function SessionWorkflowPanel({
   onSessionUpdated,
   onError,
   onConfigureDiscord,
+  onOpenCharacters,
 }: Props): ReactElement {
   const { t } = useTranslation();
   const [pipeline, setPipeline] = useState<SessionPipelineState | null>(null);
@@ -197,6 +199,7 @@ export function SessionWorkflowPanel({
               }}
               onError={onError}
               onConfigureDiscord={onConfigureDiscord}
+              onOpenCharacters={onOpenCharacters}
               compact
             />
           </li>

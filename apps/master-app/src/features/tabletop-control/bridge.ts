@@ -40,7 +40,10 @@ export async function listTokens(mapId: MapId): Promise<Token[]> {
   return raw.map((row) => tokenSchema.parse(row));
 }
 
-export async function moveToken(args: { tokenId: TokenId; position: TokenPosition }): Promise<Token> {
+export async function moveToken(args: {
+  tokenId: TokenId;
+  position: TokenPosition;
+}): Promise<Token> {
   const raw = await invoke<unknown>('move_token', {
     tokenId: args.tokenId,
     positionJson: args.position,
@@ -72,8 +75,24 @@ export async function hideHandout(handoutId: HandoutId): Promise<void> {
   return invoke<void>('hide_handout', { handoutId });
 }
 
-export async function publishTabletopSnapshot(sessionId: SessionId): Promise<void> {
-  return invoke<void>('publish_tabletop_snapshot', { sessionId });
+export async function buildTabletopSnapshot(
+  sessionId: SessionId,
+  activeMapId?: string | null,
+): Promise<unknown> {
+  return invoke<unknown>('build_tabletop_snapshot_json', {
+    sessionId,
+    activeMapId: activeMapId ?? null,
+  });
+}
+
+export async function publishTabletopSnapshot(
+  sessionId: SessionId,
+  activeMapId?: string | null,
+): Promise<void> {
+  return invoke<void>('publish_tabletop_snapshot', {
+    sessionId,
+    activeMapId: activeMapId ?? null,
+  });
 }
 
 export async function listHandouts(sessionId: SessionId): Promise<unknown[]> {

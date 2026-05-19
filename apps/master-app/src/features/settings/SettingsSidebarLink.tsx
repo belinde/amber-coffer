@@ -1,8 +1,8 @@
-import { DiscordLogo } from '@phosphor-icons/react';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '../../components/ui/Button.js';
+import { SettingsIcon } from '../../components/ui/icons.js';
 
 type Props = {
   active: boolean;
@@ -16,7 +16,7 @@ export function SettingsSidebarLink({ active, onOpen }: Props): ReactElement {
     <Button
       type="button"
       className={active ? 'sidebar-settings-link is-active' : 'sidebar-settings-link'}
-      icon={DiscordLogo}
+      icon={SettingsIcon}
       aria-current={active ? 'page' : undefined}
       onClick={onOpen}
     >

@@ -7,7 +7,8 @@ use crate::commands::vault_validate::{validate_session_play_state, validate_sess
 use crate::db::validate::ensure_campaign_exists;
 use crate::db::{AppState, RecordingState};
 use crate::error::AppError;
-use crate::models::{CreateSessionInput, Session, UpdateSessionInput};
+use crate::models::{CreateSessionInput, Recording, Session, UpdateSessionInput};
+use crate::services::character_discord;
 use crate::services::discord_recording::{load_session, stop_recording};
 use crate::util::now_ms;
 use crate::validation_issue::{enum_invalid, required_field};
@@ -377,4 +378,72 @@ async fn ensure_session_number_available(
     } else {
         Ok(())
     }
+}
+
+#[derive(Debug, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionRecordingView {
+    pub id: String,
+    pub session_id: String,
+    pub user_discord_id: String,
+    pub source_kind: String,
+    pub file_path: String,
+    pub duration_ms: Option<i64>,
+    pub sample_rate: Option<i32>,
+    pub channels: Option<i32>,
+    pub created_at: i64,
+    pub updated_at: i64,
+    pub version: i32,
+    pub character_id: Option<String>,
+    pub character_name: Option<String>,
+}
+
+#[tauri::command]
+pub async fn list_session_recordings(
+    session_id: String,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<Vec<SessionRecordingView>, AppError> {
+    let pool = state.pool_for_entity_id(&app, &session_id).await?;
+    let session = load_session(&pool, &session_id).await?;
+    let pool = state.pool_for_campaign(&app, &session.campaign_id).await?;
+    let recordings = sqlx::query_as::<_, Recording>(
+        r#"
+        SELECT id, session_id, user_discord_id, source_kind, file_path,
+               duration_ms, sample_rate, channels, created_at, updated_at, version
+        FROM recordings
+        WHERE session_id = ?
+        ORDER BY created_at ASC
+        "#,
+    )
+    .bind(&session_id)
+    .fetch_all(&pool)
+    .await?;
+
+    let mut views = Vec::with_capacity(recordings.len());
+    for recording in recordings {
+        let resolved = character_discord::resolve_character_for_discord_user(
+            &pool,
+            &session.campaign_id,
+            &recording.user_discord_id,
+        )
+        .await?;
+        views.push(SessionRecordingView {
+            id: recording.id,
+            session_id: recording.session_id,
+            user_discord_id: recording.user_discord_id,
+            source_kind: recording.source_kind,
+            file_path: recording.file_path,
+            duration_ms: recording.duration_ms,
+            sample_rate: recording.sample_rate,
+            channels: recording.channels,
+            created_at: recording.created_at,
+            updated_at: recording.updated_at,
+            version: recording.version,
+            character_id: resolved.as_ref().map(|r| r.character_id.clone()),
+            character_name: resolved.map(|r| r.name),
+        });
+    }
+
+    Ok(views)
 }

@@ -1,7 +1,7 @@
 import type { CampaignId, SessionId, SyncChannel } from '@amber/shared';
 import { useEffect } from 'react';
 
-import type { MqttSyncClient } from '../../mqtt/client.js';
+import type { SyncClientLike } from '../../sync/types.js';
 
 import { tabletopStore } from './store.js';
 
@@ -11,15 +11,14 @@ import { tabletopStore } from './store.js';
  * Subscribes to the channels relevant for the table: `tokens`, `maps`, `handouts`, `snapshot`.
  * On every payload the typed envelope is forwarded to `tabletopStore`.
  *
- * The MQTT broker connection itself is a stub (see `MqttSyncClient`); this hook only
- * orchestrates the in-memory pub/sub for now.
+ * Wires snapshot/token/handout handlers from the active sync transport (HTTP poll or dev stub).
  */
 export function useTabletopSubscription(args: {
-  client: MqttSyncClient;
+  client: SyncClientLike;
   campaignId: CampaignId;
   sessionId: SessionId;
 }): void {
-  const { client } = args;
+  const { client, campaignId, sessionId } = args;
 
   useEffect(() => {
     const channels: SyncChannel[] = ['snapshot', 'tokens', 'maps', 'handouts', 'control'];
@@ -31,5 +30,5 @@ export function useTabletopSubscription(args: {
     return () => {
       for (const off of unsubscribers) off();
     };
-  }, [client]);
+  }, [client, campaignId, sessionId]);
 }

@@ -17,6 +17,12 @@ pub struct Campaign {
     #[serde(default = "default_play_language")]
     pub play_language: String,
     pub discord_channel_id: Option<String>,
+    #[serde(default)]
+    pub discord_guild_id: Option<String>,
+    #[serde(default)]
+    pub discord_guild_name: Option<String>,
+    #[serde(default)]
+    pub discord_channel_name: Option<String>,
     pub created_at: i64,
     pub updated_at: i64,
     pub version: i32,
@@ -32,6 +38,12 @@ pub struct CreateCampaignInput {
     #[serde(default = "default_play_language")]
     pub play_language: String,
     pub discord_channel_id: Option<String>,
+    #[serde(default)]
+    pub discord_guild_id: Option<String>,
+    #[serde(default)]
+    pub discord_guild_name: Option<String>,
+    #[serde(default)]
+    pub discord_channel_name: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -43,6 +55,10 @@ pub struct UpdateCampaignInput {
     pub catchphrase: Option<Option<String>>,
     /// `None` = field omitted (no change); inner `None` = clear channel.
     pub discord_channel_id: Option<Option<String>>,
+    /// `None` = field omitted (no change); inner `None` = clear guild.
+    pub discord_guild_id: Option<Option<String>>,
+    pub discord_guild_name: Option<Option<String>>,
+    pub discord_channel_name: Option<Option<String>>,
     pub play_language: Option<String>,
 }
 

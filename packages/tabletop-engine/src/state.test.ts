@@ -14,6 +14,7 @@ const sampleToken: Token = {
   entityId: 'char-1',
   position: { zone: 'board', xCell: 0, yCell: 0 },
   visibleToPlayers: true,
+  controlledByPlayerDiscordId: null,
   createdAt: 0,
   updatedAt: 0,
   version: 1,
@@ -36,6 +37,7 @@ describe('tabletopReducer', () => {
     const next = tabletopReducer(initialTabletopState, {
       type: 'snapshot.applied',
       activeMapId: mapAId,
+      maps: [],
       tokens: [sampleToken],
       visibleHandouts: [sampleHandout],
     });

@@ -5,6 +5,7 @@ use crate::db::AppState;
 use crate::error::AppError;
 use crate::models::{normalize_play_language, Campaign, CreateCampaignInput, UpdateCampaignInput};
 use crate::services::campaign_storage;
+use crate::services::discord_setup;
 use crate::util::{now_ms, slugify};
 use crate::validation_issue::required_field;
 
@@ -38,6 +39,9 @@ pub async fn find_or_create_campaign_by_name(
         catchphrase,
         play_language: "it".to_string(),
         discord_channel_id: None,
+        discord_guild_id: None,
+        discord_guild_name: None,
+        discord_channel_name: None,
     };
     let campaign = create_campaign_inner(input, preferred_id, app, state).await?;
     Ok((campaign, true))
@@ -76,6 +80,9 @@ async fn create_campaign_inner(
         catchphrase: input.catchphrase,
         play_language,
         discord_channel_id: input.discord_channel_id,
+        discord_guild_id: input.discord_guild_id,
+        discord_guild_name: input.discord_guild_name,
+        discord_channel_name: input.discord_channel_name,
         created_at: now,
         updated_at: now,
         version: 1,
@@ -178,10 +185,48 @@ pub async fn update_campaign(
             .map(|s| s.trim())
             .filter(|s| !s.is_empty())
             .map(|s| s.to_string());
+        if campaign.discord_channel_id.is_none() {
+            campaign.discord_channel_name = None;
+        }
+    }
+    if let Some(guild_opt) = &input.discord_guild_id {
+        campaign.discord_guild_id = guild_opt
+            .as_ref()
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_string());
+        if campaign.discord_guild_id.is_none() {
+            campaign.discord_guild_name = None;
+        }
+    }
+    if let Some(name_opt) = &input.discord_guild_name {
+        campaign.discord_guild_name = name_opt
+            .as_ref()
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_string());
+    }
+    if let Some(name_opt) = &input.discord_channel_name {
+        campaign.discord_channel_name = name_opt
+            .as_ref()
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_string());
     }
     if let Some(ref lang) = input.play_language {
         campaign.play_language = normalize_play_language(lang).map_err(|msg| AppError::Internal(msg))?;
     }
+
+    if campaign.discord_guild_id.is_none() {
+        if let Some(ref channel_id) = campaign.discord_channel_id {
+            if let Ok(Some(guild_id)) =
+                discord_setup::resolve_guild_id_from_channel(&app, channel_id).await
+            {
+                campaign.discord_guild_id = Some(guild_id);
+            }
+        }
+    }
+
     campaign.updated_at = now;
     campaign.version += 1;
 

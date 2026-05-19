@@ -19,6 +19,9 @@ const createCampaignInputSchema = z.object({
   catchphrase: z.string().nullable().optional(),
   playLanguage: playLanguageSchema.optional(),
   discordChannelId: z.string().nullable().optional(),
+  discordGuildId: z.string().nullable().optional(),
+  discordGuildName: z.string().nullable().optional(),
+  discordChannelName: z.string().nullable().optional(),
 });
 
 export type CreateCampaignInput = z.infer<typeof createCampaignInputSchema>;
@@ -48,6 +51,9 @@ const updateCampaignInputSchema = z.object({
   name: z.string().min(1).optional(),
   catchphrase: z.string().nullable().optional(),
   discordChannelId: z.string().nullable().optional(),
+  discordGuildId: z.string().nullable().optional(),
+  discordGuildName: z.string().nullable().optional(),
+  discordChannelName: z.string().nullable().optional(),
   playLanguage: playLanguageSchema.optional(),
 });
 

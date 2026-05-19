@@ -21,7 +21,7 @@ Il sistema registra l'audio, gestisce i materiali di campagna in un database SQL
 - **Monorepo**: gestito con `pnpm` workspaces e `Turborepo`
 - **Schermo del master** (`apps/master-app`): `Tauri` (Rust + React). Gestisce SQLite locale, registrazione audio multi-track tramite bot Discord locale e pipeline AI
 - **Tavolo di gioco** (`apps/player-activity`): `React` + Discord Embedded App SDK. Viewer tattico leggero e stateless
-- **Cloud Infrastructure**: `AWS CDK` (TypeScript). AWS IoT Core per sync real-time, DynamoDB per handshake di sessione, S3/CloudFront per hosting del Canon pubblico
+- **Cloud Infrastructure**: `AWS CDK` (TypeScript). HTTP API + DynamoDB per handshake e sync tattico (polling 2 s), S3/CloudFront per hosting del Canon pubblico
 - **AI Strategy**: `AWS Bedrock` (Claude 3 Haiku/Sonnet). Accesso in abbonamento per evitare friction "Bring Your Own Key"
 
 ## 3. Strategia MVP e semplificazioni

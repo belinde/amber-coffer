@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-import { campaignIdSchema, characterIdSchema, locationIdSchema } from '../ids/schemas.js';
+import {
+  campaignIdSchema,
+  characterIdSchema,
+  discordUserIdSchema,
+  locationIdSchema,
+} from '../ids/schemas.js';
 
 import { appearanceSchema, defaultAppearance } from './appearance.schema.js';
 import { eventReferenceSchema } from './event-reference.schema.js';
@@ -14,7 +19,7 @@ export const characterSchema = z.object({
   id: characterIdSchema,
   campaignId: campaignIdSchema,
   name: z.string().min(1),
-  playerDiscordId: z.string().nullable(),
+  playerDiscordId: discordUserIdSchema.nullable(),
   currentLocationId: locationIdSchema.nullable(),
   species: z.string().nullable().default(null),
   roleHint: z.string().nullable().default(null),

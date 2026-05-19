@@ -8,8 +8,12 @@
     "subtitle": "Narrative OS for Game Masters"
   },
   "settings": {
-    "title": "Discord",
-    "sidebarLink": "Discord",
+    "title": "Settings",
+    "sidebarLink": "Settings",
+    "sectionNav": "Settings sections",
+    "tabs": {
+      "discord": "Discord"
+    },
     "discordPageHint": "Set up your recording bot on this device. Link a server and voice channel for each campaign under Vault › Campaign › Discord.",
     "discord": {
       "needCampaign": "Create or select a campaign to connect it to Discord. The bot token above applies to all campaigns on this device.",
@@ -20,12 +24,32 @@
         "whyTitle": "Your responsibilities",
         "whyBody": "Creating the bot is your choice. Invite it only on servers where you may record, and tell your group if needed. The token is secret — do not share it; anyone with it acts as your bot. If it leaks, regenerate it in the portal. Amber Coffer does not listen to players on our servers; audio goes through your bot on your Discord.",
         "howTitle": "Create it in the portal",
-        "step1": "Open the Developer Portal (button on the left) with your Discord account.",
+        "step1": "Open the Developer Portal with your Discord account.",
         "step2": "Create a new application and give it a name players will recognize (e.g. Narrator).",
         "step3": "Open the Bot tab and add the bot if Discord asks.",
-        "step4": "Copy the token, paste it on the left, and save. Do not send it to anyone.",
-        "step5": "For voice-only recording you usually do not need to change anything else on the Bot tab.",
-        "wizardNote": "Then save the token if needed and connect server and voice channel on the Campaign page in the Vault."
+        "step4": "On the Bot tab, enable every required privileged intent listed above.",
+        "step5": "Copy the token, paste it in the field on the left, and save. Do not send it to anyone.",
+        "wizardNote": "Connect server and voice channel on the Campaign page in the Vault; the bot invite applies the required permissions listed above."
+      },
+      "requirements": {
+        "title": "Required intents and permissions",
+        "intentsHeading": "Privileged intents (Bot tab)",
+        "intentsIntro": "Developer Portal → your application → Bot → Privileged Gateway Intents — enable:",
+        "intent": {
+          "serverMembers": "Server Members Intent — list and search guild members (link characters to Discord)"
+        },
+        "permissionsHeading": "Permissions when inviting the bot",
+        "permissionsIntro": "When you invite the bot (Vault Campaign wizard or OAuth2 → URL Generator, scope \"bot\"), select all of:",
+        "permission": {
+          "viewChannel": "View Channel",
+          "connect": "Connect",
+          "speak": "Speak — voice announcements when recording starts and stops"
+        },
+        "notRequiredHeading": "Do not enable (not required)",
+        "notRequired": {
+          "presence": "Presence Intent",
+          "messageContent": "Message Content Intent"
+        }
       },
       "botSetup": {
         "title": "Recording bot (this device)",
@@ -33,8 +57,10 @@
         "openPortal": "Open Discord Developer Portal",
         "stepCreate": "New Application → choose a name → open the Bot tab.",
         "stepBotToken": "Reset Token (or View Token) → copy → paste below → Save token.",
-        "stepIntents": "On the Bot tab, enable privileged intents only if Discord asks; voice-only recording usually needs no extra intents.",
-        "applicationId": "Detected application ID: {{id}}"
+        "stepIntentsIntro": "On the Bot tab in the portal, set the required intents and permissions:",
+        "applicationId": "Detected application ID: {{id}}",
+        "configuredSummary": "The recording bot is already configured",
+        "editToken": "Edit token"
       },
       "campaignWizard": {
         "title": "Connect campaign to Discord",
@@ -103,6 +129,11 @@
     },
     "image": {
       "unsupported_format": "Unsupported image format (use JPEG, PNG, WebP, or GIF)"
+    },
+    "members_intent_required": "Enable Server Members Intent on your Discord bot in the Developer Portal.",
+    "user_oauth_expired": "Your “Sign in with Discord” session expired or is no longer valid. Sign in again — this is separate from the bot token.",
+    "player_discord_id": {
+      "duplicate": "This Discord account is already assigned to another character in the campaign."
     }
   },
   "list": {
@@ -154,6 +185,7 @@
       "needToken": "Set up the bot token first in Discord settings (sidebar).",
       "configureToken": "Go to bot token",
       "loginDiscord": "Sign in with Discord",
+      "oauthReconnectHint": "Your Discord account sign-in (to pick a server) is separate from the bot token. If you only regenerated the bot token, click below to sign in again.",
       "selectGuild": "Server",
       "guildPlaceholder": "Choose a server you manage…",
       "botPresent": "bot already invited",
@@ -167,7 +199,10 @@
       "stage": "stage",
       "saveChannel": "Save voice channel",
       "advanced": "Advanced: paste channel ID manually",
-      "currentChannel": "Current voice channel: {{id}}",
+      "configuredSummary": "The bot link is already configured",
+      "configuredRoute": "{{guild}} --> {{channel}}",
+      "editLink": "Edit",
+      "unknownLabel": "—",
       "manualChannelId": "Voice channel ID",
       "manualChannelPlaceholder": "Numeric channel ID"
     }
@@ -181,6 +216,21 @@
     "name": "Name",
     "playerDiscordId": "Player Discord ID",
     "playerDiscordIdPlaceholder": "Optional",
+    "playerDiscordIdDuplicate": "This Discord account is already assigned to another character in the campaign.",
+    "listDiscordLinked": "Discord linked",
+    "discordPicker": {
+      "needCampaignDiscord": "Link a Discord server and voice channel from the campaign tab first.",
+      "needBotToken": "Configure the Discord bot token in settings to list server members.",
+      "configureBot": "Open Discord settings",
+      "none": "No Discord player",
+      "searchPlaceholder": "Search by name or @username…",
+      "filterPlaceholder": "Filter list…",
+      "refreshRoster": "Refresh roster",
+      "manualId": "Manual ID",
+      "usePicker": "Use server list",
+      "intentRequired": "Enable Server Members Intent on your bot in the Discord Developer Portal, then try again.",
+      "duplicateWarning": "“{{name}}” already uses this Discord account."
+    },
     "statusLabel": "Status",
     "attributes": "Attributes (JSON)",
     "attributesInvalid": "Attributes must be a valid JSON object.",
@@ -319,8 +369,8 @@
     "discordSetupAlertStep1": "1. Open https://discord.com/developers/applications and sign in with your Discord account.",
     "discordSetupAlertStep2": "2. Click \"New Application\", choose a name (e.g. \"Campaign bot\"), and confirm.",
     "discordSetupAlertStep3": "3. Open the \"Bot\" tab → \"Reset Token\" (or \"View Token\") → copy the token → paste it above and click \"Save token\". Never share it.",
-    "discordSetupAlertStep4": "4. Still under \"Bot\", enable any privileged intents Discord requires (for voice-only recording you usually do not need \"Message Content\").",
-    "discordSetupAlertStep5": "5. Open the \"OAuth2\" tab → \"URL Generator\": scope \"bot\", permissions \"Connect\" and \"Use Voice Activity\" (optional \"Speak\") → copy the URL → open it in your browser and invite the bot to your campaign server.",
+    "discordSetupAlertStep4": "4. Bot tab → Privileged Gateway Intents: enable \"Server Members Intent\". Do not enable \"Presence Intent\" or \"Message Content Intent\".",
+    "discordSetupAlertStep5": "5. When inviting the bot (Campaign wizard or OAuth2 → URL Generator, scope \"bot\"): required permissions \"View Channel\", \"Connect\", and \"Speak\".",
     "discordSetupAlertStep6": "6. In Discord (desktop or web): User Settings → \"Advanced\" → enable \"Developer Mode\". Right-click your session voice channel → \"Copy Channel ID\" → paste it above and click \"Save channel\".",
     "discordSetupAlertStep7": "7. When you start recording, the bot joins that channel and saves one audio track per participant for offline transcription."
   },
@@ -369,6 +419,10 @@
     "workflowDiscordRequiredHint": "Recording and transcription require the bot token and voice channel under Settings → Discord.",
     "stepRecord": "Recording",
     "stepRecordHint": "Start and stop as needed. You can run multiple recording passes; new audio is appended to the session.",
+    "recordingTracksTitle": "Audio tracks",
+    "recordingTrackDiscord": "Discord {{id}}",
+    "recordingTrackUnassigned": "No character assigned.",
+    "recordingTrackAssign": "Assign in characters",
     "stepTranscribe": "Transcription",
     "stepTranscribeHint": "Run offline Whisper only while recording is stopped and audio files exist.",
     "transcriptionStarting": "Starting transcription…",
@@ -388,7 +442,7 @@
     "notFound": "Session not found.",
     "loadingTitle": "Session",
     "createAndOpen": "Create and open",
-    "returnToSession": "Return to {{label}}",
+    "returnToSession": "Return to session",
     "campaignLockedHint": "Campaign switch is disabled while a session is live. You can still browse this campaign's vault.",
     "editDetails": "Edit details",
     "editDetailsClose": "Close details",
@@ -424,6 +478,14 @@
     "postHideTabletop": "Hide tabletop",
     "deleteSession": "Delete session",
     "editDetailsLockedLive": "End the live session before editing dates or deleting."
+  },
+  "sessionSync": {
+    "errors": {
+      "discordAuthFailed": "Discord sign-in is invalid or expired. Reconnect your Amber Coffer account in campaign settings (OAuth), then try again.",
+      "apiNotConfigured": "Sync API is not configured on the server (session-auth secret). Check the CDK deploy.",
+      "apiUrlMissing": "VITE_AMBER_SYNC_API_BASE_URL is missing — rebuild master-app with apps/master-app/.env (see .env.example).",
+      "tokenFailed": "Could not obtain sync token ({{code}})."
+    }
   },
   "images": {
     "listTitle": "Campaign images",
@@ -518,12 +580,21 @@
     "imageRefHint": "Pick an image from the campaign archive (must have an uploaded file).",
     "imageRefSearchPlaceholder": "Search by title or caption…",
     "imageRefNoResults": "No images with a file in the archive.",
-    "imageRefUnknown": "The saved reference does not match any archive image; pick another or clear.",
+    "imageRefDirectPortrait": "Portrait on this record",
+    "imageRefUnknown": "This portrait is not linked to an archive entry. Pick one from the list above or leave it as is.",
     "portraitVsArchiveHint": "The portrait below takes priority in lists. Images linked from the archive appear under Linked images and as the list thumbnail when no portrait is set.",
     "linkedImagesHint": "Campaign archive images linked to this record. To add or change links, open the Images archive.",
     "linkedImagesEmpty": "No images linked from the archive.",
     "linkedImagesSaveFirst": "Save this record to see images linked from the archive.",
     "openImagesArchive": "Open image archive",
+    "linkImage": "Link image",
+    "uploadNewImage": "Upload new",
+    "setDefaultImage": "Set as default image",
+    "defaultImage": "Default image",
+    "removeImageLink": "Remove link",
+    "linkImageDialogTitle": "Link image",
+    "imageGalleryEmpty": "No linked images.",
+    "newLinkedImageTitle": "New image",
     "characterLinksHint": "Narrative links to PCs (full editor coming).",
     "gameStatsEmpty": "No sheet fields yet—add free-form key/value pairs.",
     "addStat": "Add field",

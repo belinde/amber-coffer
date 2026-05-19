@@ -1,15 +1,16 @@
 import * as cdk from 'aws-cdk-lib';
 import type { Construct } from 'constructs';
 
-import { PROJECT_NAME } from '../constants.js';
+import { applyStackTags } from '../constructs/stack-tags.js';
+
+import type { AmberStackProps } from './base-stack-props.js';
 
 /** AWS Bedrock access for subscription-based AI pipeline (placeholder). */
 export class AiBedrockStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: AmberStackProps) {
     super(scope, id, props);
 
-    cdk.Tags.of(this).add('Project', PROJECT_NAME);
-    cdk.Tags.of(this).add('Component', 'ai-bedrock');
+    applyStackTags(this, 'ai-bedrock', props.envName);
 
     // TODO: IAM roles, model access policies for Claude Haiku/Sonnet
   }

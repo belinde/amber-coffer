@@ -23,18 +23,20 @@ export type ExtractError = {
   cause?: string;
 };
 
-export type DumpAssetEntityKind =
-  | 'character'
-  | 'npc'
-  | 'location'
-  | 'faction'
-  | 'campaign_image';
+export type DumpAssetEntityKind = 'character' | 'npc' | 'location' | 'faction' | 'campaign_image';
 
 export type DumpAsset = {
   entityKind: DumpAssetEntityKind;
   entityId: string;
   sourcePath: string;
   relativeLocal: string;
+};
+
+/** Maps a vault entity portrait to its archive `CampaignImage` row (stable via `.amber-mapping.json`). */
+export type PortraitBinding = {
+  entityKind: Exclude<DumpAssetEntityKind, 'campaign_image'>;
+  entityId: string;
+  campaignImageId: string;
 };
 
 export type ExtractContext = {
@@ -46,6 +48,9 @@ export type ExtractContext = {
   registry: EntityRegistry;
   mapping: AmberMappingFile;
   assets: DumpAsset[];
+  /** Portrait rows for `entities.campaignImages` (merged with session scenes in extract). */
+  portraitCampaignImages: CampaignImage[];
+  portraitBindings: PortraitBinding[];
   fileCount: number;
 };
 
@@ -70,6 +75,7 @@ export type CampaignDump = {
   campaignId: string;
   entities: CampaignDumpEntities;
   assets: DumpAsset[];
+  portraitBindings: PortraitBinding[];
   warnings: ExtractWarning[];
   errors: ExtractError[];
 };

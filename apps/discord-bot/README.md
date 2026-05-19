@@ -14,10 +14,11 @@ The recorder **always** uses the **GM’s bot token**, not the Amber Coffer Appl
 ## Setup
 
 1. In Master Screen: **Settings → Discord** — follow the guided bot token steps (or create an app at [Discord Developer Portal](https://discord.com/developers/applications) manually).
-2. Bot permissions for invite: `Connect`, `Speak`, `Use Voice Activity` — see `GM_BOT_INVITE_PERMISSIONS` in `@amber/shared` (Speak is required for start/stop recording announcements).
-3. Set **table language** (`playLanguage` on the campaign): used for VC announcements and transcription hint.
-4. Complete the **campaign connection** wizard (OAuth → server → invite bot → voice channel), or paste a channel ID in Advanced.
-5. Never commit tokens.
+2. Bot permissions for invite: `View Channel`, `Connect`, `Speak` — see `GM_BOT_INVITE_PERMISSIONS` / `GM_BOT_INVITE_PERMISSION_IDS` in `@amber/shared` (Speak is required for start/stop recording announcements).
+3. **Server Members Intent** (Privileged Gateway Intent on your bot app): required for the Master Screen character picker to list and search guild members (`GET /guilds/{id}/members` and `/members/search`). Enable it in the [Developer Portal](https://discord.com/developers/applications) → Bot → Privileged Gateway Intents.
+4. Set **table language** (`playLanguage` on the campaign): used for VC announcements and transcription hint.
+5. Complete the **campaign connection** wizard (OAuth → server → invite bot → voice channel), or paste a channel ID in Advanced.
+6. Never commit tokens.
 
 ## Build
 

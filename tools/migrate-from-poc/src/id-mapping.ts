@@ -15,10 +15,7 @@ export function mappingPath(rootPath: string): string {
   return join(rootPath, MAPPING_FILENAME);
 }
 
-export async function loadMapping(
-  rootPath: string,
-  campaignId: string,
-): Promise<AmberMappingFile> {
+export async function loadMapping(rootPath: string, campaignId: string): Promise<AmberMappingFile> {
   const path = mappingPath(rootPath);
   try {
     const raw = await readFile(path, 'utf8');
@@ -36,13 +33,15 @@ export async function saveMapping(rootPath: string, mapping: AmberMappingFile): 
   await writeFile(mappingPath(rootPath), JSON.stringify(mapping, null, 2), 'utf8');
 }
 
-export function resolveFileId(
-  mapping: AmberMappingFile,
-  relativePath: string,
-): string {
+export function resolveFileId(mapping: AmberMappingFile, relativePath: string): string {
   const existing = mapping.files[relativePath];
   if (existing) return existing;
   const id = generateUuidV7();
   mapping.files[relativePath] = id;
   return id;
+}
+
+/** Stable campaign-image id for a subject's `## Immagine` (keyed by source markdown path). */
+export function resolvePortraitImageId(mapping: AmberMappingFile, entityRelFile: string): string {
+  return resolveFileId(mapping, `portrait:${entityRelFile}`);
 }

@@ -15,6 +15,10 @@ crate-type = ["lib", "cdylib", "staticlib"]
 name = "import_poc"
 path = "src/bin/import_poc.rs"
 
+[[bin]]
+name = "repair_poc_portraits"
+path = "src/bin/repair_poc_portraits.rs"
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
@@ -37,6 +41,7 @@ rand = "0.8"
 base64 = "0.22"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 urlencoding = "2"
+keyring = { version = "3", features = ["sync-secret-service"] }
 tauri-plugin-dialog = "2"
 
 [features]

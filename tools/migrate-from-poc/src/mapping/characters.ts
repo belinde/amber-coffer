@@ -15,7 +15,7 @@ import {
   nowTimestamps,
   parseNotableEquipment,
   parseRazzaClasse,
-  queueImageFromSection,
+  queuePortraitAsCampaignImage,
   relPath,
 } from './common.js';
 
@@ -58,7 +58,14 @@ export async function extractCharacters(ctx: ExtractContext): Promise<Character[
         version: 1,
       };
 
-      queueImageFromSection(ctx, relFile, 'character', id, sectionBody(parsed, 'Immagine'));
+      queuePortraitAsCampaignImage(
+        ctx,
+        relFile,
+        'character',
+        id,
+        parsed.title,
+        sectionBody(parsed, 'Immagine'),
+      );
 
       ctx.registry.register({
         kind: 'character',

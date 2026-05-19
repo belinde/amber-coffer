@@ -31,6 +31,8 @@ export async function extractCampaign(input: ExtractInput): Promise<CampaignDump
     registry,
     mapping,
     assets: [],
+    portraitCampaignImages: [],
+    portraitBindings: [],
     fileCount: 0,
   };
 
@@ -63,9 +65,10 @@ export async function extractCampaign(input: ExtractInput): Promise<CampaignDump
       loreNotes,
       narrativeSeeds,
       sessions,
-      campaignImages,
+      campaignImages: [...ctx.portraitCampaignImages, ...campaignImages],
     },
     assets: ctx.assets,
+    portraitBindings: ctx.portraitBindings,
     warnings: ctx.warnings,
     errors: ctx.errors,
   };

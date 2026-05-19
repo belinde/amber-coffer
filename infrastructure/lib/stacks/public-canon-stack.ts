@@ -1,15 +1,16 @@
 import * as cdk from 'aws-cdk-lib';
 import type { Construct } from 'constructs';
 
-import { PROJECT_NAME } from '../constants.js';
+import { applyStackTags } from '../constructs/stack-tags.js';
+
+import type { AmberStackProps } from './base-stack-props.js';
 
 /** S3 + CloudFront for public Amber canon sites (placeholder). */
 export class PublicCanonStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: AmberStackProps) {
     super(scope, id, props);
 
-    cdk.Tags.of(this).add('Project', PROJECT_NAME);
-    cdk.Tags.of(this).add('Component', 'public-canon');
+    applyStackTags(this, 'public-canon', props.envName);
 
     // TODO: S3 bucket, CloudFront distribution, path-based campaign hosting
   }

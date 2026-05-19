@@ -2,7 +2,7 @@
   "version": 1,
   "sourceMeta": {
     "rootPath": "/home/belinde/Campagna",
-    "extractedAt": 1779104578043,
+    "extractedAt": 1779177529438,
     "files": 55
   },
   "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
@@ -31,45 +31,45 @@
           {
             "sessionId": "5a63366e-5a63-719a-9468-cd1da42642a6",
             "summary": "Giunge a New Avalon e si imbarca sulla *Ben Campbell* diretta a nord. Durante la prima notte, avvista insieme a Leman Russ una barca senza luci che segue il battello a distanza.",
-            "occurredAt": 1779104578012
+            "occurredAt": 1779177529403
           },
           {
             "sessionId": "5a64366e-5a64-754e-ba11-e63d2bcc8ed7",
             "summary": "Partecipa alla colluttazione notturna sulla *Ben Campbell* e contribuisce a immobilizzare Sam Crow, fuorilegge ricercato.",
-            "occurredAt": 1779104578012
+            "occurredAt": 1779177529403
           },
           {
             "sessionId": "5a64366e-5a64-7e8b-86e2-f8fa780682cd",
             "summary": "Arriva a Valdoren sulla *Ben Campbell*. Incontra Anthony Gillian e il capitano McCullaghan, che aprono due possibili piste di lavoro. Incassa la sua parte dei $50 di taglia su Sam Crow.",
-            "occurredAt": 1779104578012
+            "occurredAt": 1779177529403
           },
           {
             "sessionId": "5a64366e-5a64-7c9d-b481-bcce8e45bee1",
             "summary": "Supera la valutazione di Theodor Strand alla Locanda del Fiume Rosso: le sue mappe impressionano lo scout, che la promuove senza esitare. Ingaggiata nella carovana di Brannagh come esploratrice, con una commissione di cartografia all'arrivo a destinazione.",
-            "occurredAt": 1779104578012
+            "occurredAt": 1779177529403
           },
           {
             "sessionId": "5a64366e-5a64-7cba-b1bd-29242b840f04",
             "summary": "Dopo la sosta di mezzogiorno, è la prima ad avvicinarsi alla fattoria sospetta e nota il cadavere; fa cenno a Theodor Strand di intervenire.",
-            "occurredAt": 1779104578012
+            "occurredAt": 1779177529403
           },
           {
             "sessionId": "5a64366e-5a64-7753-b2c0-4439da7d2b08",
             "summary": "Dorothy si tiene vicino a lei quasi sempre; aiuta Kelvor a seppellire Henry e Martha; la sua **scurovisione** è utile ai turni di guardia dopo il tramonto.",
-            "occurredAt": 1779104578012
+            "occurredAt": 1779177529403
           },
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Nota per prima l'anomalia della Fattoria Barlow, origlia da lontano il colloquio teso tra Leman e Mae, e assiste alla prima manifestazione concreta della strage dei branchi lungo la Via dei Coloni.",
-            "occurredAt": 1779104578012
+            "occurredAt": 1779177529403
           }
         ],
         "image": null,
         "gmNotes": "_Da definire._",
         "visibility": "gm_only",
         "status": "active",
-        "createdAt": 1779104578012,
-        "updatedAt": 1779104578012,
+        "createdAt": 1779177529403,
+        "updatedAt": 1779177529403,
         "version": 1
       },
       {
@@ -95,45 +95,45 @@
           {
             "sessionId": "5a63366e-5a63-719a-9468-cd1da42642a6",
             "summary": "Giunge a New Avalon e si imbarca sulla *Ben Campbell* diretta a nord lungo il Mississippi.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           },
           {
             "sessionId": "5a64366e-5a64-754e-ba11-e63d2bcc8ed7",
             "summary": "Partecipa alla colluttazione notturna sulla *Ben Campbell* e contribuisce a immobilizzare Sam Crow, fuorilegge ricercato.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           },
           {
             "sessionId": "5a64366e-5a64-7e8b-86e2-f8fa780682cd",
             "summary": "Arriva a Valdoren sulla *Ben Campbell*. Incontra Anthony Gillian e il capitano McCullaghan, che aprono due possibili piste di lavoro. Incassa la sua parte dei $50 di taglia su Sam Crow.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           },
           {
             "sessionId": "5a64366e-5a64-7c9d-b481-bcce8e45bee1",
             "summary": "Supera la valutazione di Andrew Carver al campo carovana e viene ingaggiato come guardia nella carovana di Brannagh.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           },
           {
             "sessionId": "5a64366e-5a64-7cba-b1bd-29242b840f04",
             "summary": "Nello scontro alla fattoria combatte a cavallo; molla le redini nel corso della mischia e il destriero si spaventa, complicando la situazione.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           },
           {
             "sessionId": "5a64366e-5a64-7753-b2c0-4439da7d2b08",
             "summary": "Durante il dibattito sulla proprietà di Dorothy è **furioso**, ancora lordo di **sangue rappreso** dopo la mischia; contesta chi vorrebbe profittare della bambina. La **scurovisione** lo rende adatto ai **turni di guardia** dopo il tramonto.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           },
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Aiuta al pozzo della Fattoria Barlow durante la sosta della carovana e si ritrova vicino a Mae quando la ragazza, spaventata dalla proposta di Leman, torna in fretta a riprendere il lavoro.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           }
         ],
         "image": null,
         "gmNotes": "_Da definire._",
         "visibility": "gm_only",
         "status": "active",
-        "createdAt": 1779104578013,
-        "updatedAt": 1779104578013,
+        "createdAt": 1779177529404,
+        "updatedAt": 1779177529404,
         "version": 1
       },
       {
@@ -159,45 +159,45 @@
           {
             "sessionId": "5a63366e-5a63-719a-9468-cd1da42642a6",
             "summary": "Giunge a New Avalon e si imbarca sulla *Ben Campbell* diretta a nord lungo il Mississippi.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           },
           {
             "sessionId": "5a64366e-5a64-754e-ba11-e63d2bcc8ed7",
             "summary": "Tenta di risolvere pacificamente lo scontro con Sam Crow, viene aggredito e risponde con la forza. Contribuisce a immobilizzare il fuorilegge.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           },
           {
             "sessionId": "5a64366e-5a64-7e8b-86e2-f8fa780682cd",
             "summary": "Arriva a Valdoren sulla *Ben Campbell*. Incontra Anthony Gillian e il capitano McCullaghan, che aprono due possibili piste di lavoro. Incassa la sua parte dei $50 di taglia su Sam Crow.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           },
           {
             "sessionId": "5a64366e-5a64-7c9d-b481-bcce8e45bee1",
             "summary": "Supera la valutazione di Andrew Carver al campo carovana e viene ingaggiato come guardia nella carovana di Brannagh.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           },
           {
             "sessionId": "5a64366e-5a64-7cba-b1bd-29242b840f04",
             "summary": "Ferma l'halfling ladro con *Sonno*; recupera il fagotto, lascia due dollari in tasca al ragazzo e restituisce personalmente il malloppo alla donna sul carro.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           },
           {
             "sessionId": "5a64366e-5a64-7753-b2c0-4439da7d2b08",
             "summary": "Lancia *Individuazione del magico* sulla scena: nulla oltre alle impronte note sulle armi da fuoco; recupera i cavalli dei briganti seguendo il coordinamento di Andrew; nota che giustizia e legalità non coincidevano nella mediazione con Drummond. La **scurovisione** lo rende adatto alle **guardie notturne**.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           },
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Attraversa con la carovana il primo tratto oltre la Fattoria Mercer e assiste al campo dei bisonti massacrati e alla sosta alla Fattoria Barlow, dove la violenza economica della Frontiera si mostra ormai senza maschere.",
-            "occurredAt": 1779104578013
+            "occurredAt": 1779177529404
           }
         ],
         "image": null,
         "gmNotes": "_Da definire._",
         "visibility": "gm_only",
         "status": "active",
-        "createdAt": 1779104578013,
-        "updatedAt": 1779104578013,
+        "createdAt": 1779177529404,
+        "updatedAt": 1779177529404,
         "version": 1
       },
       {
@@ -223,45 +223,45 @@
           {
             "sessionId": "5a63366e-5a63-719a-9468-cd1da42642a6",
             "summary": "Giunge a New Avalon e si imbarca sulla *Ben Campbell* diretta a nord lungo il Mississippi.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           },
           {
             "sessionId": "5a64366e-5a64-754e-ba11-e63d2bcc8ed7",
             "summary": "Partecipa alla colluttazione notturna sulla *Ben Campbell* e contribuisce a immobilizzare Sam Crow, fuorilegge ricercato.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           },
           {
             "sessionId": "5a64366e-5a64-7e8b-86e2-f8fa780682cd",
             "summary": "Arriva a Valdoren sulla *Ben Campbell*. Incontra Anthony Gillian e il capitano McCullaghan, che aprono due possibili piste di lavoro. Incassa la sua parte dei $50 di taglia su Sam Crow.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           },
           {
             "sessionId": "5a64366e-5a64-7c9d-b481-bcce8e45bee1",
             "summary": "Supera la valutazione di Andrew Carver al campo carovana. Ingaggiato come guardia nella carovana di Brannagh. Acquista un revolver tecnomagico di ottima fattura.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           },
           {
             "sessionId": "5a64366e-5a64-7cba-b1bd-29242b840f04",
             "summary": "In retrovia vicino all'ultimo carro non nota subito l'intruso; fuori Valdoren è il primo a scorgere il movimento nell'erba e tenta l'inseguimento. Riceve i ringraziamenti della donna sul carro da lontano.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           },
           {
             "sessionId": "5a64366e-5a64-7753-b2c0-4439da7d2b08",
             "summary": "Ricognizione della Fattoria Mercer e ricostruzione della dinamica dell'attacco; cura le ferite di Dorothy; con Dora scava le tombe di Henry e Martha e celebra un breve commiato; chiede a Silas Drummond delle taglie sui briganti e ottiene il promemoria del credito a Valdoren.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           },
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Riprende la marcia con la carovana dopo la Fattoria Mercer e assiste alla scoperta della strage di bisonti e alla sosta tesa presso la Fattoria Barlow, dove il gruppo comincia a misurare il costo morale della Frontiera.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           }
         ],
         "image": null,
         "gmNotes": "_Da definire._",
         "visibility": "gm_only",
         "status": "active",
-        "createdAt": 1779104578014,
-        "updatedAt": 1779104578014,
+        "createdAt": 1779177529405,
+        "updatedAt": 1779177529405,
         "version": 1
       },
       {
@@ -287,45 +287,45 @@
           {
             "sessionId": "5a63366e-5a63-719a-9468-cd1da42642a6",
             "summary": "Giunge a New Avalon e si imbarca sulla *Ben Campbell* diretta a nord. Durante la prima notte, avvista con Dora una barca senza luci che segue il battello e chiede a un gruppo di druidi a bordo di sorvegliare la situazione.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           },
           {
             "sessionId": "5a64366e-5a64-754e-ba11-e63d2bcc8ed7",
             "summary": "Partecipa alla colluttazione notturna sulla *Ben Campbell* e contribuisce a immobilizzare Sam Crow, fuorilegge ricercato.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           },
           {
             "sessionId": "5a64366e-5a64-7e8b-86e2-f8fa780682cd",
             "summary": "Arriva a Valdoren sulla *Ben Campbell*. Incontra Anthony Gillian e il capitano McCullaghan, che aprono due possibili piste di lavoro. Incassa la sua parte dei $50 di taglia su Sam Crow.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           },
           {
             "sessionId": "5a64366e-5a64-7c9d-b481-bcce8e45bee1",
             "summary": "Partecipa alla valutazione con Theodor Strand e viene ingaggiato nella carovana di Brannagh. Acquista una balestra in vista del viaggio verso la Frontiera.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           },
           {
             "sessionId": "5a64366e-5a64-7cba-b1bd-29242b840f04",
             "summary": "Alla fattoria assume forma d'orso e combatte i briganti in mischia sanguinosa.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           },
           {
             "sessionId": "5a64366e-5a64-7753-b2c0-4439da7d2b08",
             "summary": "Presente alla riunione e ai lavori sulla Via dei Coloni; come **mezzelfo**, la **scurovisione** lo rende adatto ai **turni di guardia notturni** dopo il tramonto.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           },
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Individua per primo il campo dei bisonti massacrati, ne ricostruisce le tracce e anticipa a Elias Barlow il denaro per la sosta della carovana; più tardi tenta senza successo di spingere Mae Barlow a incendiare i carri dei cacciatori.",
-            "occurredAt": 1779104578014
+            "occurredAt": 1779177529405
           }
         ],
         "image": null,
         "gmNotes": "_Da definire._",
         "visibility": "gm_only",
         "status": "active",
-        "createdAt": 1779104578014,
-        "updatedAt": 1779104578014,
+        "createdAt": 1779177529405,
+        "updatedAt": 1779177529405,
         "version": 1
       }
     ],
@@ -370,8 +370,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578015,
-        "updatedAt": 1779104578015,
+        "createdAt": 1779177529406,
+        "updatedAt": 1779177529406,
         "version": 1
       },
       {
@@ -411,22 +411,22 @@
           {
             "sessionId": "5a64366e-5a64-7c9d-b481-bcce8e45bee1",
             "summary": "Valuta Kelvor, Grombrindal e Gud Bender al campo carovana su incarico di Brannagh. Il colloquio è positivo: il gruppo viene accettato.",
-            "occurredAt": 1779104578016
+            "occurredAt": 1779177529407
           },
           {
             "sessionId": "5a64366e-5a64-7cba-b1bd-29242b840f04",
             "summary": "In coda alla carovana; procura tre cavalli al gruppo e definisce le distanze di pattugliamento. Supervisiona il caso del ladro halfling. A fine scontro alla fattoria, mette fine con un colpo di pistola al bandito moribondo, per pietà.",
-            "occurredAt": 1779104578016
+            "occurredAt": 1779177529407
           },
           {
             "sessionId": "5a64366e-5a64-7753-b2c0-4439da7d2b08",
             "summary": "Coordina chi parte per Valdoren e chi perlustra; intima di non calpestare le tracce durante gli scavi delle tombe e delle trincee; confessa la sua inquietudine sul piano dei briganti (troppo pochi / troppi).",
-            "occurredAt": 1779104578016
+            "occurredAt": 1779177529407
           },
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Condivide con Theodor l'idea che la carovana abbia ormai superato la fascia più pericolosa attorno a Valdoren e mantiene la disciplina del convoglio durante la sosta tesa alla Fattoria Barlow.",
-            "occurredAt": 1779104578016
+            "occurredAt": 1779177529407
           }
         ],
         "image": null,
@@ -435,8 +435,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578016,
-        "updatedAt": 1779104578016,
+        "createdAt": 1779177529407,
+        "updatedAt": 1779177529407,
         "version": 1
       },
       {
@@ -476,7 +476,7 @@
           {
             "sessionId": "5a64366e-5a64-7e8b-86e2-f8fa780682cd",
             "summary": "Si avvicina al gruppo sulla *Ben Campbell* e fornisce informazioni sulla banda di orchi che opera a nord di Fort Lame, con un nascondiglio presso il Passo del Serpente. Non chiede compenso anticipato.",
-            "occurredAt": 1779104578017
+            "occurredAt": 1779177529409
           }
         ],
         "image": null,
@@ -485,8 +485,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578017,
-        "updatedAt": 1779104578017,
+        "createdAt": 1779177529409,
+        "updatedAt": 1779177529409,
         "version": 1
       },
       {
@@ -526,17 +526,17 @@
           {
             "sessionId": "5a64366e-5a64-7cba-b1bd-29242b840f04",
             "summary": "Trovata nella botola della fattoria dopo la sparatoria; terrorizzata, in lacrime; la sessione si chiude su di lei.",
-            "occurredAt": 1779104578018
+            "occurredAt": 1779177529410
           },
           {
             "sessionId": "5a64366e-5a64-7753-b2c0-4439da7d2b08",
             "summary": "Si affida soprattutto a **Dora** mentre Kelvor cura le sue ferite e la carovana decide il suo destino; assiste alla sepoltura dei genitori accanto alla tomba di Tobias.",
-            "occurredAt": 1779104578018
+            "occurredAt": 1779177529410
           },
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Prosegue il viaggio ormai affidata agli Halverson e, durante la prima serata di relativa quiete, si avvicina con timidezza alla sua nuova famiglia adottiva.",
-            "occurredAt": 1779104578018
+            "occurredAt": 1779177529410
           }
         ],
         "image": null,
@@ -545,8 +545,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578018,
-        "updatedAt": 1779104578018,
+        "createdAt": 1779177529410,
+        "updatedAt": 1779177529410,
         "version": 1
       },
       {
@@ -586,7 +586,7 @@
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Accoglie la carovana alla Fattoria Barlow e vende a Brannagh il diritto di campeggiare e un barile d'acqua fresca, lasciando emergere quanto la sopravvivenza della sua famiglia dipenda ormai dal passaggio dei cacciatori di bisonti.",
-            "occurredAt": 1779104578019
+            "occurredAt": 1779177529411
           }
         ],
         "image": null,
@@ -595,8 +595,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578019,
-        "updatedAt": 1779104578019,
+        "createdAt": 1779177529411,
+        "updatedAt": 1779177529411,
         "version": 1
       },
       {
@@ -636,7 +636,7 @@
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Appare per la prima volta alla Fattoria Barlow come uomo armato di lungo fucile che tiene la situazione sotto controllo accanto a Elias; i PG lo vedono, ma non ne conoscono ancora il nome.",
-            "occurredAt": 1779104578019
+            "occurredAt": 1779177529411
           }
         ],
         "image": null,
@@ -645,8 +645,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578019,
-        "updatedAt": 1779104578019,
+        "createdAt": 1779177529411,
+        "updatedAt": 1779177529411,
         "version": 1
       },
       {
@@ -686,22 +686,22 @@
           {
             "sessionId": "5a64366e-5a64-7c9d-b481-bcce8e45bee1",
             "summary": "Incontra il gruppo a Valdoren e li ingaggia come guardie e scout. Divide il gruppo in due per le valutazioni: Dora e Leman Russ da Theodor Strand, gli altri da Andrew Carver. Conferma l'offerta il giorno seguente e annuncia la partenza per l'indomani mattina.",
-            "occurredAt": 1779104578020
+            "occurredAt": 1779177529412
           },
           {
             "sessionId": "5a64366e-5a64-7cba-b1bd-29242b840f04",
             "summary": "All'alba guida la partenza della carovana da Valdoren: in testa al convoglio dirige operazioni e ritmo della marcia.",
-            "occurredAt": 1779104578020
+            "occurredAt": 1779177529412
           },
           {
             "sessionId": "5a64366e-5a64-7753-b2c0-4439da7d2b08",
             "summary": "Media il dibattito sulla sorte di Dorothy Mercer alla Fattoria Mercer; convoca i carovaniere, accorda l'accampamento e la missione verso Silas Drummond; stringe la mano allo sceriffo e ospita il gruppo di notte.",
-            "occurredAt": 1779104578020
+            "occurredAt": 1779177529412
           },
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Guida la carovana oltre la Fattoria Mercer, tratta con Elias Barlow per la sosta alla fattoria e, dopo che Leman anticipa i 10 dollari pattuiti, si dichiara in debito con lui quando il druido rifiuta il rimborso.",
-            "occurredAt": 1779104578020
+            "occurredAt": 1779177529412
           }
         ],
         "image": null,
@@ -710,8 +710,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578020,
-        "updatedAt": 1779104578020,
+        "createdAt": 1779177529412,
+        "updatedAt": 1779177529412,
         "version": 1
       },
       {
@@ -751,7 +751,7 @@
           {
             "sessionId": "5a64366e-5a64-7e8b-86e2-f8fa780682cd",
             "summary": "Invita il gruppo a cena e li informa di una carovana in partenza da Valdoren verso la Frontiera. Li accompagna dallo sceriffo Drummond per la consegna di Sam Crow, poi si trattiene per incassare la taglia su Todd Crow senza informare il gruppo.",
-            "occurredAt": 1779104578020
+            "occurredAt": 1779177529412
           }
         ],
         "image": null,
@@ -760,8 +760,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578020,
-        "updatedAt": 1779104578020,
+        "createdAt": 1779177529412,
+        "updatedAt": 1779177529412,
         "version": 1
       },
       {
@@ -801,7 +801,7 @@
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Accompagna i membri della carovana al pozzo della fattoria, ammette con lucidita' che i cacciatori di bisonti sono clienti necessari alla sopravvivenza dei Barlow e si spaventa quando Leman le propone di incendiarne i carri durante la notte.",
-            "occurredAt": 1779104578021
+            "occurredAt": 1779177529413
           }
         ],
         "image": null,
@@ -810,8 +810,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578021,
-        "updatedAt": 1779104578021,
+        "createdAt": 1779177529413,
+        "updatedAt": 1779177529413,
         "version": 1
       },
       {
@@ -851,12 +851,12 @@
           {
             "sessionId": "5a64366e-5a64-7753-b2c0-4439da7d2b08",
             "summary": "Citata da Olaf come sarebbe **d'accordo** sull'adozione di Dorothy Mercer; non interviene ancora personalmente nella discussione tra carovaniere.",
-            "occurredAt": 1779104578021
+            "occurredAt": 1779177529413
           },
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Prosegue il viaggio con Dorothy Mercer ormai affidata alla famiglia Halverson; pur restando sullo sfondo, e' ormai parte della nuova casa provvisoria della bambina.",
-            "occurredAt": 1779104578021
+            "occurredAt": 1779177529413
           }
         ],
         "image": null,
@@ -865,8 +865,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578021,
-        "updatedAt": 1779104578021,
+        "createdAt": 1779177529413,
+        "updatedAt": 1779177529413,
         "version": 1
       },
       {
@@ -906,12 +906,12 @@
           {
             "sessionId": "5a64366e-5a64-7753-b2c0-4439da7d2b08",
             "summary": "Si offre di **adottare Dorothy**, affermando che anche **Maren** approverebbe; resta in lizza come possibile tutore insieme alla mediazione di Silas Drummond.",
-            "occurredAt": 1779104578022
+            "occurredAt": 1779177529415
           },
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Continua il viaggio con Dorothy Mercer ormai affidata a lui e a Maren; durante la serata al campo la bambina comincia ad avvicinarsi con timidezza alla sua nuova famiglia adottiva.",
-            "occurredAt": 1779104578022
+            "occurredAt": 1779177529415
           }
         ],
         "image": null,
@@ -920,8 +920,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578022,
-        "updatedAt": 1779104578022,
+        "createdAt": 1779177529415,
+        "updatedAt": 1779177529415,
         "version": 1
       },
       {
@@ -961,7 +961,7 @@
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "E' presente alla Fattoria Barlow ma non si mostra apertamente: i PG ne colgono solo la presenza dietro una tendina che si richiude in fretta mentre la carovana tratta per la sosta.",
-            "occurredAt": 1779104578022
+            "occurredAt": 1779177529415
           }
         ],
         "image": null,
@@ -970,8 +970,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578022,
-        "updatedAt": 1779104578022,
+        "createdAt": 1779177529415,
+        "updatedAt": 1779177529415,
         "version": 1
       },
       {
@@ -1011,12 +1011,12 @@
           {
             "sessionId": "5a64366e-5a64-754e-ba11-e63d2bcc8ed7",
             "summary": "Scoperto mentre deruba una passeggera nelle cabine di lusso della *Ben Campbell*. Aggredisce Gud Bender, viene immobilizzato dal gruppo e arrestato dal primo ufficiale Thomas Caldwell.",
-            "occurredAt": 1779104578023
+            "occurredAt": 1779177529416
           },
           {
             "sessionId": "5a64366e-5a64-7e8b-86e2-f8fa780682cd",
             "summary": "Consegnato allo sceriffo di Valdoren, Silas Drummond, dal capitano McCullaghan. Il gruppo incassa $50 di taglia.",
-            "occurredAt": 1779104578023
+            "occurredAt": 1779177529416
           }
         ],
         "image": null,
@@ -1025,8 +1025,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578023,
-        "updatedAt": 1779104578023,
+        "createdAt": 1779177529416,
+        "updatedAt": 1779177529416,
         "version": 1
       },
       {
@@ -1066,12 +1066,12 @@
           {
             "sessionId": "5a64366e-5a64-7e8b-86e2-f8fa780682cd",
             "summary": "Riceve la consegna di Sam Crow dal capitano McCullaghan e paga la taglia di $50 al gruppo. Si trattiene con McCullaghan dopo che il gruppo se n'è andato.",
-            "occurredAt": 1779104578023
+            "occurredAt": 1779177529416
           },
           {
             "sessionId": "5a64366e-5a64-7753-b2c0-4439da7d2b08",
             "summary": "Raggiunge la carovana accampata alla Fattoria Mercer; definisce tutela, concessione e narrazione per liberare i PG da accuse di bottino; conferma taglie da **$10** su ciascuno dei quattro briganti (non liquidabili sul momento) e registra un **credito di $40** per il gruppo al rientro a Valdoren.",
-            "occurredAt": 1779104578023
+            "occurredAt": 1779177529416
           }
         ],
         "image": null,
@@ -1080,8 +1080,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578023,
-        "updatedAt": 1779104578023,
+        "createdAt": 1779177529416,
+        "updatedAt": 1779177529416,
         "version": 1
       },
       {
@@ -1121,22 +1121,22 @@
           {
             "sessionId": "5a64366e-5a64-7c9d-b481-bcce8e45bee1",
             "summary": "Valuta Dora e Leman Russ alla Locanda del Fiume Rosso. Rimane colpito dalle mappe di Dora e la promuove senza esitare. Li informa delle principali minacce faunistiche delle pianure e dà il suo benestare all'ingaggio del gruppo.",
-            "occurredAt": 1779104578023
+            "occurredAt": 1779177529416
           },
           {
             "sessionId": "5a64366e-5a64-7cba-b1bd-29242b840f04",
             "summary": "In avanguardia durante la prima giornata di marcia; Dora lo avvisa per la fattoria sospetta, ordina alla carovana di fermarsi e partecipa allo scontro a fuoco con i briganti.",
-            "occurredAt": 1779104578023
+            "occurredAt": 1779177529416
           },
           {
             "sessionId": "5a64366e-5a64-7753-b2c0-4439da7d2b08",
             "summary": "Segue le tracce oltre il campo di mais fino ai quattro cavalli legati; propone che i briganti ignorassero l'ingaggio dell'ultimo giorno e si aspettassero una carovana più debole.",
-            "occurredAt": 1779104578023
+            "occurredAt": 1779177529416
           },
           {
             "sessionId": "5a64366e-5a64-7ca5-b391-aedb3ed709d8",
             "summary": "Conferma che la carovana ha superato la fascia più pericolosa attorno a Valdoren, poi interpreta il campo dei bisonti massacrati come prova della caccia commerciale e avverte il gruppo che più a ovest la strage dei branchi sarà ancora peggiore.",
-            "occurredAt": 1779104578023
+            "occurredAt": 1779177529416
           }
         ],
         "image": null,
@@ -1145,8 +1145,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578023,
-        "updatedAt": 1779104578023,
+        "createdAt": 1779177529416,
+        "updatedAt": 1779177529416,
         "version": 1
       },
       {
@@ -1186,7 +1186,7 @@
           {
             "sessionId": "5a64366e-5a64-754e-ba11-e63d2bcc8ed7",
             "summary": "Interviene sul ponte della *Ben Campbell* durante la colluttazione notturna. Uccide con un colpo di rivoltella il secondo fratello Crow mentre cerca di fuggire sulla barchetta senza luci. Arresta Sam Crow e ordina la perquisizione della nave.",
-            "occurredAt": 1779104578024
+            "occurredAt": 1779177529417
           }
         ],
         "image": null,
@@ -1195,8 +1195,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578024,
-        "updatedAt": 1779104578024,
+        "createdAt": 1779177529417,
+        "updatedAt": 1779177529417,
         "version": 1
       },
       {
@@ -1236,7 +1236,7 @@
           {
             "sessionId": "5a64366e-5a64-754e-ba11-e63d2bcc8ed7",
             "summary": "Ferito durante la colluttazione notturna sulla *Ben Campbell*, si getta nel Mississippi per fuggire. Ucciso da un colpo di rivoltella del primo ufficiale Thomas Caldwell.",
-            "occurredAt": 1779104578024
+            "occurredAt": 1779177529417
           }
         ],
         "image": null,
@@ -1245,8 +1245,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578024,
-        "updatedAt": 1779104578024,
+        "createdAt": 1779177529417,
+        "updatedAt": 1779177529417,
         "version": 1
       },
       {
@@ -1289,8 +1289,8 @@
         "status": "alive",
         "disposition": null,
         "description": null,
-        "createdAt": 1779104578024,
-        "updatedAt": 1779104578024,
+        "createdAt": 1779177529418,
+        "updatedAt": 1779177529418,
         "version": 1
       }
     ],
@@ -1334,8 +1334,8 @@
         "visibility": "gm_only",
         "description": null,
         "coordinates": null,
-        "createdAt": 1779104577997,
-        "updatedAt": 1779104577997,
+        "createdAt": 1779177529388,
+        "updatedAt": 1779177529388,
         "version": 1
       },
       {
@@ -1377,8 +1377,8 @@
         "visibility": "gm_only",
         "description": null,
         "coordinates": null,
-        "createdAt": 1779104578002,
-        "updatedAt": 1779104578002,
+        "createdAt": 1779177529395,
+        "updatedAt": 1779177529395,
         "version": 1
       },
       {
@@ -1424,8 +1424,8 @@
         "visibility": "gm_only",
         "description": null,
         "coordinates": null,
-        "createdAt": 1779104578003,
-        "updatedAt": 1779104578003,
+        "createdAt": 1779177529396,
+        "updatedAt": 1779177529396,
         "version": 1
       },
       {
@@ -1467,8 +1467,8 @@
         "visibility": "gm_only",
         "description": null,
         "coordinates": null,
-        "createdAt": 1779104578004,
-        "updatedAt": 1779104578004,
+        "createdAt": 1779177529397,
+        "updatedAt": 1779177529397,
         "version": 1
       },
       {
@@ -1510,8 +1510,8 @@
         "visibility": "gm_only",
         "description": null,
         "coordinates": null,
-        "createdAt": 1779104578004,
-        "updatedAt": 1779104578004,
+        "createdAt": 1779177529397,
+        "updatedAt": 1779177529397,
         "version": 1
       },
       {
@@ -1553,8 +1553,8 @@
         "visibility": "gm_only",
         "description": null,
         "coordinates": null,
-        "createdAt": 1779104578005,
-        "updatedAt": 1779104578005,
+        "createdAt": 1779177529398,
+        "updatedAt": 1779177529398,
         "version": 1
       },
       {
@@ -1596,8 +1596,8 @@
         "visibility": "gm_only",
         "description": null,
         "coordinates": null,
-        "createdAt": 1779104578005,
-        "updatedAt": 1779104578005,
+        "createdAt": 1779177529398,
+        "updatedAt": 1779177529398,
         "version": 1
       },
       {
@@ -1639,8 +1639,8 @@
         "visibility": "gm_only",
         "description": null,
         "coordinates": null,
-        "createdAt": 1779104578008,
-        "updatedAt": 1779104578008,
+        "createdAt": 1779177529399,
+        "updatedAt": 1779177529399,
         "version": 1
       }
     ],
@@ -1658,8 +1658,8 @@
         "eventsInteresting": [],
         "image": null,
         "visibility": "gm_only",
-        "createdAt": 1779104578009,
-        "updatedAt": 1779104578009,
+        "createdAt": 1779177529400,
+        "updatedAt": 1779177529400,
         "version": 1
       },
       {
@@ -1675,8 +1675,8 @@
         "eventsInteresting": [],
         "image": null,
         "visibility": "gm_only",
-        "createdAt": 1779104578010,
-        "updatedAt": 1779104578010,
+        "createdAt": 1779177529401,
+        "updatedAt": 1779177529401,
         "version": 1
       },
       {
@@ -1692,8 +1692,8 @@
         "eventsInteresting": [],
         "image": null,
         "visibility": "gm_only",
-        "createdAt": 1779104578010,
-        "updatedAt": 1779104578010,
+        "createdAt": 1779177529401,
+        "updatedAt": 1779177529401,
         "version": 1
       },
       {
@@ -1709,8 +1709,8 @@
         "eventsInteresting": [],
         "image": null,
         "visibility": "gm_only",
-        "createdAt": 1779104578011,
-        "updatedAt": 1779104578011,
+        "createdAt": 1779177529401,
+        "updatedAt": 1779177529401,
         "version": 1
       }
     ],
@@ -1724,8 +1724,8 @@
         "tags": [],
         "visibility": "gm_only",
         "linkedEntities": [],
-        "createdAt": 1779104578025,
-        "updatedAt": 1779104578025,
+        "createdAt": 1779177529419,
+        "updatedAt": 1779177529419,
         "version": 1
       },
       {
@@ -1737,8 +1737,8 @@
         "tags": [],
         "visibility": "gm_only",
         "linkedEntities": [],
-        "createdAt": 1779104578026,
-        "updatedAt": 1779104578026,
+        "createdAt": 1779177529420,
+        "updatedAt": 1779177529420,
         "version": 1
       },
       {
@@ -1750,8 +1750,8 @@
         "tags": ["geography"],
         "visibility": "gm_only",
         "linkedEntities": [],
-        "createdAt": 1779104578027,
-        "updatedAt": 1779104578027,
+        "createdAt": 1779177529420,
+        "updatedAt": 1779177529420,
         "version": 1
       },
       {
@@ -1763,8 +1763,8 @@
         "tags": [],
         "visibility": "gm_only",
         "linkedEntities": [],
-        "createdAt": 1779104578028,
-        "updatedAt": 1779104578028,
+        "createdAt": 1779177529420,
+        "updatedAt": 1779177529420,
         "version": 1
       },
       {
@@ -1776,8 +1776,8 @@
         "tags": [],
         "visibility": "gm_only",
         "linkedEntities": [],
-        "createdAt": 1779104578028,
-        "updatedAt": 1779104578028,
+        "createdAt": 1779177529421,
+        "updatedAt": 1779177529421,
         "version": 1
       },
       {
@@ -1789,8 +1789,8 @@
         "tags": [],
         "visibility": "gm_only",
         "linkedEntities": [],
-        "createdAt": 1779104578029,
-        "updatedAt": 1779104578029,
+        "createdAt": 1779177529421,
+        "updatedAt": 1779177529421,
         "version": 1
       },
       {
@@ -1802,8 +1802,8 @@
         "tags": [],
         "visibility": "gm_only",
         "linkedEntities": [],
-        "createdAt": 1779104578029,
-        "updatedAt": 1779104578029,
+        "createdAt": 1779177529421,
+        "updatedAt": 1779177529421,
         "version": 1
       },
       {
@@ -1815,8 +1815,8 @@
         "tags": [],
         "visibility": "gm_only",
         "linkedEntities": [],
-        "createdAt": 1779104578030,
-        "updatedAt": 1779104578030,
+        "createdAt": 1779177529422,
+        "updatedAt": 1779177529422,
         "version": 1
       },
       {
@@ -1828,8 +1828,8 @@
         "tags": [],
         "visibility": "gm_only",
         "linkedEntities": [],
-        "createdAt": 1779104578030,
-        "updatedAt": 1779104578030,
+        "createdAt": 1779177529422,
+        "updatedAt": 1779177529422,
         "version": 1
       },
       {
@@ -1841,8 +1841,8 @@
         "tags": ["magic"],
         "visibility": "gm_only",
         "linkedEntities": [],
-        "createdAt": 1779104578031,
-        "updatedAt": 1779104578031,
+        "createdAt": 1779177529422,
+        "updatedAt": 1779177529422,
         "version": 1
       },
       {
@@ -1854,8 +1854,8 @@
         "tags": ["player-briefing"],
         "visibility": "gm_only",
         "linkedEntities": [],
-        "createdAt": 1779104578031,
-        "updatedAt": 1779104578031,
+        "createdAt": 1779177529423,
+        "updatedAt": 1779177529423,
         "version": 1
       }
     ],
@@ -1870,8 +1870,8 @@
         "tags": ["arco narrativo"],
         "linkedEntities": [],
         "firstSessionId": null,
-        "createdAt": 1779104578032,
-        "updatedAt": 1779104578032,
+        "createdAt": 1779177529424,
+        "updatedAt": 1779177529424,
         "version": 1
       },
       {
@@ -1884,8 +1884,8 @@
         "tags": ["evento"],
         "linkedEntities": [],
         "firstSessionId": null,
-        "createdAt": 1779104578032,
-        "updatedAt": 1779104578032,
+        "createdAt": 1779177529424,
+        "updatedAt": 1779177529424,
         "version": 1
       }
     ],
@@ -1905,13 +1905,12 @@
         "publicSummary": "I cinque avventurieri convergono su New Avalon da percorsi diversi, accomunati dalla decisione di spingersi verso nord lungo la Frontiera. Scelgono la via più economica — il battello fluviale — e si imbarcano sulla *Ben Campbell*, una steamboat che risale il Mississippi. La prima giornata scorre pigra tra le acque limacciose del Grande Fiume, ma la notte porta con sé un'ombra silenziosa e un grido che promette guai.",
         "locationsVisited": [
           "5a6a366e-5a6a-7146-9378-2bd94eb0489f",
-          "5a65366e-5a65-7e93-90ea-31681e5b3471",
           "5a65366e-5a65-7e93-90ea-31681e5b3471"
         ],
         "npcsEncountered": [],
         "playedAt": 1773100800000,
-        "createdAt": 1779104578033,
-        "updatedAt": 1779104578033,
+        "createdAt": 1779177529427,
+        "updatedAt": 1779177529427,
         "version": 1
       },
       {
@@ -1934,8 +1933,8 @@
           "5a77366e-5a77-7321-9c0e-44d099bba7a1"
         ],
         "playedAt": 1774310400000,
-        "createdAt": 1779104578037,
-        "updatedAt": 1779104578037,
+        "createdAt": 1779177529429,
+        "updatedAt": 1779177529429,
         "version": 1
       },
       {
@@ -1958,8 +1957,8 @@
           "5a77366e-5a77-7546-9763-27c1ff78abe3"
         ],
         "playedAt": 1775520000000,
-        "createdAt": 1779104578039,
-        "updatedAt": 1779104578039,
+        "createdAt": 1779177529430,
+        "updatedAt": 1779177529430,
         "version": 1
       },
       {
@@ -1982,8 +1981,8 @@
           "5a77366e-5a77-75b4-a538-8837af42c1c4"
         ],
         "playedAt": 1776124800000,
-        "createdAt": 1779104578040,
-        "updatedAt": 1779104578040,
+        "createdAt": 1779177529431,
+        "updatedAt": 1779177529431,
         "version": 1
       },
       {
@@ -2010,8 +2009,8 @@
           "5a73366e-5a73-7e3a-b1f5-6c7968f3e5a4"
         ],
         "playedAt": 1776729600000,
-        "createdAt": 1779104578040,
-        "updatedAt": 1779104578040,
+        "createdAt": 1779177529432,
+        "updatedAt": 1779177529432,
         "version": 1
       },
       {
@@ -2038,8 +2037,8 @@
           "5a73366e-5a73-7e3a-b1f5-6c7968f3e5a4"
         ],
         "playedAt": 1777334400000,
-        "createdAt": 1779104578041,
-        "updatedAt": 1779104578041,
+        "createdAt": 1779177529434,
+        "updatedAt": 1779177529434,
         "version": 1
       },
       {
@@ -2065,14 +2064,473 @@
           "5a75366e-5a75-7486-ac7c-818d253746ca"
         ],
         "playedAt": 1778544000000,
-        "createdAt": 1779104578042,
-        "updatedAt": 1779104578042,
+        "createdAt": 1779177529435,
+        "updatedAt": 1779177529435,
         "version": 1
       }
     ],
     "campaignImages": [
       {
-        "id": "79f43ae5-79f4-7bd4-a55e-69d9e0d3fa58",
+        "id": "a02f3f3e-a02f-70b5-a3b4-114003df1566",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Ben Campbell",
+        "caption": "Veduta della Ben Campbell",
+        "image": null,
+        "links": [
+          {
+            "kind": "location",
+            "id": "5a65366e-5a65-7e93-90ea-31681e5b3471"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529391,
+        "updatedAt": 1779177529391,
+        "version": 1
+      },
+      {
+        "id": "a0333f3e-a033-7d45-9bac-8ae702d6ccdb",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Fattoria Barlow",
+        "caption": "Veduta della Fattoria Barlow",
+        "image": null,
+        "links": [
+          {
+            "kind": "location",
+            "id": "5a69366e-5a69-7d2c-b09c-a1c924c48a18"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529395,
+        "updatedAt": 1779177529395,
+        "version": 1
+      },
+      {
+        "id": "a0343f3e-a034-76d3-ad4b-05c2901e387f",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Fattoria Mercer",
+        "caption": "Veduta della Fattoria Mercer",
+        "image": null,
+        "links": [
+          {
+            "kind": "location",
+            "id": "5a69366e-5a69-73ba-971d-73ef01ce92f3"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529396,
+        "updatedAt": 1779177529396,
+        "version": 1
+      },
+      {
+        "id": "a0353f3e-a035-70ed-baaf-3f8da745f1c7",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "New Avalon",
+        "caption": "Veduta di New Avalon",
+        "image": null,
+        "links": [
+          {
+            "kind": "location",
+            "id": "5a6a366e-5a6a-7146-9378-2bd94eb0489f"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529397,
+        "updatedAt": 1779177529397,
+        "version": 1
+      },
+      {
+        "id": "a0373f3e-a037-7e68-bd31-5c66029edb7c",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Valdoren",
+        "caption": "Veduta di Valdoren",
+        "image": null,
+        "links": [
+          {
+            "kind": "location",
+            "id": "5a6b366e-5a6b-7b34-a9e3-6c6db50f976c"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529399,
+        "updatedAt": 1779177529399,
+        "version": 1
+      },
+      {
+        "id": "a03b3f3e-a03b-7d7a-a259-34ba96088b94",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Dora l'Esploratrice",
+        "caption": "Ritratto di Dora l'Esploratrice",
+        "image": null,
+        "links": [
+          {
+            "kind": "character",
+            "id": "5a6e366e-5a6e-7a09-b707-76ebc9b16459"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529403,
+        "updatedAt": 1779177529403,
+        "version": 1
+      },
+      {
+        "id": "a03c3f3e-a03c-76ab-8546-8825cfffb162",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Grombrindal",
+        "caption": "Ritratto di Grombrindal",
+        "image": null,
+        "links": [
+          {
+            "kind": "character",
+            "id": "5a6f366e-5a6f-7a04-8ece-5c467d473ac4"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529404,
+        "updatedAt": 1779177529404,
+        "version": 1
+      },
+      {
+        "id": "a03c3f3e-a03c-70d0-8bd8-c4feae2d63d4",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Gud Bender",
+        "caption": "Ritratto di Gud Bender",
+        "image": null,
+        "links": [
+          {
+            "kind": "character",
+            "id": "5a70366e-5a70-73ea-a3cd-a6b084a6f67f"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529404,
+        "updatedAt": 1779177529404,
+        "version": 1
+      },
+      {
+        "id": "a03d3f3e-a03d-72df-a9ca-0ab26a1b7ccb",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Kelvor Rivib",
+        "caption": "Ritratto di Kelvor Rivib",
+        "image": null,
+        "links": [
+          {
+            "kind": "character",
+            "id": "5a70366e-5a70-7e55-bcb8-d50cdf6a9679"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529405,
+        "updatedAt": 1779177529405,
+        "version": 1
+      },
+      {
+        "id": "a03e3f3e-a03e-70b2-8e1b-ec8781811be5",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Leman Russ",
+        "caption": "Ritratto di Leman Russ",
+        "image": null,
+        "links": [
+          {
+            "kind": "character",
+            "id": "5a70366e-5a70-77cd-9f70-a1a7e6e9c12f"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529406,
+        "updatedAt": 1779177529406,
+        "version": 1
+      },
+      {
+        "id": "a03f3f3e-a03f-76ea-b9ae-baa7998684c5",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Abigail Rooke",
+        "caption": "Ritratto di Abigail Rooke",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a71366e-5a71-754a-95b3-755ffe05ae99"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529407,
+        "updatedAt": 1779177529407,
+        "version": 1
+      },
+      {
+        "id": "a03f3f3e-a03f-7ced-b0f9-39792e859060",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Andrew Carver",
+        "caption": "Ritratto di Andrew Carver",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a72366e-5a72-7353-bab7-62597603519d"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529407,
+        "updatedAt": 1779177529407,
+        "version": 1
+      },
+      {
+        "id": "a0413f3e-a041-744f-91b9-96115ce3a1ac",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Anthony Gillian",
+        "caption": "Ritratto di Anthony Gillian",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a73366e-5a73-7028-bc03-c5bb729baf58"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529409,
+        "updatedAt": 1779177529409,
+        "version": 1
+      },
+      {
+        "id": "a0423f3e-a042-7060-9bb5-fcde037493a2",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Dorothy Mercer",
+        "caption": "Ritratto di Dorothy Mercer",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a73366e-5a73-7e3a-b1f5-6c7968f3e5a4"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529410,
+        "updatedAt": 1779177529410,
+        "version": 1
+      },
+      {
+        "id": "a0433f3e-a043-7dc2-b059-6fbadf36dbc2",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Elias Barlow",
+        "caption": "Ritratto di Elias Barlow",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a74366e-5a74-72b6-94dc-81878e66bc0f"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529411,
+        "updatedAt": 1779177529411,
+        "version": 1
+      },
+      {
+        "id": "a0443f3e-a044-78d5-89c5-6354413b400a",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Harlan Pike",
+        "caption": "Ritratto di Harlan Pike",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a74366e-5a74-7cff-943a-3434078ed697"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529412,
+        "updatedAt": 1779177529412,
+        "version": 1
+      },
+      {
+        "id": "a0443f3e-a044-794c-a1da-1ae7a1a79c82",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Hector Brannagh",
+        "caption": "Ritratto di Hector Brannagh",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a75366e-5a75-7098-83fb-8dd72ebd5c8e"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529412,
+        "updatedAt": 1779177529412,
+        "version": 1
+      },
+      {
+        "id": "a0443f3e-a044-7276-ad57-f24a40f97995",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Lucien McCullaghan",
+        "caption": "Ritratto di Lucien McCullaghan",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a75366e-5a75-77b2-902d-4a98dc2bb0c6"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529413,
+        "updatedAt": 1779177529413,
+        "version": 1
+      },
+      {
+        "id": "a0453f3e-a045-736a-8160-25042e14709b",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Mae Barlow",
+        "caption": "Ritratto di Mae Barlow",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a75366e-5a75-7486-ac7c-818d253746ca"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529413,
+        "updatedAt": 1779177529413,
+        "version": 1
+      },
+      {
+        "id": "a0463f3e-a046-7f32-8459-cc3598c2ab0b",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Maren Halverson",
+        "caption": "Ritratto di Maren Halverson",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a75366e-5a75-7502-ad02-8475e271c14f"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529414,
+        "updatedAt": 1779177529414,
+        "version": 1
+      },
+      {
+        "id": "a0473f3e-a047-745a-a920-ccb2c1c6e17e",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Olaf Halverson",
+        "caption": "Ritratto di Olaf Halverson",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a76366e-5a76-7cff-85d5-49f7e22d329d"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529415,
+        "updatedAt": 1779177529415,
+        "version": 1
+      },
+      {
+        "id": "a0473f3e-a047-7516-a058-66fdf0e4c888",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Ruth Barlow",
+        "caption": "Ritratto di Ruth Barlow",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a76366e-5a76-75ea-8688-503269a006f9"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529415,
+        "updatedAt": 1779177529415,
+        "version": 1
+      },
+      {
+        "id": "a0483f3e-a048-7265-8a87-e8ce3e28419c",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Sam Crow",
+        "caption": "Ritratto di Sam Crow",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a76366e-5a76-75de-a182-2933b37df8cf"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529416,
+        "updatedAt": 1779177529416,
+        "version": 1
+      },
+      {
+        "id": "a0483f3e-a048-7f6b-a767-b0896f85ed8d",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Silas Drummond",
+        "caption": "Ritratto di Silas Drummond",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a77366e-5a77-7546-9763-27c1ff78abe3"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529416,
+        "updatedAt": 1779177529416,
+        "version": 1
+      },
+      {
+        "id": "a0483f3e-a048-7c21-9db8-834aa6fd515b",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Theodor Strand",
+        "caption": "Ritratto di Theodor Strand",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a77366e-5a77-75b4-a538-8837af42c1c4"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529416,
+        "updatedAt": 1779177529416,
+        "version": 1
+      },
+      {
+        "id": "a0493f3e-a049-7474-87e4-6abf7659721b",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Thomas Caldwell",
+        "caption": "Ritratto di Thomas Caldwell",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a77366e-5a77-7321-9c0e-44d099bba7a1"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529417,
+        "updatedAt": 1779177529417,
+        "version": 1
+      },
+      {
+        "id": "a04a3f3e-a04a-7fad-82fd-b669718ffa44",
+        "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
+        "title": "Yargra delle Orme Profonde",
+        "caption": "Ritratto di Yargra delle Orme Profonde",
+        "image": null,
+        "links": [
+          {
+            "kind": "npc",
+            "id": "5a78366e-5a78-77c1-8d87-90e3590426f8"
+          }
+        ],
+        "visibility": "gm_only",
+        "createdAt": 1779177529418,
+        "updatedAt": 1779177529418,
+        "version": 1
+      },
+      {
+        "id": "a0553f3e-a055-75dc-a652-87d644d81e21",
         "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
         "title": "Il grido nella notte",
         "caption": "Dora e Leman sul ponte della",
@@ -2084,12 +2542,12 @@
           }
         ],
         "visibility": "gm_only",
-        "createdAt": 1779104578036,
-        "updatedAt": 1779104578036,
+        "createdAt": 1779177529429,
+        "updatedAt": 1779177529429,
         "version": 1
       },
       {
-        "id": "79f63ae5-79f6-7779-b3e0-4c8e6d84ef95",
+        "id": "a0563f3e-a056-7082-8163-81f094a7e4cf",
         "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
         "title": "Il colpo sul Mississippi",
         "caption": "Thomas Caldwell abbatte il secondo fratello Crow mentre tenta di raggiungere la barchetta senza luci che segue la",
@@ -2101,12 +2559,12 @@
           }
         ],
         "visibility": "gm_only",
-        "createdAt": 1779104578038,
-        "updatedAt": 1779104578038,
+        "createdAt": 1779177529430,
+        "updatedAt": 1779177529430,
         "version": 1
       },
       {
-        "id": "79f73ae5-79f7-77a3-9e30-f15ff2c95663",
+        "id": "a0563f3e-a056-70b1-b43d-009fc66b544d",
         "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
         "title": "Consegna della taglia",
         "caption": "Lo sceriffo di Valdoren conta i cinquanta dollari della taglia mentre Sam Crow viene consegnato in catene.",
@@ -2118,12 +2576,12 @@
           }
         ],
         "visibility": "gm_only",
-        "createdAt": 1779104578039,
-        "updatedAt": 1779104578039,
+        "createdAt": 1779177529430,
+        "updatedAt": 1779177529430,
         "version": 1
       },
       {
-        "id": "79f83ae5-79f8-71be-a51e-6f67570f4140",
+        "id": "a0573f3e-a057-7b56-9c89-b45a1d9f260a",
         "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
         "title": "La carovana di Brannagh",
         "caption": "La carovana di Hector Brannagh in allestimento nella pianura appena oltre le ultime case di Valdoren.",
@@ -2135,12 +2593,12 @@
           }
         ],
         "visibility": "gm_only",
-        "createdAt": 1779104578040,
-        "updatedAt": 1779104578040,
+        "createdAt": 1779177529431,
+        "updatedAt": 1779177529431,
         "version": 1
       },
       {
-        "id": "79f93ae5-79f9-7788-84e2-e692fabc3efc",
+        "id": "a0583f3e-a058-7991-b599-0e0d4cf8e233",
         "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
         "title": "Gud ferma il ladruncolo",
         "caption": "Gud Bender addormenta con Sonno il ragazzino halfling nell'erba alta ai margini della strada, recupera il sacco rubato e gli lascia due dollari in tasca.",
@@ -2152,12 +2610,12 @@
           }
         ],
         "visibility": "gm_only",
-        "createdAt": 1779104578041,
-        "updatedAt": 1779104578041,
+        "createdAt": 1779177529432,
+        "updatedAt": 1779177529432,
         "version": 1
       },
       {
-        "id": "79f93ae5-79f9-7ec2-bc80-41ddd0b8520f",
+        "id": "a0583f3e-a058-7aec-83f3-0b1759903f82",
         "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
         "title": "Dorothy nella botola",
         "caption": "Dorothy Mercer, bambina dai capelli chiari, terrorizzata nel buio della botola dopo l'assalto alla Fattoria Mercer.",
@@ -2169,12 +2627,12 @@
           }
         ],
         "visibility": "gm_only",
-        "createdAt": 1779104578041,
-        "updatedAt": 1779104578041,
+        "createdAt": 1779177529432,
+        "updatedAt": 1779177529432,
         "version": 1
       },
       {
-        "id": "79f93ae5-79f9-74b2-b6cf-47f0073420f4",
+        "id": "a05a3f3e-a05a-7298-9bdb-ed6273652cdf",
         "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
         "title": "Dora e Dorothy nell'accampamento",
         "caption": "Dora resta accanto a Dorothy Mercer nell'accampamento notturno dopo la strage alla Fattoria Mercer.",
@@ -2186,12 +2644,12 @@
           }
         ],
         "visibility": "gm_only",
-        "createdAt": 1779104578041,
-        "updatedAt": 1779104578041,
+        "createdAt": 1779177529434,
+        "updatedAt": 1779177529434,
         "version": 1
       },
       {
-        "id": "79f93ae5-79f9-7efe-b63a-46db6db974db",
+        "id": "a05a3f3e-a05a-7862-bf1c-e750627f884e",
         "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
         "title": "Kelvor sotterra i Mercer",
         "caption": "Kelvor e Dora danno sepoltura a Henry e Martha Mercer alla Fattoria Mercer dopo l'assalto dei briganti.",
@@ -2203,12 +2661,12 @@
           }
         ],
         "visibility": "gm_only",
-        "createdAt": 1779104578041,
-        "updatedAt": 1779104578041,
+        "createdAt": 1779177529434,
+        "updatedAt": 1779177529434,
         "version": 1
       },
       {
-        "id": "79fa3ae5-79fa-7a30-9b57-a0145ec56890",
+        "id": "a05c3f3e-a05c-7cde-b4ba-84a2a4b69c5e",
         "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
         "title": "La strage dei branchi",
         "caption": "Leman Russ scopre nella prateria i resti della strage dei bisonti e comprende che la Frontiera sta gia' divorando i suoi branchi.",
@@ -2220,12 +2678,12 @@
           }
         ],
         "visibility": "gm_only",
-        "createdAt": 1779104578042,
-        "updatedAt": 1779104578042,
+        "createdAt": 1779177529436,
+        "updatedAt": 1779177529436,
         "version": 1
       },
       {
-        "id": "79fa3ae5-79fa-7085-872f-66ce22355ba3",
+        "id": "a05c3f3e-a05c-78e6-9981-d1f1b40baf2c",
         "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
         "title": "La proposta al pozzo",
         "caption": "Alla Fattoria Barlow, Leman tenta in disparte di convincere Mae a dare fuoco ai carri dei cacciatori; spaventata, la ragazza torna in fretta verso il pozzo mentre Dora origlia da lontano.",
@@ -2237,12 +2695,12 @@
           }
         ],
         "visibility": "gm_only",
-        "createdAt": 1779104578042,
-        "updatedAt": 1779104578042,
+        "createdAt": 1779177529436,
+        "updatedAt": 1779177529436,
         "version": 1
       },
       {
-        "id": "79fa3ae5-79fa-7b36-ac05-971a5d519fd9",
+        "id": "a05c3f3e-a05c-7503-9f14-25a578f857df",
         "campaignId": "019e359c-5036-7ac2-94df-b8f2f13bfd09",
         "title": "Calma tra i carri",
         "caption": "Alla Fattoria Barlow, Kelvor Rivib trova un attimo di tranquillità ad affilare la lama della spada, mentre l’accampamento della carovana e la presenza dei cacciatori mantengono l’atmosfera tesa.",
@@ -2254,240 +2712,377 @@
           }
         ],
         "visibility": "gm_only",
-        "createdAt": 1779104578042,
-        "updatedAt": 1779104578042,
+        "createdAt": 1779177529436,
+        "updatedAt": 1779177529436,
         "version": 1
       }
     ]
   },
   "assets": [
     {
+      "entityKind": "campaign_image",
+      "entityId": "a02f3f3e-a02f-70b5-a3b4-114003df1566",
+      "sourcePath": "/home/belinde/Campagna/immagini/luoghi/ben-campbell.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a02f3f3e-a02f-70b5-a3b4-114003df1566/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0333f3e-a033-7d45-9bac-8ae702d6ccdb",
+      "sourcePath": "/home/belinde/Campagna/immagini/luoghi/fattoria-barlow.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0333f3e-a033-7d45-9bac-8ae702d6ccdb/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0343f3e-a034-76d3-ad4b-05c2901e387f",
+      "sourcePath": "/home/belinde/Campagna/immagini/luoghi/fattoria-mercer.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0343f3e-a034-76d3-ad4b-05c2901e387f/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0353f3e-a035-70ed-baaf-3f8da745f1c7",
+      "sourcePath": "/home/belinde/Campagna/immagini/luoghi/new-avalon.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0353f3e-a035-70ed-baaf-3f8da745f1c7/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0373f3e-a037-7e68-bd31-5c66029edb7c",
+      "sourcePath": "/home/belinde/Campagna/immagini/luoghi/valdoren.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0373f3e-a037-7e68-bd31-5c66029edb7c/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a03b3f3e-a03b-7d7a-a259-34ba96088b94",
+      "sourcePath": "/home/belinde/Campagna/immagini/personaggi/dora-l-esploratrice.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a03b3f3e-a03b-7d7a-a259-34ba96088b94/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a03c3f3e-a03c-76ab-8546-8825cfffb162",
+      "sourcePath": "/home/belinde/Campagna/immagini/personaggi/grombrindal.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a03c3f3e-a03c-76ab-8546-8825cfffb162/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a03c3f3e-a03c-70d0-8bd8-c4feae2d63d4",
+      "sourcePath": "/home/belinde/Campagna/immagini/personaggi/gud-bender.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a03c3f3e-a03c-70d0-8bd8-c4feae2d63d4/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a03d3f3e-a03d-72df-a9ca-0ab26a1b7ccb",
+      "sourcePath": "/home/belinde/Campagna/immagini/personaggi/kelvor-rivib.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a03d3f3e-a03d-72df-a9ca-0ab26a1b7ccb/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a03e3f3e-a03e-70b2-8e1b-ec8781811be5",
+      "sourcePath": "/home/belinde/Campagna/immagini/personaggi/leman-russ.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a03e3f3e-a03e-70b2-8e1b-ec8781811be5/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a03f3f3e-a03f-76ea-b9ae-baa7998684c5",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/abigail-rooke.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a03f3f3e-a03f-76ea-b9ae-baa7998684c5/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a03f3f3e-a03f-7ced-b0f9-39792e859060",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/andrew-carver.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a03f3f3e-a03f-7ced-b0f9-39792e859060/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0413f3e-a041-744f-91b9-96115ce3a1ac",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/anthony-gillian.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0413f3e-a041-744f-91b9-96115ce3a1ac/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0423f3e-a042-7060-9bb5-fcde037493a2",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/dorothy-mercer.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0423f3e-a042-7060-9bb5-fcde037493a2/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0433f3e-a043-7dc2-b059-6fbadf36dbc2",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/elias-barlow.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0433f3e-a043-7dc2-b059-6fbadf36dbc2/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0443f3e-a044-78d5-89c5-6354413b400a",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/harlan-pike.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0443f3e-a044-78d5-89c5-6354413b400a/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0443f3e-a044-794c-a1da-1ae7a1a79c82",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/hector-brannagh.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0443f3e-a044-794c-a1da-1ae7a1a79c82/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0443f3e-a044-7276-ad57-f24a40f97995",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/lucien-mccullaghan.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0443f3e-a044-7276-ad57-f24a40f97995/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0453f3e-a045-736a-8160-25042e14709b",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/mae-barlow.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0453f3e-a045-736a-8160-25042e14709b/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0463f3e-a046-7f32-8459-cc3598c2ab0b",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/maren-halverson.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0463f3e-a046-7f32-8459-cc3598c2ab0b/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0473f3e-a047-745a-a920-ccb2c1c6e17e",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/olaf-halverson.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0473f3e-a047-745a-a920-ccb2c1c6e17e/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0473f3e-a047-7516-a058-66fdf0e4c888",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/ruth-barlow.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0473f3e-a047-7516-a058-66fdf0e4c888/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0483f3e-a048-7265-8a87-e8ce3e28419c",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/sam-crow.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0483f3e-a048-7265-8a87-e8ce3e28419c/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0483f3e-a048-7f6b-a767-b0896f85ed8d",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/silas-drummond.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0483f3e-a048-7f6b-a767-b0896f85ed8d/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0483f3e-a048-7c21-9db8-834aa6fd515b",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/theodor-strand.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0483f3e-a048-7c21-9db8-834aa6fd515b/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0493f3e-a049-7474-87e4-6abf7659721b",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/thomas-caldwell.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0493f3e-a049-7474-87e4-6abf7659721b/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a04a3f3e-a04a-7fad-82fd-b669718ffa44",
+      "sourcePath": "/home/belinde/Campagna/immagini/png/yargra-delle-orme-profonde.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a04a3f3e-a04a-7fad-82fd-b669718ffa44/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0553f3e-a055-75dc-a652-87d644d81e21",
+      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-001/grido-nella-notte-sulla-ben-campbell.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0553f3e-a055-75dc-a652-87d644d81e21/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0563f3e-a056-7082-8163-81f094a7e4cf",
+      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-002/colpo-sul-mississippi.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0563f3e-a056-7082-8163-81f094a7e4cf/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0563f3e-a056-70b1-b43d-009fc66b544d",
+      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-003/consegna-taglia-a-valdoren.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0563f3e-a056-70b1-b43d-009fc66b544d/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0573f3e-a057-7b56-9c89-b45a1d9f260a",
+      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-004/primo-incontro-con-la-carovana.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0573f3e-a057-7b56-9c89-b45a1d9f260a/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0583f3e-a058-7991-b599-0e0d4cf8e233",
+      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-005/gud-bender-addormenta-il-ladruncolo.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0583f3e-a058-7991-b599-0e0d4cf8e233/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a0583f3e-a058-7aec-83f3-0b1759903f82",
+      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-005/dorothy-mercer-in-botola.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a0583f3e-a058-7aec-83f3-0b1759903f82/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a05a3f3e-a05a-7298-9bdb-ed6273652cdf",
+      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-006/dora-e-dorothy-in-accampamento.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a05a3f3e-a05a-7298-9bdb-ed6273652cdf/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a05a3f3e-a05a-7862-bf1c-e750627f884e",
+      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-006/kelvor-sotterra-i-mercer.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a05a3f3e-a05a-7862-bf1c-e750627f884e/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a05c3f3e-a05c-7cde-b4ba-84a2a4b69c5e",
+      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-007/leman-scopre-la-strage-dei-bisonti.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a05c3f3e-a05c-7cde-b4ba-84a2a4b69c5e/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a05c3f3e-a05c-78e6-9981-d1f1b40baf2c",
+      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-007/leman-proposta-mae-bruciare-carri.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a05c3f3e-a05c-78e6-9981-d1f1b40baf2c/original.jpg"
+    },
+    {
+      "entityKind": "campaign_image",
+      "entityId": "a05c3f3e-a05c-7503-9f14-25a578f857df",
+      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-007/kelvor-affila-spada-fattoria-barlow.jpg",
+      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/a05c3f3e-a05c-7503-9f14-25a578f857df/original.jpg"
+    }
+  ],
+  "portraitBindings": [
+    {
       "entityKind": "location",
       "entityId": "5a65366e-5a65-7e93-90ea-31681e5b3471",
-      "sourcePath": "/home/belinde/Campagna/immagini/luoghi/ben-campbell.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a65366e-5a65-7e93-90ea-31681e5b3471/original.jpg"
+      "campaignImageId": "a02f3f3e-a02f-70b5-a3b4-114003df1566"
     },
     {
       "entityKind": "location",
       "entityId": "5a69366e-5a69-7d2c-b09c-a1c924c48a18",
-      "sourcePath": "/home/belinde/Campagna/immagini/luoghi/fattoria-barlow.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a69366e-5a69-7d2c-b09c-a1c924c48a18/original.jpg"
+      "campaignImageId": "a0333f3e-a033-7d45-9bac-8ae702d6ccdb"
     },
     {
       "entityKind": "location",
       "entityId": "5a69366e-5a69-73ba-971d-73ef01ce92f3",
-      "sourcePath": "/home/belinde/Campagna/immagini/luoghi/fattoria-mercer.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a69366e-5a69-73ba-971d-73ef01ce92f3/original.jpg"
+      "campaignImageId": "a0343f3e-a034-76d3-ad4b-05c2901e387f"
     },
     {
       "entityKind": "location",
       "entityId": "5a6a366e-5a6a-7146-9378-2bd94eb0489f",
-      "sourcePath": "/home/belinde/Campagna/immagini/luoghi/new-avalon.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a6a366e-5a6a-7146-9378-2bd94eb0489f/original.jpg"
+      "campaignImageId": "a0353f3e-a035-70ed-baaf-3f8da745f1c7"
     },
     {
       "entityKind": "location",
       "entityId": "5a6b366e-5a6b-7b34-a9e3-6c6db50f976c",
-      "sourcePath": "/home/belinde/Campagna/immagini/luoghi/valdoren.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a6b366e-5a6b-7b34-a9e3-6c6db50f976c/original.jpg"
+      "campaignImageId": "a0373f3e-a037-7e68-bd31-5c66029edb7c"
     },
     {
       "entityKind": "character",
       "entityId": "5a6e366e-5a6e-7a09-b707-76ebc9b16459",
-      "sourcePath": "/home/belinde/Campagna/immagini/personaggi/dora-l-esploratrice.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a6e366e-5a6e-7a09-b707-76ebc9b16459/original.jpg"
+      "campaignImageId": "a03b3f3e-a03b-7d7a-a259-34ba96088b94"
     },
     {
       "entityKind": "character",
       "entityId": "5a6f366e-5a6f-7a04-8ece-5c467d473ac4",
-      "sourcePath": "/home/belinde/Campagna/immagini/personaggi/grombrindal.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a6f366e-5a6f-7a04-8ece-5c467d473ac4/original.jpg"
+      "campaignImageId": "a03c3f3e-a03c-76ab-8546-8825cfffb162"
     },
     {
       "entityKind": "character",
       "entityId": "5a70366e-5a70-73ea-a3cd-a6b084a6f67f",
-      "sourcePath": "/home/belinde/Campagna/immagini/personaggi/gud-bender.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a70366e-5a70-73ea-a3cd-a6b084a6f67f/original.jpg"
+      "campaignImageId": "a03c3f3e-a03c-70d0-8bd8-c4feae2d63d4"
     },
     {
       "entityKind": "character",
       "entityId": "5a70366e-5a70-7e55-bcb8-d50cdf6a9679",
-      "sourcePath": "/home/belinde/Campagna/immagini/personaggi/kelvor-rivib.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a70366e-5a70-7e55-bcb8-d50cdf6a9679/original.jpg"
+      "campaignImageId": "a03d3f3e-a03d-72df-a9ca-0ab26a1b7ccb"
     },
     {
       "entityKind": "character",
       "entityId": "5a70366e-5a70-77cd-9f70-a1a7e6e9c12f",
-      "sourcePath": "/home/belinde/Campagna/immagini/personaggi/leman-russ.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a70366e-5a70-77cd-9f70-a1a7e6e9c12f/original.jpg"
+      "campaignImageId": "a03e3f3e-a03e-70b2-8e1b-ec8781811be5"
     },
     {
       "entityKind": "npc",
       "entityId": "5a71366e-5a71-754a-95b3-755ffe05ae99",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/abigail-rooke.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a71366e-5a71-754a-95b3-755ffe05ae99/original.jpg"
+      "campaignImageId": "a03f3f3e-a03f-76ea-b9ae-baa7998684c5"
     },
     {
       "entityKind": "npc",
       "entityId": "5a72366e-5a72-7353-bab7-62597603519d",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/andrew-carver.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a72366e-5a72-7353-bab7-62597603519d/original.jpg"
+      "campaignImageId": "a03f3f3e-a03f-7ced-b0f9-39792e859060"
     },
     {
       "entityKind": "npc",
       "entityId": "5a73366e-5a73-7028-bc03-c5bb729baf58",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/anthony-gillian.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a73366e-5a73-7028-bc03-c5bb729baf58/original.jpg"
+      "campaignImageId": "a0413f3e-a041-744f-91b9-96115ce3a1ac"
     },
     {
       "entityKind": "npc",
       "entityId": "5a73366e-5a73-7e3a-b1f5-6c7968f3e5a4",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/dorothy-mercer.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a73366e-5a73-7e3a-b1f5-6c7968f3e5a4/original.jpg"
+      "campaignImageId": "a0423f3e-a042-7060-9bb5-fcde037493a2"
     },
     {
       "entityKind": "npc",
       "entityId": "5a74366e-5a74-72b6-94dc-81878e66bc0f",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/elias-barlow.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a74366e-5a74-72b6-94dc-81878e66bc0f/original.jpg"
+      "campaignImageId": "a0433f3e-a043-7dc2-b059-6fbadf36dbc2"
     },
     {
       "entityKind": "npc",
       "entityId": "5a74366e-5a74-7cff-943a-3434078ed697",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/harlan-pike.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a74366e-5a74-7cff-943a-3434078ed697/original.jpg"
+      "campaignImageId": "a0443f3e-a044-78d5-89c5-6354413b400a"
     },
     {
       "entityKind": "npc",
       "entityId": "5a75366e-5a75-7098-83fb-8dd72ebd5c8e",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/hector-brannagh.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a75366e-5a75-7098-83fb-8dd72ebd5c8e/original.jpg"
+      "campaignImageId": "a0443f3e-a044-794c-a1da-1ae7a1a79c82"
     },
     {
       "entityKind": "npc",
       "entityId": "5a75366e-5a75-77b2-902d-4a98dc2bb0c6",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/lucien-mccullaghan.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a75366e-5a75-77b2-902d-4a98dc2bb0c6/original.jpg"
+      "campaignImageId": "a0443f3e-a044-7276-ad57-f24a40f97995"
     },
     {
       "entityKind": "npc",
       "entityId": "5a75366e-5a75-7486-ac7c-818d253746ca",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/mae-barlow.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a75366e-5a75-7486-ac7c-818d253746ca/original.jpg"
+      "campaignImageId": "a0453f3e-a045-736a-8160-25042e14709b"
     },
     {
       "entityKind": "npc",
       "entityId": "5a75366e-5a75-7502-ad02-8475e271c14f",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/maren-halverson.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a75366e-5a75-7502-ad02-8475e271c14f/original.jpg"
+      "campaignImageId": "a0463f3e-a046-7f32-8459-cc3598c2ab0b"
     },
     {
       "entityKind": "npc",
       "entityId": "5a76366e-5a76-7cff-85d5-49f7e22d329d",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/olaf-halverson.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a76366e-5a76-7cff-85d5-49f7e22d329d/original.jpg"
+      "campaignImageId": "a0473f3e-a047-745a-a920-ccb2c1c6e17e"
     },
     {
       "entityKind": "npc",
       "entityId": "5a76366e-5a76-75ea-8688-503269a006f9",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/ruth-barlow.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a76366e-5a76-75ea-8688-503269a006f9/original.jpg"
+      "campaignImageId": "a0473f3e-a047-7516-a058-66fdf0e4c888"
     },
     {
       "entityKind": "npc",
       "entityId": "5a76366e-5a76-75de-a182-2933b37df8cf",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/sam-crow.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a76366e-5a76-75de-a182-2933b37df8cf/original.jpg"
+      "campaignImageId": "a0483f3e-a048-7265-8a87-e8ce3e28419c"
     },
     {
       "entityKind": "npc",
       "entityId": "5a77366e-5a77-7546-9763-27c1ff78abe3",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/silas-drummond.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a77366e-5a77-7546-9763-27c1ff78abe3/original.jpg"
+      "campaignImageId": "a0483f3e-a048-7f6b-a767-b0896f85ed8d"
     },
     {
       "entityKind": "npc",
       "entityId": "5a77366e-5a77-75b4-a538-8837af42c1c4",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/theodor-strand.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a77366e-5a77-75b4-a538-8837af42c1c4/original.jpg"
+      "campaignImageId": "a0483f3e-a048-7c21-9db8-834aa6fd515b"
     },
     {
       "entityKind": "npc",
       "entityId": "5a77366e-5a77-7321-9c0e-44d099bba7a1",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/thomas-caldwell.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a77366e-5a77-7321-9c0e-44d099bba7a1/original.jpg"
+      "campaignImageId": "a0493f3e-a049-7474-87e4-6abf7659721b"
     },
     {
       "entityKind": "npc",
       "entityId": "5a78366e-5a78-77c1-8d87-90e3590426f8",
-      "sourcePath": "/home/belinde/Campagna/immagini/png/yargra-delle-orme-profonde.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/5a78366e-5a78-77c1-8d87-90e3590426f8/original.jpg"
-    },
-    {
-      "entityKind": "campaign_image",
-      "entityId": "79f43ae5-79f4-7bd4-a55e-69d9e0d3fa58",
-      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-001/grido-nella-notte-sulla-ben-campbell.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/79f43ae5-79f4-7bd4-a55e-69d9e0d3fa58/original.jpg"
-    },
-    {
-      "entityKind": "campaign_image",
-      "entityId": "79f63ae5-79f6-7779-b3e0-4c8e6d84ef95",
-      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-002/colpo-sul-mississippi.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/79f63ae5-79f6-7779-b3e0-4c8e6d84ef95/original.jpg"
-    },
-    {
-      "entityKind": "campaign_image",
-      "entityId": "79f73ae5-79f7-77a3-9e30-f15ff2c95663",
-      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-003/consegna-taglia-a-valdoren.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/79f73ae5-79f7-77a3-9e30-f15ff2c95663/original.jpg"
-    },
-    {
-      "entityKind": "campaign_image",
-      "entityId": "79f83ae5-79f8-71be-a51e-6f67570f4140",
-      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-004/primo-incontro-con-la-carovana.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/79f83ae5-79f8-71be-a51e-6f67570f4140/original.jpg"
-    },
-    {
-      "entityKind": "campaign_image",
-      "entityId": "79f93ae5-79f9-7788-84e2-e692fabc3efc",
-      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-005/gud-bender-addormenta-il-ladruncolo.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/79f93ae5-79f9-7788-84e2-e692fabc3efc/original.jpg"
-    },
-    {
-      "entityKind": "campaign_image",
-      "entityId": "79f93ae5-79f9-7ec2-bc80-41ddd0b8520f",
-      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-005/dorothy-mercer-in-botola.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/79f93ae5-79f9-7ec2-bc80-41ddd0b8520f/original.jpg"
-    },
-    {
-      "entityKind": "campaign_image",
-      "entityId": "79f93ae5-79f9-74b2-b6cf-47f0073420f4",
-      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-006/dora-e-dorothy-in-accampamento.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/79f93ae5-79f9-74b2-b6cf-47f0073420f4/original.jpg"
-    },
-    {
-      "entityKind": "campaign_image",
-      "entityId": "79f93ae5-79f9-7efe-b63a-46db6db974db",
-      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-006/kelvor-sotterra-i-mercer.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/79f93ae5-79f9-7efe-b63a-46db6db974db/original.jpg"
-    },
-    {
-      "entityKind": "campaign_image",
-      "entityId": "79fa3ae5-79fa-7a30-9b57-a0145ec56890",
-      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-007/leman-scopre-la-strage-dei-bisonti.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/79fa3ae5-79fa-7a30-9b57-a0145ec56890/original.jpg"
-    },
-    {
-      "entityKind": "campaign_image",
-      "entityId": "79fa3ae5-79fa-7085-872f-66ce22355ba3",
-      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-007/leman-proposta-mae-bruciare-carri.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/79fa3ae5-79fa-7085-872f-66ce22355ba3/original.jpg"
-    },
-    {
-      "entityKind": "campaign_image",
-      "entityId": "79fa3ae5-79fa-7b36-ac05-971a5d519fd9",
-      "sourcePath": "/home/belinde/Campagna/immagini/eventi/sessione-007/kelvor-affila-spada-fattoria-barlow.jpg",
-      "relativeLocal": "019e359c-5036-7ac2-94df-b8f2f13bfd09/79fa3ae5-79fa-7b36-ac05-971a5d519fd9/original.jpg"
+      "campaignImageId": "a04a3f3e-a04a-7fad-82fd-b669718ffa44"
     }
   ],
   "warnings": [],

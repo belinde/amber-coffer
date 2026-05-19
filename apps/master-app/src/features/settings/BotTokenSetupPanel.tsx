@@ -9,6 +9,8 @@ import { Button } from '../../components/ui/Button.js';
 import { Field } from '../../components/ui/Field.js';
 import { ActionIcons } from '../../components/ui/icons.js';
 
+import { DiscordBotRequirements } from './DiscordBotRequirements.js';
+
 const DEVELOPER_PORTAL_URL = 'https://discord.com/developers/applications';
 
 type Props = {
@@ -20,8 +22,11 @@ export function BotTokenSetupPanel({ onError, onTokenConfigured }: Props): React
   const { t } = useTranslation();
   const [botToken, setBotToken] = useState('');
   const [tokenConfigured, setTokenConfigured] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [parsedAppId, setParsedAppId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const showSetupForm = !tokenConfigured || editing;
 
   const refreshTokenState = useCallback(async () => {
     try {
@@ -54,6 +59,12 @@ export function BotTokenSetupPanel({ onError, onTokenConfigured }: Props): React
     }
   }
 
+  function cancelEditing(): void {
+    setEditing(false);
+    setBotToken('');
+    setParsedAppId(null);
+  }
+
   async function saveToken(ev: React.FormEvent): Promise<void> {
     ev.preventDefault();
     if (!botToken.trim()) return;
@@ -61,6 +72,8 @@ export function BotTokenSetupPanel({ onError, onTokenConfigured }: Props): React
     try {
       await setDiscordBotToken(botToken.trim());
       setBotToken('');
+      setParsedAppId(null);
+      setEditing(false);
       await refreshTokenState();
       onTokenConfigured?.();
     } catch (err) {
@@ -70,12 +83,24 @@ export function BotTokenSetupPanel({ onError, onTokenConfigured }: Props): React
     }
   }
 
+  if (tokenConfigured && !showSetupForm) {
+    return (
+      <div className="discord-bot-configured" role="status">
+        <p className="discord-bot-configured__message">
+          {t('settings.discord.botSetup.configuredSummary')}
+        </p>
+        <Button type="button" variant="primary" onClick={() => setEditing(true)}>
+          {t('settings.discord.botSetup.editToken')}
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <section
-      className="discord-settings discord-settings--bot-token"
-      aria-labelledby="bot-token-heading"
-    >
-      <h3 id="bot-token-heading">{t('settings.discord.botSetup.title')}</h3>
+    <div className="discord-bot-setup-form" aria-labelledby="bot-token-heading">
+      <h3 id="bot-token-heading" className="discord-bot-setup-form__title">
+        {t('settings.discord.botSetup.title')}
+      </h3>
       <p className="vault-section-help">{t('settings.discord.botSetup.hint')}</p>
 
       <ol className="discord-wizard-steps">
@@ -89,7 +114,8 @@ export function BotTokenSetupPanel({ onError, onTokenConfigured }: Props): React
           <p className="vault-section-help">{t('settings.discord.botSetup.stepBotToken')}</p>
         </li>
         <li>
-          <p className="vault-section-help">{t('settings.discord.botSetup.stepIntents')}</p>
+          <p className="vault-section-help">{t('settings.discord.botSetup.stepIntentsIntro')}</p>
+          <DiscordBotRequirements headingLevel="h5" />
         </li>
       </ol>
 
@@ -124,10 +150,15 @@ export function BotTokenSetupPanel({ onError, onTokenConfigured }: Props): React
             {t('settings.discord.botSetup.applicationId', { id: parsedAppId })}
           </p>
         ) : null}
-        <p className="vault-section-help discord-settings__token-status" role="status">
-          {tokenConfigured ? t('liveSession.botTokenConfigured') : t('liveSession.botTokenMissing')}
-        </p>
       </form>
-    </section>
+
+      {tokenConfigured ? (
+        <div className="discord-bot-setup-form__actions">
+          <Button type="button" variant="default" onClick={cancelEditing}>
+            {t('common.cancel')}
+          </Button>
+        </div>
+      ) : null}
+    </div>
   );
 }

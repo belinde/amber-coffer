@@ -15,7 +15,7 @@ export type VaultView =
 export function useVaultNavigation(initial: VaultView = { kind: 'sessions' }) {
   const [stack, setStack] = useState<VaultView[]>([initial]);
 
-  const current = useMemo(() => stack[stack.length - 1] ?? { kind: 'home' }, [stack]);
+  const current = useMemo((): VaultView => stack[stack.length - 1] ?? { kind: 'home' }, [stack]);
 
   const pushView = useCallback((view: VaultView) => {
     setStack((prev) => [...prev, view]);

@@ -126,6 +126,8 @@ function minimalCtx(registry: EntityRegistry): ExtractContext {
     registry,
     mapping: { version: 1, campaignId: 'camp-1', files: {} },
     assets: [],
+    portraitCampaignImages: [],
+    portraitBindings: [],
     fileCount: 0,
   };
 }

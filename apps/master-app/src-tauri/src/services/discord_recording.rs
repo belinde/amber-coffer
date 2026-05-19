@@ -5,20 +5,18 @@ use std::time::Duration;
 use serde::Deserialize;
 use sqlx::SqlitePool;
 use tauri::AppHandle;
-use tauri_plugin_store::StoreExt;
 use uuid::Uuid;
 
 use crate::db::{RecordingRuntime, RecordingState, TranscriptionRuntime, TranscriptionState};
 use crate::error::{AppError, AppResult};
 use crate::models::{normalize_play_language, Session};
+use crate::services::character_discord;
+use crate::services::discord_secrets;
 use crate::services::session_paths::{
     self, campaign_root, ensure_session_dirs, relative_to_campaign, session_manifest_path,
     session_raw_merged_transcript_path,
 };
 use crate::util::now_ms;
-
-const BOT_TOKEN_STORE_KEY: &str = "discord.botToken";
-const SETTINGS_STORE: &str = "amber-settings.json";
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -52,40 +50,16 @@ struct RecordingManifest {
 }
 
 pub fn read_bot_token(handle: &AppHandle) -> AppResult<String> {
-    let store = handle
-        .store(SETTINGS_STORE)
-        .map_err(|e| AppError::Internal(e.to_string()))?;
-    let token = store
-        .get(BOT_TOKEN_STORE_KEY)
-        .and_then(|v| v.as_str().map(|s| s.to_string()));
-    token.ok_or_else(|| crate::validation_issue::required_field(&["discord", "botToken"]))
+    discord_secrets::load_bot_token_after_migration(handle)
 }
 
 pub fn write_bot_token(handle: &AppHandle, token: String) -> AppResult<()> {
-    let trimmed = token.trim();
-    if trimmed.is_empty() {
-        return Err(crate::validation_issue::required_field(&["discord", "botToken"]));
-    }
-    let store = handle
-        .store(SETTINGS_STORE)
-        .map_err(|e| AppError::Internal(e.to_string()))?;
-    store.set(BOT_TOKEN_STORE_KEY, trimmed);
-    store
-        .save()
-        .map_err(|e| AppError::Internal(e.to_string()))?;
-    Ok(())
+    discord_secrets::save_bot_token(handle, &token)
 }
 
 pub fn has_bot_token(handle: &AppHandle) -> AppResult<bool> {
-    let store = handle
-        .store(SETTINGS_STORE)
-        .map_err(|e| AppError::Internal(e.to_string()))?;
-    let configured = store
-        .get(BOT_TOKEN_STORE_KEY)
-        .and_then(|v| v.as_str().map(|s| s.to_string()))
-        .map(|s| !s.trim().is_empty())
-        .unwrap_or(false);
-    Ok(configured)
+    let _ = discord_secrets::migrate_bot_token_from_store(handle);
+    Ok(discord_secrets::has_bot_token(handle))
 }
 
 pub async fn load_session(pool: &SqlitePool, session_id: &str) -> AppResult<Session> {
@@ -306,6 +280,8 @@ async fn ingest_manifest(
 
     if manifest.version >= 2 && !manifest.chunks.is_empty() {
         for chunk in manifest.chunks {
+            log_recording_character_resolution(pool, &session.campaign_id, &chunk.discord_user_id)
+                .await;
             let id = Uuid::now_v7().to_string();
             let rel = format!(
                 "sessions/{}/{}",
@@ -335,6 +311,8 @@ async fn ingest_manifest(
         }
     } else {
         for track in manifest.tracks {
+            log_recording_character_resolution(pool, &session.campaign_id, &track.discord_user_id)
+                .await;
             let id = Uuid::now_v7().to_string();
             let rel = track.relative_path.clone();
 
@@ -362,6 +340,32 @@ async fn ingest_manifest(
     }
 
     Ok(())
+}
+
+async fn log_recording_character_resolution(
+    pool: &SqlitePool,
+    campaign_id: &str,
+    discord_user_id: &str,
+) {
+    match character_discord::resolve_character_for_discord_user(pool, campaign_id, discord_user_id)
+        .await
+    {
+        Ok(Some(resolved)) => tracing::debug!(
+            discord_user_id = %discord_user_id,
+            character_id = %resolved.character_id,
+            character_name = %resolved.name,
+            "recording track mapped to character"
+        ),
+        Ok(None) => tracing::debug!(
+            discord_user_id = %discord_user_id,
+            "recording track has no linked character"
+        ),
+        Err(e) => tracing::warn!(
+            discord_user_id = %discord_user_id,
+            error = %e,
+            "failed to resolve recording track character"
+        ),
+    }
 }
 
 const TRANSCRIPTION_PROGRESS_FILE: &str = "transcripts/transcription-progress.json";

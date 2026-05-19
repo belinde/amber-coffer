@@ -6,5 +6,56 @@
   "app": {
     "title": "Amber Coffer — Tavolo di gioco",
     "subtitle": "Tavolo di gioco per i giocatori"
+  },
+  "session": {
+    "connecting": "Connessione al tavolo di gioco…",
+    "waiting": "In attesa dello snapshot di sessione…",
+    "waitingSnapshot": "In attesa che il master pubbichi il tavolo…",
+    "ended": "Sessione terminata.",
+    "error": "Errore di connessione al tavolo.",
+    "retry": "Riprova",
+    "noMap": "Nessuna mappa attiva nello snapshot.",
+    "errors": {
+      "channelNotLinked": {
+        "title": "Canale non collegato alla campagna",
+        "detail": "L’Activity deve essere avviata dal canale vocale della sessione. Canale Discord attuale: {{channelId}}. In DynamoDB va registrato questo ID (script seed-handshake-channel). «Launch in DM» non usa il canale vocale."
+      },
+      "channelUnavailable": {
+        "title": "Canale Discord non disponibile",
+        "detail": "Entra in un canale vocale del server e avvia l’Activity da lì (non da DM né dalla chat testuale)."
+      },
+      "voiceChannelRequired": {
+        "title": "Serve un canale vocale",
+        "detail": "Avvia l’Activity mentre sei nel canale vocale di gioco (ID attuale: {{channelId}}). I messaggi diretti non sono supportati."
+      },
+      "syncFailed": {
+        "title": "Sincronizzazione tavolo non riuscita",
+        "detail": "Impossibile caricare lo stato di gioco dall’API. Controlla la connessione e riprova."
+      }
+    }
+  },
+  "tabletop": {
+    "boardAria": "Mappa tattica",
+    "benchAria": "Token fuori scena",
+    "handoutsAria": "Documenti conmotionati",
+    "tokenOwned": "Token controllato {{id}}",
+    "tokenLocked": "Token bloccato {{id}}"
+  },
+  "discord": {
+    "loading": "Discord…",
+    "embedded": "Activity Discord",
+    "standalone": "Modalità locale"
+  },
+  "dev": {
+    "panelAria": "Controlli di sviluppo",
+    "panelTitle": "Harness sync (dev)",
+    "playerLabel": "Giocatore simulato",
+    "playerA": "Giocatore A",
+    "playerB": "Giocatore B",
+    "loadSnapshot": "Carica snapshot demo",
+    "moveTokenGm": "Muovi token PG (GM)",
+    "showHandout": "Mostra handout",
+    "hideHandout": "Nascondi handout",
+    "endSession": "Termina sessione"
   }
 }

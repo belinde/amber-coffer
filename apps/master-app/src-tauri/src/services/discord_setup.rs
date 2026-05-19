@@ -15,6 +15,12 @@ use urlencoding::encode;
 
 use crate::error::{AppError, AppResult};
 use crate::services::discord_recording::read_bot_token;
+use crate::services::discord_secrets::{
+    clear_oauth_session, load_oauth_session, oauth_session_from_token_response, save_oauth_session,
+    StoredOAuthSession,
+};
+use crate::util::now_ms;
+use crate::validation_issue::{validation_issues, ValidationIssue};
 
 /// Amber Coffer product application — keep in sync with `packages/shared`.
 pub const AMBER_DISCORD_APPLICATION_ID: &str = "1505870393007935598";
@@ -25,18 +31,14 @@ const GM_BOT_INVITE_PERMISSIONS: &str = "3146752";
 const ADMINISTRATOR: u64 = 0x8;
 const MANAGE_GUILD: u64 = 0x20;
 
-#[derive(Clone)]
-pub struct UserOAuthSession {
-    pub access_token: String,
-}
-
 #[derive(Default)]
 pub struct DiscordOAuthState {
-    session: RwLock<Option<UserOAuthSession>>,
+    session: RwLock<Option<StoredOAuthSession>>,
 }
 
 impl DiscordOAuthState {
-    pub fn set_session(&self, session: UserOAuthSession) -> AppResult<()> {
+    fn set_session(&self, session: StoredOAuthSession) -> AppResult<()> {
+        save_oauth_session(&session)?;
         let mut guard = self
             .session
             .write()
@@ -45,22 +47,37 @@ impl DiscordOAuthState {
         Ok(())
     }
 
-    pub fn clear_session(&self) {
+    fn clear_ram(&self) {
         if let Ok(mut guard) = self.session.write() {
             *guard = None;
         }
     }
 
-    pub fn access_token(&self) -> AppResult<String> {
+    fn ram_session(&self) -> AppResult<Option<StoredOAuthSession>> {
         let guard = self
             .session
             .read()
             .map_err(|_| AppError::Internal("oauth session lock poisoned".into()))?;
-        guard
-            .as_ref()
-            .map(|s| s.access_token.clone())
-            .ok_or_else(|| AppError::Internal("discord user login required".into()))
+        Ok(guard.clone())
     }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DiscordOauthStatus {
+    pub connected: bool,
+    pub expires_at: Option<i64>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DiscordGuildMemberOption {
+    pub id: String,
+    pub username: String,
+    pub global_name: Option<String>,
+    pub nick: Option<String>,
+    pub avatar: Option<String>,
+    pub display_name: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -85,7 +102,39 @@ pub struct DiscordVoiceChannelOption {
 #[derive(Debug, Deserialize)]
 struct TokenResponse {
     access_token: String,
+    #[serde(default)]
+    refresh_token: Option<String>,
+    #[serde(default)]
+    expires_in: Option<i64>,
+    #[serde(default)]
+    #[allow(dead_code)]
+    token_type: Option<String>,
+    #[serde(default)]
+    scope: Option<String>,
 }
+
+#[derive(Debug, Deserialize)]
+struct ChannelGuildRow {
+    guild_id: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct MemberUserRow {
+    id: String,
+    username: String,
+    global_name: Option<String>,
+    avatar: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct MemberRow {
+    user: MemberUserRow,
+    nick: Option<String>,
+}
+
+const MEMBER_LIST_PAGE_LIMIT: u32 = 1000;
+const MEMBER_LIST_MAX_PAGES: u32 = 10;
+const MEMBER_SEARCH_LIMIT: u32 = 100;
 
 #[derive(Debug, Deserialize)]
 struct GuildRow {
@@ -176,6 +225,219 @@ async fn discord_api_get_json<T: serde::de::DeserializeOwned>(
         .map_err(|e| AppError::Internal(format!("{api_label} parse: {e}")))
 }
 
+fn member_display_name(user: &MemberUserRow, nick: Option<&str>) -> String {
+    nick.filter(|n| !n.is_empty())
+        .map(|n| n.to_string())
+        .or_else(|| user.global_name.clone())
+        .unwrap_or_else(|| user.username.clone())
+}
+
+fn member_row_to_option(row: MemberRow) -> DiscordGuildMemberOption {
+    let display_name = member_display_name(&row.user, row.nick.as_deref());
+    DiscordGuildMemberOption {
+        id: row.user.id,
+        username: row.user.username,
+        global_name: row.user.global_name,
+        nick: row.nick,
+        avatar: row.user.avatar,
+        display_name,
+    }
+}
+
+fn discord_members_api_error(status: reqwest::StatusCode, body: &str, api_label: &str) -> AppError {
+    if status == reqwest::StatusCode::FORBIDDEN {
+        return validation_issues(vec![ValidationIssue::new(
+            &["discord"],
+            "members_intent_required",
+        )]);
+    }
+    AppError::Internal(format!("{api_label}: HTTP {status} {body}"))
+}
+
+async fn discord_api_get_members(
+    client: &Client,
+    url: &str,
+    bot_token: &str,
+    api_label: &str,
+) -> AppResult<Vec<MemberRow>> {
+    let res = apply_discord_auth(client.get(url), DiscordAuth::Bot(bot_token))
+        .send()
+        .await
+        .map_err(|e| AppError::Internal(format!("{api_label}: {e}")))?;
+    let status = res.status();
+    if !status.is_success() {
+        let body = res.text().await.unwrap_or_default();
+        return Err(discord_members_api_error(status, &body, api_label));
+    }
+    res.json()
+        .await
+        .map_err(|e| AppError::Internal(format!("{api_label} parse: {e}")))
+}
+
+fn hydrate_oauth_from_store(oauth_state: &DiscordOAuthState) -> AppResult<()> {
+    if oauth_state.ram_session()?.is_some() {
+        return Ok(());
+    }
+    if let Some(session) = load_oauth_session()? {
+        let mut guard = oauth_state
+            .session
+            .write()
+            .map_err(|_| AppError::Internal("oauth session lock poisoned".into()))?;
+        *guard = Some(session);
+    }
+    Ok(())
+}
+
+fn is_discord_http_unauthorized(err: &AppError) -> bool {
+    match err {
+        AppError::Internal(msg) => msg.contains("HTTP 401") || msg.contains("401 Unauthorized"),
+        _ => false,
+    }
+}
+
+fn user_oauth_expired_error() -> AppError {
+    validation_issues(vec![ValidationIssue::new(
+        &["discord"],
+        "user_oauth_expired",
+    )])
+}
+
+async fn refresh_user_access_token(oauth_state: &DiscordOAuthState) -> AppResult<String> {
+    hydrate_oauth_from_store(oauth_state)?;
+    let session = oauth_state
+        .ram_session()?
+        .or(load_oauth_session()?)
+        .ok_or_else(|| AppError::Internal("discord user login required".into()))?;
+    let refreshed = refresh_oauth_session(&session).await?;
+    oauth_state.set_session(refreshed.clone())?;
+    Ok(refreshed.access_token)
+}
+
+async fn refresh_oauth_session(session: &StoredOAuthSession) -> AppResult<StoredOAuthSession> {
+    let refresh_token = session.refresh_token.as_deref().ok_or_else(|| {
+        AppError::Internal("discord oauth refresh token missing".into())
+    })?;
+    let client = http_client()?;
+    let token_res = client
+        .post("https://discord.com/api/oauth2/token")
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .body(format!(
+            "client_id={}&grant_type=refresh_token&refresh_token={}",
+            encode(AMBER_DISCORD_APPLICATION_ID),
+            encode(refresh_token),
+        ))
+        .send()
+        .await
+        .map_err(|e| AppError::Internal(format!("oauth refresh request: {e}")))?;
+
+    if !token_res.status().is_success() {
+        let body = token_res.text().await.unwrap_or_default();
+        return Err(AppError::Internal(format!("oauth refresh failed: {body}")));
+    }
+
+    let token: TokenResponse = token_res
+        .json()
+        .await
+        .map_err(|e| AppError::Internal(format!("oauth refresh parse: {e}")))?;
+
+    Ok(oauth_session_from_token_response(
+        token.access_token,
+        token.refresh_token.or(session.refresh_token.clone()),
+        token.expires_in,
+        token.scope.or(session.scope.clone()),
+    ))
+}
+
+pub async fn ensure_user_access_token(
+    handle: &AppHandle,
+    oauth_state: &DiscordOAuthState,
+) -> AppResult<String> {
+    hydrate_oauth_from_store(oauth_state)?;
+    let now = now_ms();
+
+    if let Some(session) = oauth_state.ram_session()? {
+        if session.is_valid(now) {
+            return Ok(session.access_token);
+        }
+        return refresh_user_access_token(oauth_state).await;
+    }
+    if let Some(session) = load_oauth_session()? {
+        if session.is_valid(now) {
+            oauth_state.set_session(session.clone())?;
+            return Ok(session.access_token);
+        }
+        oauth_state.set_session(session.clone())?;
+        return refresh_user_access_token(oauth_state).await;
+    }
+
+    oauth_start(handle, oauth_state).await?;
+    oauth_state
+        .ram_session()?
+        .map(|s| s.access_token)
+        .ok_or_else(|| AppError::Internal("discord user login required".into()))
+}
+
+pub fn oauth_status() -> AppResult<DiscordOauthStatus> {
+    let now = now_ms();
+    match load_oauth_session()? {
+        Some(session) if session.is_valid(now) => Ok(DiscordOauthStatus {
+            connected: true,
+            expires_at: Some(session.expires_at),
+        }),
+        Some(session) => Ok(DiscordOauthStatus {
+            connected: false,
+            expires_at: Some(session.expires_at),
+        }),
+        None => Ok(DiscordOauthStatus {
+            connected: false,
+            expires_at: None,
+        }),
+    }
+}
+
+pub fn oauth_logout(oauth_state: &DiscordOAuthState) -> AppResult<()> {
+    oauth_state.clear_ram();
+    clear_oauth_session()
+}
+
+pub fn oauth_clear(oauth_state: &DiscordOAuthState) {
+    oauth_state.clear_ram();
+}
+
+async fn exchange_authorization_code(code: &str, verifier: &str) -> AppResult<StoredOAuthSession> {
+    let client = http_client()?;
+    let token_res = client
+        .post("https://discord.com/api/oauth2/token")
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .body(format!(
+            "client_id={}&grant_type=authorization_code&code={}&redirect_uri={}&code_verifier={}",
+            encode(AMBER_DISCORD_APPLICATION_ID),
+            encode(code),
+            encode(OAUTH_REDIRECT_URI),
+            encode(verifier),
+        ))
+        .send()
+        .await
+        .map_err(|e| AppError::Internal(format!("oauth token request: {e}")))?;
+
+    if !token_res.status().is_success() {
+        let body = token_res.text().await.unwrap_or_default();
+        return Err(AppError::Internal(format!("oauth token failed: {body}")));
+    }
+
+    let token: TokenResponse = token_res
+        .json()
+        .await
+        .map_err(|e| AppError::Internal(format!("oauth token parse: {e}")))?;
+
+    Ok(oauth_session_from_token_response(
+        token.access_token,
+        token.refresh_token,
+        token.expires_in,
+        token.scope,
+    ))
+}
+
 /// Decodes the first dot-separated segment of a Discord bot token (unpadded standard base64).
 fn decode_bot_token_segment(segment: &str) -> AppResult<Vec<u8>> {
     let pad_len = (4 - segment.len() % 4) % 4;
@@ -221,7 +483,7 @@ pub async fn oauth_start(handle: &AppHandle, oauth_state: &DiscordOAuthState) ->
         ));
     }
 
-    oauth_state.clear_session();
+    oauth_logout(oauth_state)?;
 
     let verifier = pkce_verifier();
     let challenge = pkce_challenge(&verifier);
@@ -247,35 +509,8 @@ pub async fn oauth_start(handle: &AppHandle, oauth_state: &DiscordOAuthState) ->
     .await
     .map_err(|e| AppError::Internal(format!("oauth task join: {e}")))??;
 
-    let client = http_client()?;
-    let token_res = client
-        .post("https://discord.com/api/oauth2/token")
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .body(format!(
-            "client_id={}&grant_type=authorization_code&code={}&redirect_uri={}&code_verifier={}",
-            encode(AMBER_DISCORD_APPLICATION_ID),
-            encode(&code),
-            encode(OAUTH_REDIRECT_URI),
-            encode(&verifier),
-        ))
-        .send()
-        .await
-        .map_err(|e| AppError::Internal(format!("oauth token request: {e}")))?;
-
-    let token_status = token_res.status();
-    if !token_status.is_success() {
-        let body = token_res.text().await.unwrap_or_default();
-        return Err(AppError::Internal(format!("oauth token failed: {body}")));
-    }
-
-    let token: TokenResponse = token_res
-        .json()
-        .await
-        .map_err(|e| AppError::Internal(format!("oauth token parse: {e}")))?;
-
-    oauth_state.set_session(UserOAuthSession {
-        access_token: token.access_token,
-    })
+    let session = exchange_authorization_code(&code, &verifier).await?;
+    oauth_state.set_session(session)
 }
 
 fn wait_for_oauth_code(
@@ -349,13 +584,46 @@ fn user_can_admin_guild(permissions: &str) -> bool {
     (bits & ADMINISTRATOR) != 0 || (bits & MANAGE_GUILD) != 0
 }
 
+async fn list_guilds_merged_with_oauth_recovery(
+    oauth_state: &DiscordOAuthState,
+    user_token: &str,
+    bot_token: Option<&str>,
+) -> AppResult<Vec<DiscordGuildOption>> {
+    match list_guilds_merged(user_token, bot_token).await {
+        Ok(guilds) => Ok(guilds),
+        Err(e) if is_discord_http_unauthorized(&e) => {
+            let refreshed_token = refresh_user_access_token(oauth_state).await;
+            match refreshed_token {
+                Ok(token) => match list_guilds_merged(&token, bot_token).await {
+                    Ok(guilds) => Ok(guilds),
+                    Err(retry_err) if is_discord_http_unauthorized(&retry_err) => {
+                        let _ = oauth_logout(oauth_state);
+                        Err(user_oauth_expired_error())
+                    }
+                    Err(retry_err) => Err(retry_err),
+                },
+                Err(_) => {
+                    let _ = oauth_logout(oauth_state);
+                    Err(user_oauth_expired_error())
+                }
+            }
+        }
+        Err(e) => Err(e),
+    }
+}
+
 pub async fn list_admin_guilds_with_bot(
     handle: &AppHandle,
     oauth_state: &DiscordOAuthState,
 ) -> AppResult<Vec<DiscordGuildOption>> {
-    let access_token = oauth_state.access_token()?;
+    let access_token = ensure_user_access_token(handle, oauth_state).await?;
     let bot_token = read_bot_token(handle).ok();
-    list_guilds_merged(&access_token, bot_token.as_deref()).await
+    list_guilds_merged_with_oauth_recovery(oauth_state, &access_token, bot_token.as_deref()).await
+}
+
+pub async fn ensure_user_oauth(handle: &AppHandle, oauth_state: &DiscordOAuthState) -> AppResult<()> {
+    ensure_user_access_token(handle, oauth_state).await?;
+    Ok(())
 }
 
 async fn fetch_discord_guild_rows(
@@ -477,6 +745,91 @@ pub fn open_bot_invite(handle: &AppHandle, guild_id: &str) -> AppResult<()> {
     let bot_token = read_bot_token(handle)?;
     let url = bot_invite_url_with_token(&bot_token, guild_id)?;
     open_url(handle, &url)
+}
+
+pub async fn resolve_guild_id_from_channel(
+    handle: &AppHandle,
+    channel_id: &str,
+) -> AppResult<Option<String>> {
+    let bot_token = read_bot_token(handle)?;
+    let client = http_client()?;
+    let channel: ChannelGuildRow = discord_api_get_json(
+        &client,
+        &format!("https://discord.com/api/v10/channels/{channel_id}"),
+        DiscordAuth::Bot(&bot_token),
+        "discord channel",
+    )
+    .await?;
+    Ok(channel.guild_id)
+}
+
+pub async fn list_guild_members(
+    handle: &AppHandle,
+    guild_id: &str,
+) -> AppResult<Vec<DiscordGuildMemberOption>> {
+    let bot_token = read_bot_token(handle)?;
+    let client = http_client()?;
+    let mut members: Vec<DiscordGuildMemberOption> = Vec::new();
+    let mut after: Option<String> = None;
+
+    for _ in 0..MEMBER_LIST_MAX_PAGES {
+        let mut url = format!(
+            "https://discord.com/api/v10/guilds/{guild_id}/members?limit={MEMBER_LIST_PAGE_LIMIT}"
+        );
+        if let Some(ref cursor) = after {
+            url.push_str(&format!("&after={}", encode(cursor)));
+        }
+
+        let page: Vec<MemberRow> =
+            discord_api_get_members(&client, &url, &bot_token, "discord guild members").await?;
+        let page_len = page.len();
+        members.extend(page.into_iter().map(member_row_to_option));
+        if page_len < MEMBER_LIST_PAGE_LIMIT as usize {
+            break;
+        }
+        after = members.last().map(|m| m.id.clone());
+        if after.is_none() {
+            break;
+        }
+    }
+
+    members.sort_by(|a, b| {
+        a.display_name
+            .to_lowercase()
+            .cmp(&b.display_name.to_lowercase())
+    });
+    Ok(members)
+}
+
+pub async fn search_guild_members(
+    handle: &AppHandle,
+    guild_id: &str,
+    query: &str,
+) -> AppResult<Vec<DiscordGuildMemberOption>> {
+    let trimmed = query.trim();
+    if trimmed.is_empty() {
+        return Err(validation_issues(vec![ValidationIssue::with_min(
+            &["query"],
+            1,
+        )]));
+    }
+
+    let bot_token = read_bot_token(handle)?;
+    let client = http_client()?;
+    let url = format!(
+        "https://discord.com/api/v10/guilds/{guild_id}/members/search?query={}&limit={MEMBER_SEARCH_LIMIT}",
+        encode(trimmed)
+    );
+    let rows: Vec<MemberRow> =
+        discord_api_get_members(&client, &url, &bot_token, "discord guild member search").await?;
+    let mut members: Vec<DiscordGuildMemberOption> =
+        rows.into_iter().map(member_row_to_option).collect();
+    members.sort_by(|a, b| {
+        a.display_name
+            .to_lowercase()
+            .cmp(&b.display_name.to_lowercase())
+    });
+    Ok(members)
 }
 
 #[cfg(test)]

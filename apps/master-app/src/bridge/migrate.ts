@@ -8,8 +8,26 @@ export type ImportCampaignReport = {
   updated: number;
   skipped: number;
   imagesCopied: number;
+  portraitsSynced: number;
+  portraitsRepaired: number;
   errors: string[];
 };
+
+export type RepairCampaignPortraitsReport = {
+  campaignId: string;
+  migratedToArchive: number;
+  syncedFromLinks: number;
+  syncedFromBindings: number;
+  errors: string[];
+};
+
+export async function repairCampaignImagePortraits(
+  campaignId: string,
+): Promise<RepairCampaignPortraitsReport> {
+  return invoke<RepairCampaignPortraitsReport>('repair_campaign_image_portraits', {
+    campaignId,
+  });
+}
 
 export type EnsurePocCampaignResult = {
   campaignId: string;

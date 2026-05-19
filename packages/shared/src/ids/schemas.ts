@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
-const uuidV7Regex =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const uuidV7Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export const uuidV7Schema = z.string().regex(uuidV7Regex, 'Expected UUID v7');
 
@@ -24,6 +23,7 @@ export const loreNoteIdSchema = uuidV7Schema.brand<'LoreNoteId'>();
 export const narrativeSeedIdSchema = uuidV7Schema.brand<'NarrativeSeedId'>();
 export const campaignImageIdSchema = uuidV7Schema.brand<'CampaignImageId'>();
 export const discordChannelIdSchema = z.string().min(1).brand<'DiscordChannelId'>();
+export const discordGuildIdSchema = z.string().min(1).brand<'DiscordGuildId'>();
 export const discordUserIdSchema = z.string().min(1).brand<'DiscordUserId'>();
 
 export const entityKindSchema = z.enum([

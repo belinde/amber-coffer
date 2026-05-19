@@ -96,12 +96,12 @@ const sessionEndedSchema = z.object({
 
 /**
  * Full state snapshot published as a **retained** MQTT message on
- * `amber-coffer/{campaignId}/{sessionId}/tabletop/snapshot` so newly joined
+ * `amber-coffer/{campaignId}/{sessionId}/snapshot` so newly joined
  * Player Activities can bootstrap without a back-channel.
  *
  * Decision recorded in docs/migration/tabletop-porting-notes.md (D6).
  */
-const tabletopSnapshotSchema = z.object({
+export const tabletopSnapshotSchema = z.object({
   kind: z.literal('tabletop.snapshot'),
   sessionId: sessionIdSchema,
   activeMapId: mapIdSchema.nullable(),

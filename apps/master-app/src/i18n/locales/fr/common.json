@@ -8,8 +8,12 @@
     "subtitle": "Narrative OS pour maîtres de jeu"
   },
   "settings": {
-    "title": "Discord",
-    "sidebarLink": "Discord",
+    "title": "Paramètres",
+    "sidebarLink": "Paramètres",
+    "sectionNav": "Sections des paramètres",
+    "tabs": {
+      "discord": "Discord"
+    },
     "discordPageHint": "Configurez votre bot d'enregistrement sur cet appareil. Liez serveur et canal vocal pour chaque campagne via Vault › Campagne › Discord.",
     "discord": {
       "needCampaign": "Créez ou sélectionnez une campagne pour la connecter à Discord. Le jeton bot ci-dessus s’applique à toutes les campagnes sur cet appareil.",
@@ -20,12 +24,32 @@
         "whyTitle": "Vos responsabilités",
         "whyBody": "Créer le bot est votre choix. Invitez-le seulement sur des serveurs où vous avez le droit d’enregistrer, et prévenez le groupe si besoin. Le jeton est secret — ne le partagez pas ; quiconque l’a agit à votre place. S’il fuit, régénérez-le dans le portail. Amber Coffer n’écoute pas les joueurs sur nos serveurs : l’audio passe par votre bot sur votre Discord.",
         "howTitle": "Création dans le portail",
-        "step1": "Ouvrez le portail développeur (bouton à gauche) avec votre compte Discord.",
+        "step1": "Ouvrez le portail développeur avec votre compte Discord.",
         "step2": "Créez une nouvelle application et donnez-lui un nom reconnaissable (ex. Narrateur).",
         "step3": "Ouvrez l’onglet Bot et ajoutez le bot si Discord le demande.",
-        "step4": "Copiez le jeton, collez-le à gauche et enregistrez. Ne l’envoyez à personne.",
-        "step5": "Pour la voix seule, inutile de modifier le reste de l’onglet Bot en général.",
-        "wizardNote": "Puis enregistrez le jeton si besoin et reliez serveur et canal vocal sur la page Campagne dans le Vault."
+        "step4": "Dans l’onglet Bot, activez tous les intents privilégiés obligatoires listés ci-dessus.",
+        "step5": "Copiez le jeton, collez-le dans le champ à gauche et enregistrez. Ne l’envoyez à personne.",
+        "wizardNote": "Reliez serveur et canal vocal sur la page Campagne dans le Vault ; l’invitation du bot applique les permissions obligatoires listées ci-dessus."
+      },
+      "requirements": {
+        "title": "Intents et permissions obligatoires",
+        "intentsHeading": "Intents privilégiés (onglet Bot)",
+        "intentsIntro": "Portail développeur → votre application → Bot → Privileged Gateway Intents — activez :",
+        "intent": {
+          "serverMembers": "Server Members Intent — liste et recherche des membres du serveur (lier les PJ à Discord)"
+        },
+        "permissionsHeading": "Permissions à l’invitation sur le serveur",
+        "permissionsIntro": "À l’invitation du bot (assistant Campagne dans le Vault ou OAuth2 → URL Generator, scope « bot »), sélectionnez tout :",
+        "permission": {
+          "viewChannel": "View Channel (Voir les salons)",
+          "connect": "Connect (Se connecter)",
+          "speak": "Speak (Parler) — annonces vocales au début et à la fin de l’enregistrement"
+        },
+        "notRequiredHeading": "Ne pas activer (non requis)",
+        "notRequired": {
+          "presence": "Presence Intent",
+          "messageContent": "Message Content Intent"
+        }
       },
       "botSetup": {
         "title": "Bot d'enregistrement (cet appareil)",
@@ -33,8 +57,10 @@
         "openPortal": "Ouvrir le portail développeur Discord",
         "stepCreate": "New Application → nom → onglet Bot.",
         "stepBotToken": "Reset Token → copier → coller ci-dessous → Enregistrer le jeton.",
-        "stepIntents": "Onglet Bot : intents privilégiés seulement si demandé ; pour la voix seule, souvent inutile.",
-        "applicationId": "ID d'application détecté : {{id}}"
+        "stepIntentsIntro": "Dans l’onglet Bot du portail, configurez les intents et permissions obligatoires :",
+        "applicationId": "ID d'application détecté : {{id}}",
+        "configuredSummary": "Le bot d'enregistrement est déjà configuré",
+        "editToken": "Modifier le jeton"
       },
       "campaignWizard": {
         "title": "Connecter la campagne à Discord",
@@ -103,6 +129,11 @@
     },
     "image": {
       "unsupported_format": "Format d'image non pris en charge (JPEG, PNG, WebP ou GIF)"
+    },
+    "members_intent_required": "Activez Server Members Intent sur votre bot Discord dans le portail développeur.",
+    "user_oauth_expired": "La session « Se connecter avec Discord » a expiré ou n’est plus valide. Reconnectez-vous : c’est distinct du jeton du bot.",
+    "player_discord_id": {
+      "duplicate": "Ce compte Discord est déjà assigné à un autre personnage dans la campagne."
     }
   },
   "list": {
@@ -154,6 +185,7 @@
       "needToken": "Configurez d'abord le jeton du bot dans Discord (barre latérale).",
       "configureToken": "Aller au jeton bot",
       "loginDiscord": "Se connecter avec Discord",
+      "oauthReconnectHint": "La connexion avec votre compte Discord (pour choisir le serveur) est distincte du jeton du bot. Si vous avez seulement régénéré le jeton bot, cliquez ci-dessous pour vous reconnecter.",
       "selectGuild": "Serveur",
       "guildPlaceholder": "Choisissez un serveur que vous administrez…",
       "botPresent": "bot déjà invité",
@@ -167,7 +199,10 @@
       "stage": "scène",
       "saveChannel": "Enregistrer le canal vocal",
       "advanced": "Avancé : coller l'ID du canal manuellement",
-      "currentChannel": "Canal vocal actuel : {{id}}",
+      "configuredSummary": "La liaison du bot est déjà configurée",
+      "configuredRoute": "{{guild}} --> {{channel}}",
+      "editLink": "Modifier",
+      "unknownLabel": "—",
       "manualChannelId": "ID du canal vocal",
       "manualChannelPlaceholder": "ID numérique du canal"
     }
@@ -181,6 +216,21 @@
     "name": "Nom",
     "playerDiscordId": "ID Discord du joueur",
     "playerDiscordIdPlaceholder": "Facultatif",
+    "playerDiscordIdDuplicate": "Ce compte Discord est déjà assigné à un autre personnage dans la campagne.",
+    "listDiscordLinked": "Discord lié",
+    "discordPicker": {
+      "needCampaignDiscord": "Liez d'abord un serveur et un canal vocal Discord depuis l'onglet campagne.",
+      "needBotToken": "Configurez le jeton du bot Discord dans les paramètres pour lister les membres du serveur.",
+      "configureBot": "Ouvrir les paramètres Discord",
+      "none": "Aucun joueur Discord",
+      "searchPlaceholder": "Rechercher par nom ou @username…",
+      "filterPlaceholder": "Filtrer la liste…",
+      "refreshRoster": "Actualiser la liste",
+      "manualId": "ID manuel",
+      "usePicker": "Utiliser la liste du serveur",
+      "intentRequired": "Activez Server Members Intent sur votre bot dans le portail développeur Discord, puis réessayez.",
+      "duplicateWarning": "« {{name}} » utilise déjà ce compte Discord."
+    },
     "statusLabel": "Statut",
     "attributes": "Attributs (JSON)",
     "attributesInvalid": "Les attributs doivent être un objet JSON valide.",
@@ -319,8 +369,8 @@
     "discordSetupAlertStep1": "1. Ouvrez https://discord.com/developers/applications et connectez-vous avec votre compte Discord.",
     "discordSetupAlertStep2": "2. Cliquez sur « New Application », choisissez un nom (ex. « Bot de campagne ») et validez.",
     "discordSetupAlertStep3": "3. Onglet « Bot » → « Reset Token » (ou « View Token ») → copiez le jeton → collez-le ci-dessus et cliquez sur « Enregistrer le jeton ». Ne le partagez avec personne.",
-    "discordSetupAlertStep4": "4. Toujours dans « Bot », activez les intents privilégiés demandés par Discord si nécessaire (pour l'enregistrement vocal seul, « Message Content » n'est en général pas requis).",
-    "discordSetupAlertStep5": "5. Onglet « OAuth2 » → « URL Generator » : scope « bot », permissions « Connect » et « Use Voice Activity » (optionnel « Speak ») → copiez l'URL → ouvrez-la dans le navigateur et invitez le bot sur le serveur de la campagne.",
+    "discordSetupAlertStep4": "4. Onglet « Bot » → Privileged Gateway Intents : activez « Server Members Intent ». N’activez pas « Presence Intent » ni « Message Content Intent ».",
+    "discordSetupAlertStep5": "5. À l’invitation du bot (assistant Campagne ou OAuth2 → URL Generator, scope « bot ») : permissions obligatoires « View Channel », « Connect » et « Speak ».",
     "discordSetupAlertStep6": "6. Dans Discord (application ou web) : Paramètres utilisateur → « Avancé » → activez le « Mode développeur ». Clic droit sur le salon vocal de séance → « Copier l'identifiant du salon » → collez-le ci-dessus et cliquez sur « Enregistrer le salon ».",
     "discordSetupAlertStep7": "7. Au démarrage de l'enregistrement, le bot rejoint ce salon et enregistre une piste audio par participant pour la transcription hors ligne."
   },
@@ -369,6 +419,10 @@
     "workflowDiscordRequiredHint": "L'enregistrement et la transcription nécessitent le jeton du bot et le canal vocal dans Paramètres → Discord.",
     "stepRecord": "Enregistrement",
     "stepRecordHint": "Démarrez et arrêtez selon vos besoins. Plusieurs passes sont possibles ; l'audio s'ajoute à la séance.",
+    "recordingTracksTitle": "Pistes audio",
+    "recordingTrackDiscord": "Discord {{id}}",
+    "recordingTrackUnassigned": "Aucun personnage assigné.",
+    "recordingTrackAssign": "Assigner dans les PJ",
     "stepTranscribe": "Transcription",
     "stepTranscribeHint": "Lancez Whisper uniquement à l'arrêt, avec des fichiers audio présents.",
     "transcriptionStarting": "Démarrage de la transcription…",
@@ -388,7 +442,7 @@
     "notFound": "Séance introuvable.",
     "loadingTitle": "Séance",
     "createAndOpen": "Créer et ouvrir",
-    "returnToSession": "Retour à {{label}}",
+    "returnToSession": "Retour à la session",
     "campaignLockedHint": "Changement de campagne désactivé pendant une session en direct.",
     "editDetails": "Modifier les détails",
     "editDetailsClose": "Fermer les détails",
@@ -423,7 +477,15 @@
     "postShowTabletop": "Mostra tabletop",
     "postHideTabletop": "Nascondi tabletop",
     "deleteSession": "Elimina sessione",
-    "editDetailsLockedLive": "Termina la sessione in gioco prima di modificare le date o eliminare."
+    "editDetailsLockedLive": "Terminez la session en direct avant de modifier les dates ou supprimer."
+  },
+  "sessionSync": {
+    "errors": {
+      "discordAuthFailed": "Connexion Discord invalide ou expirée. Reconnectez le compte Amber Coffer dans les paramètres de campagne (OAuth), puis réessayez.",
+      "apiNotConfigured": "L’API de sync n’est pas configurée sur le serveur (secret session-auth). Vérifiez le déploiement CDK.",
+      "apiUrlMissing": "VITE_AMBER_SYNC_API_BASE_URL manquant — recompilez master-app avec apps/master-app/.env (voir .env.example).",
+      "tokenFailed": "Impossible d’obtenir le jeton de sync ({{code}})."
+    }
   },
   "images": {
     "listTitle": "Images de campagne",
@@ -518,12 +580,21 @@
     "imageRefHint": "Choisissez une image dans l'archive de campagne (fichier téléversé requis).",
     "imageRefSearchPlaceholder": "Rechercher par titre ou légende…",
     "imageRefNoResults": "Aucune image avec fichier dans l'archive.",
-    "imageRefUnknown": "La référence enregistrée ne correspond à aucune image d'archive ; choisissez-en une autre ou effacez.",
+    "imageRefDirectPortrait": "Portrait sur cette fiche",
+    "imageRefUnknown": "Ce portrait n'est pas lié à une entrée d'archive. Choisissez-en une dans la liste ci-dessus ou laissez-le tel quel.",
     "portraitVsArchiveHint": "Le portrait ci-dessous est prioritaire dans les listes. Les images liées depuis l'archive apparaissent dans « Images liées » et en vignette si aucun portrait n'est défini.",
     "linkedImagesHint": "Images de l'archive de campagne liées à cette fiche. Pour ajouter ou modifier les liens, ouvrez l'archive Images.",
     "linkedImagesEmpty": "Aucune image liée depuis l'archive.",
     "linkedImagesSaveFirst": "Enregistrez la fiche pour voir les images liées depuis l'archive.",
     "openImagesArchive": "Ouvrir l'archive d'images",
+    "linkImage": "Lier une image",
+    "uploadNewImage": "Téléverser",
+    "setDefaultImage": "Définir comme image par défaut",
+    "defaultImage": "Image par défaut",
+    "removeImageLink": "Retirer le lien",
+    "linkImageDialogTitle": "Lier une image",
+    "imageGalleryEmpty": "Aucune image liée.",
+    "newLinkedImageTitle": "Nouvelle image",
     "characterLinksHint": "Liens narratifs avec les PJ (éditeur complet à venir).",
     "gameStatsEmpty": "No sheet fields yet—add free-form key/value pairs.",
     "addStat": "Add field",

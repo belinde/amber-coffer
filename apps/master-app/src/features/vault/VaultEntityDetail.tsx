@@ -23,7 +23,7 @@ import {
 import { VaultEntitySections } from './VaultEntitySections.js';
 
 type Props = {
-  campaignId: Campaign['id'];
+  campaign: Campaign;
   category: VaultCategory;
   entityId: string;
   onBack: () => void;
@@ -31,10 +31,11 @@ type Props = {
   onError: (message: string) => void;
   onOpenSessions?: (() => void) | undefined;
   onOpenImages?: (() => void) | undefined;
+  onConfigureDiscord?: (() => void) | undefined;
 };
 
 export function VaultEntityDetail({
-  campaignId,
+  campaign,
   category,
   entityId,
   onBack,
@@ -42,7 +43,9 @@ export function VaultEntityDetail({
   onError,
   onOpenSessions,
   onOpenImages,
+  onConfigureDiscord,
 }: Props): ReactElement {
+  const campaignId = campaign.id;
   const { t } = useTranslation();
   const { clearError } = useAppError();
   const isNew = entityId === NEW_ENTITY_ID;
@@ -153,7 +156,7 @@ export function VaultEntityDetail({
         })}
       </nav>
       <VaultEntitySections
-        campaignId={campaignId}
+        campaign={campaign}
         category={category}
         entityId={entityId}
         sectionId={activeSection}
@@ -161,7 +164,9 @@ export function VaultEntityDetail({
         fieldErrors={fieldErrors}
         onOpenSessions={onOpenSessions}
         onOpenImages={onOpenImages}
+        onConfigureDiscord={onConfigureDiscord}
         onChange={handleDraftChange}
+        onError={onError}
       />
     </EntityDetailLayout>
   );

@@ -1,10 +1,61 @@
 {
   "product": {
-    "masterScreen": "Master Screen",
+    "masterScreen": "Master screen",
     "gameTable": "Game table"
   },
   "app": {
     "title": "Amber Coffer — Game table",
-    "subtitle": "Game table for players"
+    "subtitle": "Player game table"
+  },
+  "session": {
+    "connecting": "Connecting to game table…",
+    "waiting": "Waiting for session snapshot…",
+    "waitingSnapshot": "Waiting for the GM to publish the table…",
+    "ended": "Session ended.",
+    "error": "Failed to connect to the table.",
+    "retry": "Try again",
+    "noMap": "No active map in snapshot.",
+    "errors": {
+      "channelNotLinked": {
+        "title": "Channel not linked to campaign",
+        "detail": "Launch the Activity from your session voice channel. Current Discord channel ID: {{channelId}}. Register it in DynamoDB (seed-handshake-channel script). “Launch in DM” does not use the voice channel."
+      },
+      "channelUnavailable": {
+        "title": "Discord channel unavailable",
+        "detail": "Join a server voice channel and start the Activity from there (not from DMs or a text channel)."
+      },
+      "voiceChannelRequired": {
+        "title": "Voice channel required",
+        "detail": "Start the Activity while you are in the game voice channel (current ID: {{channelId}}). Direct messages are not supported."
+      },
+      "syncFailed": {
+        "title": "Table sync failed",
+        "detail": "Could not load game state from the API. Check your connection and try again."
+      }
+    }
+  },
+  "tabletop": {
+    "boardAria": "Tactical map",
+    "benchAria": "Off-board tokens",
+    "handoutsAria": "Shared handouts",
+    "tokenOwned": "Controlled token {{id}}",
+    "tokenLocked": "Locked token {{id}}"
+  },
+  "discord": {
+    "loading": "Discord…",
+    "embedded": "Discord Activity",
+    "standalone": "Local mode"
+  },
+  "dev": {
+    "panelAria": "Development controls",
+    "panelTitle": "Sync harness (dev)",
+    "playerLabel": "Simulated player",
+    "playerA": "Player A",
+    "playerB": "Player B",
+    "loadSnapshot": "Load demo snapshot",
+    "moveTokenGm": "Move PC token (GM)",
+    "showHandout": "Show handout",
+    "hideHandout": "Hide handout",
+    "endSession": "End session"
   }
 }

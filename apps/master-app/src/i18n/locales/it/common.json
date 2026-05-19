@@ -8,8 +8,12 @@
     "subtitle": "Narrative OS per Game Master"
   },
   "settings": {
-    "title": "Discord",
-    "sidebarLink": "Discord",
+    "title": "Impostazioni",
+    "sidebarLink": "Impostazioni",
+    "sectionNav": "Sezioni impostazioni",
+    "tabs": {
+      "discord": "Discord"
+    },
     "discordPageHint": "Configura il bot di registrazione su questo dispositivo. Collega server e canale vocale per ogni campagna da Vault › Campagna › Discord.",
     "discord": {
       "needCampaign": "Crea o seleziona una campagna per collegarla a Discord. Il token bot sopra vale per tutte le campagne su questo dispositivo.",
@@ -20,12 +24,32 @@
         "whyTitle": "Le tue responsabilità",
         "whyBody": "Creare il bot è una scelta tua. Invitalo solo su server dove hai il diritto di registrare e informa il gruppo se serve. Il token è un segreto: non condividerlo; chi lo ha agisce al posto tuo. Se trapelasse, rigeneralo dal portale. Amber Coffer non ascolta i giocatori sui nostri server: l’audio passa dal tuo bot sul tuo Discord.",
         "howTitle": "Creazione nel portale",
-        "step1": "Apri il Developer Portal (pulsante a sinistra) con il tuo account Discord.",
+        "step1": "Apri il Developer Portal con il tuo account Discord.",
         "step2": "Crea una nuova applicazione e dagli un nome che i giocatori riconoscano (es. Narratore).",
         "step3": "Apri la scheda Bot e, se richiesto, aggiungi il bot.",
-        "step4": "Copia il token, incollalo a sinistra e salva. Non inviarlo a nessuno.",
-        "step5": "Per la sola registrazione vocale di solito non serve cambiare altre opzioni nella scheda Bot.",
-        "wizardNote": "Poi salva il token se serve e collega server e canale vocale dalla pagina Campagna nel Vault."
+        "step4": "Nella scheda Bot, abilita tutti gli intent privilegiati obbligatori elencati sopra.",
+        "step5": "Copia il token, incollalo nel campo a sinistra e salva. Non inviarlo a nessuno.",
+        "wizardNote": "Collega server e canale vocale dalla pagina Campagna nel Vault; l'invito del bot applica i permessi obbligatori elencati sopra."
+      },
+      "requirements": {
+        "title": "Intent e permessi obbligatori",
+        "intentsHeading": "Intent privilegiati (scheda Bot)",
+        "intentsIntro": "Developer Portal → tua applicazione → Bot → Privileged Gateway Intents — abilita:",
+        "intent": {
+          "serverMembers": "Server Members Intent — elenco e ricerca membri del server (collegamento PG ↔ Discord)"
+        },
+        "permissionsHeading": "Permessi all'invito sul server",
+        "permissionsIntro": "All'invito del bot (wizard Campagna nel Vault oppure OAuth2 → URL Generator, scope «bot») seleziona tutti:",
+        "permission": {
+          "viewChannel": "View Channel (Visualizza canale)",
+          "connect": "Connect (Connetti)",
+          "speak": "Speak (Parla) — annunci vocali all'avvio e alla fine della registrazione"
+        },
+        "notRequiredHeading": "Non abilitare (non richiesti)",
+        "notRequired": {
+          "presence": "Presence Intent",
+          "messageContent": "Message Content Intent"
+        }
       },
       "botSetup": {
         "title": "Bot di registrazione (questo dispositivo)",
@@ -33,8 +57,10 @@
         "openPortal": "Apri Discord Developer Portal",
         "stepCreate": "New Application → scegli un nome → scheda Bot.",
         "stepBotToken": "Reset Token (o View Token) → copia → incolla sotto → Salva token.",
-        "stepIntents": "Nella scheda Bot abilita gli intent privilegiati solo se richiesto; per sola voce di solito non serve altro.",
-        "applicationId": "Application ID rilevato: {{id}}"
+        "stepIntentsIntro": "Nella scheda Bot del portale, configura intent e permessi obbligatori:",
+        "applicationId": "Application ID rilevato: {{id}}",
+        "configuredSummary": "Il bot di registrazione è già configurato",
+        "editToken": "Modifica il token"
       },
       "campaignWizard": {
         "title": "Collega la campagna a Discord",
@@ -103,6 +129,11 @@
     },
     "image": {
       "unsupported_format": "Formato immagine non supportato (usa JPEG, PNG, WebP o GIF)"
+    },
+    "members_intent_required": "Abilita Server Members Intent sul bot Discord nel Developer Portal.",
+    "user_oauth_expired": "La sessione «Accedi con Discord» è scaduta o non è più valida. Ricollegati: è separata dal token del bot.",
+    "player_discord_id": {
+      "duplicate": "Questo account Discord è già assegnato a un altro personaggio in campagna."
     }
   },
   "list": {
@@ -154,6 +185,7 @@
       "needToken": "Configura prima il token del bot in Discord (barra laterale).",
       "configureToken": "Vai al token bot",
       "loginDiscord": "Accedi con Discord",
+      "oauthReconnectHint": "L'accesso con il tuo account Discord (per scegliere il server) è indipendente dal token del bot. Se hai solo rigenerato il token bot, clicca qui sotto per riconnetterti.",
       "selectGuild": "Server",
       "guildPlaceholder": "Scegli un server che amministri…",
       "botPresent": "bot già invitato",
@@ -167,7 +199,10 @@
       "stage": "palco",
       "saveChannel": "Salva canale vocale",
       "advanced": "Avanzate: incolla ID canale manualmente",
-      "currentChannel": "Canale vocale attuale: {{id}}",
+      "configuredSummary": "Il collegamento del bot è già configurato",
+      "configuredRoute": "{{guild}} --> {{channel}}",
+      "editLink": "Modifica",
+      "unknownLabel": "—",
       "manualChannelId": "ID canale vocale",
       "manualChannelPlaceholder": "ID numerico del canale"
     }
@@ -181,6 +216,21 @@
     "name": "Nome",
     "playerDiscordId": "ID Discord giocatore",
     "playerDiscordIdPlaceholder": "Opzionale",
+    "playerDiscordIdDuplicate": "Questo account Discord è già assegnato a un altro personaggio in campagna.",
+    "listDiscordLinked": "Discord collegato",
+    "discordPicker": {
+      "needCampaignDiscord": "Collega prima server e canale vocale Discord dalla scheda campagna.",
+      "needBotToken": "Configura il token del bot Discord nelle impostazioni per elencare i membri del server.",
+      "configureBot": "Apri impostazioni Discord",
+      "none": "Nessun giocatore Discord",
+      "searchPlaceholder": "Cerca per nome o @username…",
+      "filterPlaceholder": "Filtra elenco…",
+      "refreshRoster": "Aggiorna elenco",
+      "manualId": "ID manuale",
+      "usePicker": "Usa elenco server",
+      "intentRequired": "Abilita Server Members Intent sul bot nel Developer Portal Discord, poi riprova.",
+      "duplicateWarning": "«{{name}}» usa già questo account Discord."
+    },
     "statusLabel": "Stato",
     "attributes": "Attributi (JSON)",
     "attributesInvalid": "Gli attributi devono essere un oggetto JSON valido.",
@@ -319,8 +369,8 @@
     "discordSetupAlertStep1": "1. Apri https://discord.com/developers/applications e accedi con il tuo account Discord.",
     "discordSetupAlertStep2": "2. Clicca «New Application», scegli un nome (es. «Bot campagna») e conferma.",
     "discordSetupAlertStep3": "3. Scheda «Bot» → «Reset Token» (o «View Token») → copia il token → incollalo qui sopra e premi «Salva token». Non condividerlo con nessuno.",
-    "discordSetupAlertStep4": "4. Sempre in «Bot», se richiesto abilita gli intent privilegiati indicati da Discord (per la sola registrazione vocale di solito non serve «Message Content»).",
-    "discordSetupAlertStep5": "5. Scheda «OAuth2» → «URL Generator»: scope «bot», permessi «Connect» e «Use Voice Activity» (opzionale «Speak») → copia l'URL → aprilo nel browser e invita il bot al server della campagna.",
+    "discordSetupAlertStep4": "4. Scheda «Bot» → Privileged Gateway Intents: abilita «Server Members Intent». Non abilitare «Presence Intent» né «Message Content Intent».",
+    "discordSetupAlertStep5": "5. All'invito del bot (wizard Campagna o OAuth2 → URL Generator, scope «bot»): permessi obbligatori «View Channel», «Connect» e «Speak».",
     "discordSetupAlertStep6": "6. In Discord (app desktop o web): Impostazioni utente → «Avanzate» → attiva «Modalità sviluppatore». Tasto destro sul canale vocale della sessione → «Copia ID canale» → incollalo qui sopra e premi «Salva canale».",
     "discordSetupAlertStep7": "7. All'avvio registrazione, il bot entrerà in quel canale e salverà un file audio per ogni partecipante, per la trascrizione offline."
   },
@@ -369,6 +419,10 @@
     "workflowDiscordRequiredHint": "Per registrare e trascrivere serve il token del bot e il canale vocale in Impostazioni → Discord.",
     "stepRecord": "Registrazione",
     "stepRecordHint": "Avvia e ferma quando serve. Puoi ripetere la registrazione: l'audio nuovo si aggiunge alla sessione.",
+    "recordingTracksTitle": "Tracce audio",
+    "recordingTrackDiscord": "Discord {{id}}",
+    "recordingTrackUnassigned": "Personaggio non assegnato.",
+    "recordingTrackAssign": "Assegna nei PG",
     "stepTranscribe": "Trascrizione",
     "stepTranscribeHint": "Esegui Whisper solo a registrazione ferma e con file audio presenti.",
     "transcriptionStarting": "Avvio trascrizione…",
@@ -388,7 +442,7 @@
     "notFound": "Sessione non trovata.",
     "loadingTitle": "Sessione",
     "createAndOpen": "Crea e apri",
-    "returnToSession": "Torna a {{label}}",
+    "returnToSession": "Torna alla sessione",
     "campaignLockedHint": "Non puoi cambiare campagna mentre una sessione è in gioco. Puoi continuare a navigare il vault di questa campagna.",
     "editDetails": "Modifica dettagli",
     "editDetailsClose": "Chiudi dettagli",
@@ -424,6 +478,14 @@
     "postHideTabletop": "Nascondi tabletop",
     "deleteSession": "Elimina sessione",
     "editDetailsLockedLive": "Termina la sessione in gioco prima di modificare le date o eliminare."
+  },
+  "sessionSync": {
+    "errors": {
+      "discordAuthFailed": "Accesso Discord non valido o scaduto. Apri Impostazioni campagna → collega di nuovo l’account Amber Coffer (OAuth), poi riprova.",
+      "apiNotConfigured": "API di sync non configurata sul server (secret session-auth). Verifica il deploy CDK.",
+      "apiUrlMissing": "Manca VITE_AMBER_SYNC_API_BASE_URL: ricompila master-app con apps/master-app/.env (vedi .env.example).",
+      "tokenFailed": "Token di sync non ottenuto ({{code}})."
+    }
   },
   "images": {
     "listTitle": "Immagini di campagna",
@@ -518,12 +580,21 @@
     "imageRefHint": "Scegli un'immagine dall'archivio di campagna (deve avere un file caricato).",
     "imageRefSearchPlaceholder": "Cerca per titolo o didascalia…",
     "imageRefNoResults": "Nessuna immagine con file in archivio.",
-    "imageRefUnknown": "Il riferimento salvato non corrisponde a nessuna immagine in archivio; selezionane un'altra o azzera.",
+    "imageRefDirectPortrait": "Ritratto su questa scheda",
+    "imageRefUnknown": "Questo ritratto non è collegato a una voce dell'archivio. Puoi selezionarne una dall'elenco sopra o lasciarlo così.",
     "portraitVsArchiveHint": "Il ritratto qui sotto ha priorità in elenco. Le immagini collegate dall'archivio compaiono nella sezione «Immagini collegate» e come anteprima se non c'è ritratto.",
     "linkedImagesHint": "Immagini dell'archivio di campagna collegate a questa scheda. Per aggiungerne o modificare i collegamenti, apri l'archivio Immagini.",
     "linkedImagesEmpty": "Nessuna immagine collegata dall'archivio.",
     "linkedImagesSaveFirst": "Salva la scheda per vedere le immagini collegate dall'archivio.",
     "openImagesArchive": "Apri archivio immagini",
+    "linkImage": "Collega immagine",
+    "uploadNewImage": "Carica nuovo",
+    "setDefaultImage": "Imposta come immagine predefinita",
+    "defaultImage": "Immagine predefinita",
+    "removeImageLink": "Rimuovi collegamento",
+    "linkImageDialogTitle": "Collega immagine",
+    "imageGalleryEmpty": "Nessuna immagine collegata.",
+    "newLinkedImageTitle": "Nuova immagine",
     "characterLinksHint": "Collegamenti narrativi ai PG (editor completo in arrivo).",
     "gameStatsEmpty": "Nessun campo scheda: aggiungi coppie chiave/valore libere.",
     "addStat": "Aggiungi campo",

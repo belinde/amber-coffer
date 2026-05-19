@@ -6,6 +6,14 @@ use super::vault_json::{
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct ImportPortraitBinding {
+    pub entity_kind: String,
+    pub entity_id: String,
+    pub campaign_image_id: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ImportDumpAsset {
     pub entity_kind: String,
     pub entity_id: String,
@@ -201,4 +209,6 @@ pub struct CampaignImportDump {
     pub campaign_id: String,
     pub entities: ImportDumpEntities,
     pub assets: Vec<ImportDumpAsset>,
+    #[serde(default)]
+    pub portrait_bindings: Vec<ImportPortraitBinding>,
 }

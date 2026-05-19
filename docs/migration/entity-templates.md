@@ -103,6 +103,18 @@ Sorgente POC: `personaggi/*.md`. Owner: GM, ma legato a un `playerDiscordId` (Di
 | `visibility`             | `'gm_only' \| 'shared' \| 'public_canon'` |                                                                             |
 | `createdAt`, `updatedAt` | `Timestamp`                               |                                                                             |
 
+### Token (tavolo tattico)
+
+Rappresenta un PG o PNG sulla mappa attiva. Il controllo drag in Discord Activity non dipende da `entityKind`: usa `controlledByPlayerDiscordId`.
+
+| Campo                         | Tipo                   | Note                                                                                  |
+| ----------------------------- | ---------------------- | ------------------------------------------------------------------------------------- |
+| `entityKind`                  | `'character' \| 'npc'` | Riferimento all'entità sotto il token                                                 |
+| `entityId`                    | `string`               | Id dell'entità (PG o PNG)                                                             |
+| `controlledByPlayerDiscordId` | `DiscordUserId?`       | Giocatore che può trascinare il token (PG assegnato o evocazione/NPC delegato dal GM) |
+| `visibleToPlayers`            | `boolean`              | Se false, il token non appare nell'Activity                                           |
+| `position`                    | `board \| bench`       | Coordinate a griglia (`xCell`/`yCell`) o slot panchina                                |
+
 ### Npc (PNG)
 
 Sorgente POC: `png/*.md`. Riusa quasi tutti i campi di `Character`, aggiunge:

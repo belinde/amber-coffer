@@ -31,16 +31,24 @@ export {
   type ImportCampaignReport,
 } from './migrate.js';
 export {
+  discordEnsureUserOauth,
   discordIsBotInGuild,
   discordListAdminGuilds,
+  discordListGuildMembers,
   discordListVoiceChannels,
   discordOauthClear,
+  discordOauthLogout,
   discordOauthStart,
+  discordOauthStatus,
   discordOpenBotInvite,
   discordParseBotApplicationId,
+  discordSearchGuildMembers,
+  type DiscordGuildMemberOption,
   type DiscordGuildOption,
+  type DiscordOauthStatus,
   type DiscordVoiceChannelOption,
 } from './discord-setup.js';
+export { listSessionRecordings, type SessionRecordingView } from './session-recordings.js';
 
 export async function ping(): Promise<string> {
   return invoke<string>('ping');

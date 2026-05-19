@@ -14,6 +14,7 @@ type Props = {
   onSessionUpdated: (session: Session) => void;
   onError: (message: string) => void;
   onConfigureDiscord: () => void;
+  onOpenCharacters?: (() => void) | undefined;
 };
 
 export function SessionPostPanel({
@@ -22,6 +23,7 @@ export function SessionPostPanel({
   onSessionUpdated,
   onError,
   onConfigureDiscord,
+  onOpenCharacters,
 }: Props): ReactElement {
   const { t } = useTranslation();
   const [tabletopOpen, setTabletopOpen] = useState(false);
@@ -33,6 +35,7 @@ export function SessionPostPanel({
         onSessionUpdated={onSessionUpdated}
         onError={onError}
         onConfigureDiscord={onConfigureDiscord}
+        onOpenCharacters={onOpenCharacters}
       />
 
       <div className="session-post__tabletop-toggle">
@@ -40,7 +43,14 @@ export function SessionPostPanel({
           {tabletopOpen ? t('sessionDetail.postHideTabletop') : t('sessionDetail.postShowTabletop')}
         </Button>
       </div>
-      {tabletopOpen ? <SessionTabletopSection campaignId={campaignId} onError={onError} /> : null}
+      {tabletopOpen ? (
+        <SessionTabletopSection
+          campaignId={campaignId}
+          sessionId={session.id}
+          syncEnabled={tabletopOpen}
+          onError={onError}
+        />
+      ) : null}
     </div>
   );
 }

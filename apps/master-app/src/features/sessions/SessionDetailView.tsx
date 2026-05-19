@@ -144,6 +144,7 @@ export function SessionDetailView({
             onSessionUpdated={handleSessionUpdated}
             onError={onError}
             onConfigureDiscord={onConfigureDiscord}
+            onOpenCharacters={() => pushView({ kind: 'category', category: 'characters' })}
           />
         ) : null}
         {phase === 'post' ? (
@@ -153,6 +154,7 @@ export function SessionDetailView({
             onSessionUpdated={handleSessionUpdated}
             onError={onError}
             onConfigureDiscord={onConfigureDiscord}
+            onOpenCharacters={() => pushView({ kind: 'category', category: 'characters' })}
           />
         ) : null}
       </div>

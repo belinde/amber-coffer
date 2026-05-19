@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { DiscordBotRequirements } from './DiscordBotRequirements.js';
+
 const PORTAL_STEPS = [
   'settings.discord.infoAside.step1',
   'settings.discord.infoAside.step2',
@@ -32,6 +34,10 @@ export function DiscordSetupInfoAside(): ReactElement {
           {t('settings.discord.infoAside.whyTitle')}
         </h4>
         <p className="discord-settings-info__text">{t('settings.discord.infoAside.whyBody')}</p>
+      </section>
+
+      <section className="discord-settings-info__block">
+        <DiscordBotRequirements />
       </section>
 
       <section className="discord-settings-info__block">
