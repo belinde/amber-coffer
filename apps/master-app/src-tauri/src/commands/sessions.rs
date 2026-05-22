@@ -5,7 +5,8 @@ use uuid::Uuid;
 
 use crate::commands::vault_validate::{validate_session_play_state, validate_session_status};
 use crate::db::validate::ensure_campaign_exists;
-use crate::db::{AppState, RecordingState};
+use crate::db::{AppState, RecordingState, TranscriptionState};
+use crate::services::session_paths;
 use crate::error::AppError;
 use crate::models::{CreateSessionInput, Recording, Session, UpdateSessionInput};
 use crate::services::character_discord;
@@ -311,11 +312,39 @@ pub async fn session_end_play(
         .ok_or_else(|| AppError::Internal("session end play succeeded but row missing".into()))
 }
 
+fn session_has_active_recording(
+    recording_state: &RecordingState,
+    session_id: &str,
+) -> Result<bool, AppError> {
+    let guard = recording_state
+        .0
+        .lock()
+        .map_err(|_| AppError::Internal("recording state lock poisoned".into()))?;
+    Ok(guard
+        .as_ref()
+        .is_some_and(|r| r.session_id == session_id))
+}
+
+fn session_has_active_transcription(
+    transcription_state: &TranscriptionState,
+    session_id: &str,
+) -> Result<bool, AppError> {
+    let guard = transcription_state
+        .0
+        .lock()
+        .map_err(|_| AppError::Internal("transcription state lock poisoned".into()))?;
+    Ok(guard
+        .as_ref()
+        .is_some_and(|r| r.session_id == session_id))
+}
+
 #[tauri::command]
 pub async fn delete_session(
     id: String,
     app: AppHandle,
     state: State<'_, AppState>,
+    recording_state: State<'_, Arc<RecordingState>>,
+    transcription_state: State<'_, Arc<TranscriptionState>>,
 ) -> Result<(), AppError> {
     let pool = state.pool_for_entity_id(&app, &id).await?;
     let session = get_session(id.clone(), app.clone(), state.clone())
@@ -328,6 +357,21 @@ pub async fn delete_session(
         ));
     }
 
+    if session_has_active_recording(recording_state.inner(), &id)? {
+        return Err(AppError::Internal(
+            "cannot delete a session while recording is active".into(),
+        ));
+    }
+
+    if session_has_active_transcription(transcription_state.inner(), &id)? {
+        return Err(AppError::Internal(
+            "cannot delete a session while transcription is running".into(),
+        ));
+    }
+
+    let campaign_id = session.campaign_id.clone();
+    let session_number = session.number;
+
     let result = sqlx::query("DELETE FROM sessions WHERE id = ?")
         .bind(&id)
         .execute(&pool)
@@ -336,6 +380,8 @@ pub async fn delete_session(
     if result.rows_affected() == 0 {
         return Err(AppError::NotFound("session".into()));
     }
+
+    session_paths::remove_session_workspace(&app, &campaign_id, session_number)?;
 
     Ok(())
 }

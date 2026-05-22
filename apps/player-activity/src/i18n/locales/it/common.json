@@ -38,8 +38,8 @@
     "boardAria": "Mappa tattica",
     "benchAria": "Token fuori scena",
     "handoutsAria": "Documenti conmotionati",
-    "tokenOwned": "Token controllato {{id}}",
-    "tokenLocked": "Token bloccato {{id}}"
+    "tokenOwned": "Il tuo token: {{name}}",
+    "tokenLocked": "Token bloccato: {{name}}"
   },
   "discord": {
     "loading": "Discord…",

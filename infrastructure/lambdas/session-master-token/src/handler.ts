@@ -2,11 +2,13 @@ import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-sec
 import type { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 
 import { signActivitySessionToken } from '../../shared/activity-session-token.js';
+import { upsertHandshakeChannelMapping } from '../../shared/handshake-channel-store.js';
 import { jsonResponse, SYNC_CORS_HEADERS } from '../../shared/http-response.js';
 
 const secrets = new SecretsManagerClient({});
 
 const SESSION_AUTH_SECRET_ARN = process.env.SESSION_AUTH_SECRET_ARN ?? '';
+const HANDSHAKE_TABLE_NAME = process.env.HANDSHAKE_TABLE_NAME ?? '';
 const DISCORD_APPLICATION_ID = process.env.DISCORD_APPLICATION_ID ?? '';
 const POLL_INTERVAL_MS = process.env.POLL_INTERVAL_MS ?? '2000';
 
@@ -58,14 +60,19 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     return jsonResponse(503, { error: 'master_token_not_configured' });
   }
 
-  let body: { campaignId?: string; sessionId?: string; discordAccessToken?: string };
+  let body: {
+    campaignId?: string;
+    sessionId?: string;
+    discordAccessToken?: string;
+    channelId?: string;
+  };
   try {
     body = JSON.parse(event.body ?? '{}') as typeof body;
   } catch {
     return jsonResponse(400, { error: 'invalid_json' });
   }
 
-  const { campaignId, sessionId, discordAccessToken: rawDiscordToken } = body;
+  const { campaignId, sessionId, discordAccessToken: rawDiscordToken, channelId } = body;
   const discordAccessToken = rawDiscordToken?.trim();
   if (!campaignId || !sessionId || !discordAccessToken) {
     return jsonResponse(400, { error: 'missing_fields' });
@@ -87,11 +94,23 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       authSecret,
     );
 
+    let handshakeChannelLinked = false;
+    if (channelId && HANDSHAKE_TABLE_NAME) {
+      await upsertHandshakeChannelMapping({
+        tableName: HANDSHAKE_TABLE_NAME,
+        channelId,
+        campaignId,
+        sessionId,
+      });
+      handshakeChannelLinked = true;
+    }
+
     return jsonResponse(200, {
       sessionToken,
       pollIntervalMs: Number.parseInt(POLL_INTERVAL_MS, 10) || 2000,
       campaignId,
       sessionId,
+      handshakeChannelLinked,
     });
   } catch (err) {
     console.error('master_token_failed', err);

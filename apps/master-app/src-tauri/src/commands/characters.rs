@@ -9,6 +9,7 @@ use crate::db::AppState;
 use crate::error::AppError;
 use crate::validation_issue::{enum_invalid, required_field, validation_issues, ValidationIssue};
 use crate::models::{Character, CharacterRow, CreateCharacterInput, UpdateCharacterInput};
+use crate::services::tabletop_tokens;
 use crate::util::now_ms;
 
 const VALID_STATUSES: &[&str] = &["active", "retired", "deceased"];
@@ -124,6 +125,8 @@ pub async fn create_character(
     .await
     .map_err(map_character_player_discord_error)?;
 
+    let _ = tabletop_tokens::ensure_character_tokens_for_campaign(&pool, &input.campaign_id).await;
+
     get_character(id, app, state)
         .await?
         .ok_or_else(|| AppError::Internal("character insert succeeded but row missing".into()))
@@ -200,6 +203,9 @@ pub async fn update_character(
     if updated.rows_affected() == 0 {
         return Err(AppError::NotFound("character".into()));
     }
+
+    let _ =
+        tabletop_tokens::ensure_character_tokens_for_campaign(&pool, &existing.campaign_id).await;
 
     get_character(input.id, app, state)
         .await?

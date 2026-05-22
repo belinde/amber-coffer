@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { campaignIdSchema, sessionIdSchema } from '../ids/schemas.js';
+import { campaignIdSchema, discordChannelIdSchema, sessionIdSchema } from '../ids/schemas.js';
 
 import { mqttMessageSchema, tabletopSnapshotSchema } from './messages.schema.js';
 
@@ -39,6 +39,8 @@ export const sessionMasterTokenRequestSchema = z.object({
   sessionId: sessionIdSchema,
   /** Discord OAuth access token from master-app user session. */
   discordAccessToken: z.string().min(1),
+  /** When set, maps this voice channel to the live session for Player Activity handshake. */
+  channelId: discordChannelIdSchema.optional(),
 });
 
 export type SessionMasterTokenRequest = z.infer<typeof sessionMasterTokenRequestSchema>;
@@ -48,6 +50,7 @@ export const sessionMasterTokenResponseSchema = z.object({
   pollIntervalMs: z.number().int().positive(),
   campaignId: campaignIdSchema,
   sessionId: sessionIdSchema,
+  handshakeChannelLinked: z.boolean().optional(),
 });
 
 export type SessionMasterTokenResponse = z.infer<typeof sessionMasterTokenResponseSchema>;

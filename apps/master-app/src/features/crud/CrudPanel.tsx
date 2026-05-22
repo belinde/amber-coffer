@@ -17,6 +17,7 @@ type Props<T extends { id: string }> = {
   emptyKey: string;
   deleteConfirmKey: string;
   hideDelete?: boolean;
+  canDelete?: (item: T) => boolean;
   listFn: () => Promise<T[]>;
   deleteFn: (id: T['id']) => Promise<void>;
   getLabel: (item: T) => string;
@@ -42,6 +43,7 @@ export function CrudPanel<T extends { id: string }>({
   emptyKey,
   deleteConfirmKey,
   hideDelete = false,
+  canDelete,
   listFn,
   deleteFn,
   getLabel,
@@ -195,7 +197,7 @@ export function CrudPanel<T extends { id: string }>({
                     {t('common.edit')}
                   </Button>
                 )}
-                {hideDelete ? null : (
+                {hideDelete || canDelete?.(item) === false ? null : (
                   <Button
                     type="button"
                     variant="danger"

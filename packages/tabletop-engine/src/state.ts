@@ -16,6 +16,8 @@ export type TabletopState = {
   activeMapId: MapId | null;
   maps: Map[];
   tokens: Token[];
+  tokenLabels: Record<string, string>;
+  tokenNames: Record<string, string>;
   visibleHandouts: Handout[];
 };
 
@@ -23,6 +25,8 @@ export const initialTabletopState: TabletopState = {
   activeMapId: null,
   maps: [],
   tokens: [],
+  tokenLabels: {},
+  tokenNames: {},
   visibleHandouts: [],
 };
 
@@ -32,6 +36,8 @@ export type TabletopAction =
       activeMapId: MapId | null;
       maps: Map[];
       tokens: Token[];
+      tokenLabels: Record<string, string>;
+      tokenNames: Record<string, string>;
       visibleHandouts: Handout[];
     }
   | { type: 'map.activated'; mapId: MapId }
@@ -39,6 +45,7 @@ export type TabletopAction =
   | { type: 'token.moved'; tokenId: TokenId; position: TokenPosition }
   | { type: 'token.removed'; tokenId: TokenId }
   | { type: 'handout.shown'; handout: Handout }
+  | { type: 'map.updated'; map: Map }
   | { type: 'handout.hidden'; handoutId: HandoutId }
   | { type: 'session.ended' };
 
@@ -49,6 +56,8 @@ export function tabletopReducer(state: TabletopState, action: TabletopAction): T
         activeMapId: action.activeMapId,
         maps: action.maps,
         tokens: action.tokens,
+        tokenLabels: action.tokenLabels,
+        tokenNames: action.tokenNames,
         visibleHandouts: action.visibleHandouts,
       };
     case 'map.activated':
@@ -67,6 +76,14 @@ export function tabletopReducer(state: TabletopState, action: TabletopAction): T
       };
     case 'token.removed':
       return { ...state, tokens: state.tokens.filter((t) => t.id !== action.tokenId) };
+    case 'map.updated': {
+      const idx = state.maps.findIndex((m) => m.id === action.map.id);
+      const maps =
+        idx >= 0
+          ? state.maps.map((m, i) => (i === idx ? action.map : m))
+          : [...state.maps, action.map];
+      return { ...state, maps };
+    }
     case 'handout.shown':
       if (state.visibleHandouts.some((h) => h.id === action.handout.id)) {
         return state;

@@ -10,6 +10,7 @@ import { useActiveSession } from '../../context/ActiveSessionContext.js';
 import { formatSessionDatesSummary } from './format-session-dates.js';
 import { formatSessionLabel } from './session-label.js';
 import type { SessionUiPhase } from './session-phase.js';
+import { SessionDeleteButton } from './SessionDeleteButton.js';
 import { SessionEditDetailsPanel } from './SessionEditDetailsPanel.js';
 
 type Props = {
@@ -108,9 +109,9 @@ export function SessionPhaseHeader({
           open={editOpen}
           onOpenChange={setEditOpen}
           onSessionUpdated={onSessionUpdated}
-          onDeleted={onDeleted}
           onError={onError}
         />
+        <SessionDeleteButton session={session} onDeleted={onDeleted} onError={onError} />
       </div>
     </header>
   );

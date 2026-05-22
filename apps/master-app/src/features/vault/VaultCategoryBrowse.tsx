@@ -19,7 +19,12 @@ type Props = {
   onError: (message: string) => void;
 };
 
-const IMAGE_CATEGORIES = new Set<VaultCategory>(['characters', 'npcs', 'locations', 'factions']);
+const THUMBNAIL_CATEGORIES = new Set<VaultCategory>([
+  'characters',
+  'npcs',
+  'locations',
+  'factions',
+]);
 
 export function VaultCategoryBrowse({
   campaignId,
@@ -114,7 +119,7 @@ export function VaultCategoryBrowse({
         <p className="empty-state">{t(`vault.empty.${category}`)}</p>
       ) : (
         <TabularList
-          showThumbnails={IMAGE_CATEGORIES.has(category)}
+          showThumbnails={THUMBNAIL_CATEGORIES.has(category)}
           campaignId={campaignId}
           entries={filtered}
           onActivate={onOpenEntity}

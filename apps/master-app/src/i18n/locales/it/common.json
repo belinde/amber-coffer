@@ -381,6 +381,7 @@
     "editTitle": "Modifica sessione",
     "empty": "Nessuna sessione registrata.",
     "deleteConfirm": "Eliminare la sessione {{name}}?",
+    "deleteConfirmFull": "Eliminare definitivamente la sessione {{name}}?\n\nVerranno rimossi tutti i dati di sessione dal database della campagna (metadati registrazioni, trascrizioni, assegnazioni Discord, handout di sessione, token tabletop personalizzati) e la cartella su disco (file audio e trascrizioni).\n\nL'operazione non è reversibile.",
     "numbered": "Sessione {{number}}",
     "number": "Numero",
     "numberAuto": "Il numero viene assegnato automaticamente (prossimo disponibile).",
@@ -423,6 +424,23 @@
     "recordingTrackDiscord": "Discord {{id}}",
     "recordingTrackUnassigned": "Personaggio non assegnato.",
     "recordingTrackAssign": "Assegna nei PG",
+    "participantsTitle": "Partecipanti alla registrazione",
+    "participantCount": "Partecipanti",
+    "playerCountLabel": "Giocatori",
+    "playerCount": "{{count}} giocatori",
+    "noParticipants": "Nessun partecipante vocale registrato.",
+    "participantGm": "Master",
+    "participantGmHint": "Voce del narratore in canale Discord. Non è associata a un personaggio giocante.",
+    "participantPlayersTitle": "Giocatori",
+    "participantDefaultCharacter": "Collegamento campagna: {{name}}",
+    "participantNoDefaultCharacter": "Nessun personaggio collegato in campagna.",
+    "participantSessionCharacter": "Personaggio per questa sessione",
+    "participantUnassigned": "Non assegnato",
+    "participantSharedAccount": "Account conmotion",
+    "participantSharedAccountHint": "Due o più personaggi sullo stesso account Discord: la trascrizione non separa le voci; l'attribuzione avviene in analisi.",
+    "participantAddSharedCharacter": "Aggiungi personaggio (stesso account)",
+    "participantAddSharedCharacterPlaceholder": "Scegli personaggio…",
+    "participantEditCampaignLinks": "Collegamenti campagna",
     "stepTranscribe": "Trascrizione",
     "stepTranscribeHint": "Esegui Whisper solo a registrazione ferma e con file audio presenti.",
     "transcriptionStarting": "Avvio trascrizione…",
@@ -477,7 +495,10 @@
     "postShowTabletop": "Mostra tabletop",
     "postHideTabletop": "Nascondi tabletop",
     "deleteSession": "Elimina sessione",
-    "editDetailsLockedLive": "Termina la sessione in gioco prima di modificare le date o eliminare."
+    "deleteBlockedLive": "Termina la sessione in gioco prima di eliminare.",
+    "deleteBlockedRecording": "Ferma la registrazione prima di eliminare.",
+    "deleteBlockedTranscription": "Attendi la fine della trascrizione prima di eliminare.",
+    "editDetailsLockedLive": "Termina la sessione in gioco prima di modificare le date."
   },
   "sessionSync": {
     "errors": {
@@ -487,6 +508,39 @@
       "tokenFailed": "Token di sync non ottenuto ({{code}})."
     }
   },
+  "sessions": {
+    "tabletop": {
+      "tokenPanelAria": "Gestione token",
+      "tokenPanelTitle": "Token",
+      "selectToken": "Token selezionato",
+      "noTokenSelected": "— Nessuno —",
+      "visibleToPlayers": "Visibile ai giocatori",
+      "assignController": "Giocatore che può muovere",
+      "controllerNone": "— Solo GM (nessun drag giocatore) —",
+      "controllerUnlinked": "Giocatore non collegato ({{id}})",
+      "controllerNeedLinked": "Collega un personaggio a Discord nel vault per assegnare il controllo.",
+      "removeToken": "Rimuovi token",
+      "placeCharacter": "Aggiungi token personaggio",
+      "chooseCharacter": "— Scegli personaggio —",
+      "placeCharacterButton": "Metti in panchina",
+      "restoreAllCharacters": "Ripristina tutti i PG mancanti ({{count}})",
+      "placeNpc": "Aggiungi token PNG",
+      "chooseNpc": "— Scegli PNG —",
+      "placeNpcButton": "Metti in panchina",
+      "placeCustomTitle": "Token solo sessione",
+      "customTokenName": "Etichetta",
+      "customTokenNamePlaceholder": "es. Elementale del fuoco",
+      "placeCustomButton": "Aggiungi token custom",
+      "customTokenHint": "Non collegato a PNG in archivio. Visibile solo in questa sessione; eliminato con la sessione.",
+      "entityKindCustom": "custom"
+    }
+  },
+  "tabletop": {
+    "setMapBackground": "Imposta come sfondo tavolo",
+    "changeMapBackground": "Cambia sfondo mappa",
+    "backgroundUpdated": "Sfondo mappa aggiornato per i giocatori.",
+    "backgroundNoActiveMap": "Seleziona prima una mappa attiva sul tavolo."
+  },
   "images": {
     "listTitle": "Immagini di campagna",
     "create": "Nuova immagine",
@@ -495,6 +549,7 @@
     "linkCount": "{{count}} collegamenti",
     "previewAlt": "Anteprima",
     "closePreview": "Chiudi anteprima",
+    "showToPlayers": "Mostra ai giocatori",
     "thumbnailFailed": "Anteprima non disponibile",
     "noFile": "Nessun file allegato",
     "chooseFile": "Scegli file…",

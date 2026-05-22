@@ -24,6 +24,27 @@ export async function listMaps(campaignId: CampaignId): Promise<Map[]> {
 
 export async function createMap(input: CreateMapInput): Promise<Map> {
   const payload = parseBridgeInput(createMapInputSchema, input);
-  const raw = await invoke<unknown>('create_map', { input: { campaignId: payload.campaignId, name: payload.name ?? null } });
+  const raw = await invoke<unknown>('create_map', {
+    input: { campaignId: payload.campaignId, name: payload.name ?? null },
+  });
+  return parseMap(raw);
+}
+
+const updateMapBackgroundInputSchema = z.object({
+  mapId: z.string().min(1),
+  sessionId: z.string().min(1),
+  sessionToken: z.string().min(1),
+  syncApiBaseUrl: z.string().min(1),
+  campaignId: z.string().min(1),
+  localPath: z.string().min(1).optional(),
+  absoluteSourcePath: z.string().min(1).optional(),
+  campaignImageId: z.string().min(1).optional(),
+});
+
+export type UpdateMapBackgroundInput = z.infer<typeof updateMapBackgroundInputSchema>;
+
+export async function updateMapBackground(input: UpdateMapBackgroundInput): Promise<Map> {
+  const payload = parseBridgeInput(updateMapBackgroundInputSchema, input);
+  const raw = await invoke<unknown>('update_map_background', { input: payload });
   return parseMap(raw);
 }

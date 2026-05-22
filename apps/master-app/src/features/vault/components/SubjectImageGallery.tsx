@@ -4,9 +4,11 @@ import type { ReactElement } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { imageRefToSessionSource } from '../../../bridge/handouts.js';
 import { Button, BUTTON_ICON_WEIGHT } from '../../../components/ui/Button.js';
 import { ImagePreviewModal } from '../../../components/ui/ImagePreviewModal.js';
 import { resolveImageDisplayUrlAsync } from '../../../components/ui/resolve-local-image-url.js';
+import { useOptionalImagePreview } from '../../../context/ImagePreviewContext.js';
 import { removeCampaignImageLink } from '../../images/campaign-image-link-mutations.js';
 import { listCampaignImagesLinkedTo } from '../../images/campaign-image-links.js';
 import { imageRefHasDisplaySource, imageRefsEqual } from '../../images/image-ref-match.js';
@@ -72,9 +74,10 @@ export function SubjectImageGallery({
   onError,
 }: Props): ReactElement {
   const { t } = useTranslation();
+  const imagePreview = useOptionalImagePreview();
   const [items, setItems] = useState<CampaignImage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [preview, setPreview] = useState<PreviewState | null>(null);
+  const [localPreview, setLocalPreview] = useState<PreviewState | null>(null);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -99,16 +102,23 @@ export function SubjectImageGallery({
     (item: CampaignImage) => {
       if (!item.image) return;
       void resolveImageDisplayUrlAsync(campaignId, item.image).then((src) => {
-        if (src) {
-          setPreview({
+        if (!src) return;
+        const title = item.caption.trim() ? `${item.title} — ${item.caption.trim()}` : item.title;
+        const imageSource = imageRefToSessionSource(item.image);
+        if (imagePreview && imageSource) {
+          imagePreview.openPreview({
             src,
             alt: item.title,
-            title: item.caption.trim() ? `${item.title} — ${item.caption.trim()}` : item.title,
+            title,
+            campaignId,
+            imageSource: { ...imageSource, campaignImageId: item.id },
           });
+          return;
         }
+        setLocalPreview({ src, alt: item.title, title });
       });
     },
-    [campaignId],
+    [campaignId, imagePreview],
   );
 
   function isDefaultPortrait(item: CampaignImage): boolean {
@@ -235,13 +245,15 @@ export function SubjectImageGallery({
         {...(onError ? { onError } : {})}
       />
 
-      <ImagePreviewModal
-        open={preview !== null}
-        src={preview?.src ?? null}
-        alt={preview?.alt ?? ''}
-        {...(preview?.title ? { title: preview.title } : {})}
-        onClose={() => setPreview(null)}
-      />
+      {!imagePreview ? (
+        <ImagePreviewModal
+          open={localPreview !== null}
+          src={localPreview?.src ?? null}
+          alt={localPreview?.alt ?? ''}
+          {...(localPreview?.title ? { title: localPreview.title } : {})}
+          onClose={() => setLocalPreview(null)}
+        />
+      ) : null}
     </>
   );
 }

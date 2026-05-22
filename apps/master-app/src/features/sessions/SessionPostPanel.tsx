@@ -32,6 +32,7 @@ export function SessionPostPanel({
     <div className="session-post">
       <SessionWorkflowPanel
         session={session}
+        campaignId={campaignId}
         onSessionUpdated={onSessionUpdated}
         onError={onError}
         onConfigureDiscord={onConfigureDiscord}

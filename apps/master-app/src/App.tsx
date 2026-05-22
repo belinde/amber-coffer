@@ -1,4 +1,5 @@
 import type { Campaign } from '@amber/shared';
+import { SiteShell } from '@amber/ui';
 import type { ReactElement } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,9 +7,11 @@ import { useTranslation } from 'react-i18next';
 import { listCampaigns } from './bridge/campaigns.js';
 import { ActiveSessionProvider } from './context/ActiveSessionContext.js';
 import { AppErrorProvider, ErrorOutlet, useAppError } from './context/AppErrorContext.js';
+import { ImagePreviewProvider } from './context/ImagePreviewContext.js';
 import { SidebarCampaignSlot } from './features/campaigns/SidebarCampaignSlot.js';
 import { SettingsSidebarLink } from './features/settings/SettingsSidebarLink.js';
 import { SettingsView } from './features/settings/SettingsView.js';
+import { TabletopLiveProvider } from './features/tabletop-control/TabletopLiveContext.js';
 import type { VaultView } from './features/vault/useVaultNavigation.js';
 import {
   isVaultCatalogOnboardingDone,
@@ -79,9 +82,9 @@ function AppShell(): ReactElement {
   }, [clearError]);
 
   const shell = (
-    <div className="app-shell">
-      <aside className="app-sidebar">
-        <div className="app-sidebar__body">
+    <SiteShell
+      sidebar={
+        <>
           <h1>{t('app.title')}</h1>
           <p className="subtitle">{t('app.subtitle')}</p>
 
@@ -110,31 +113,30 @@ function AppShell(): ReactElement {
               <VaultSidebarNav vaultNavActive={shellSection === 'vault'} onNavigate={openVault} />
             </>
           ) : null}
-        </div>
-
-        <footer className="app-sidebar__footer">
+        </>
+      }
+      sidebarFooter={
+        <>
           <hr className="app-sidebar__divider" />
           <SettingsSidebarLink active={shellSection === 'settings'} onOpen={() => openSettings()} />
-        </footer>
-      </aside>
+        </>
+      }
+    >
+      {selectedCampaign === null ? <ErrorOutlet region="main" /> : null}
 
-      <main className="app-main">
-        {selectedCampaign === null ? <ErrorOutlet region="main" /> : null}
-
-        {shellSection === 'settings' ? (
-          <SettingsView onError={reportError} />
-        ) : selectedCampaign === null ? (
-          <p className="empty-state">{t('campaign.selectHint')}</p>
-        ) : (
-          <VaultShell
-            campaign={selectedCampaign}
-            onError={reportError}
-            onOpenSettings={openSettings}
-            onCampaignUpdated={handleCampaignUpdated}
-          />
-        )}
-      </main>
-    </div>
+      {shellSection === 'settings' ? (
+        <SettingsView onError={reportError} />
+      ) : selectedCampaign === null ? (
+        <p className="empty-state">{t('campaign.selectHint')}</p>
+      ) : (
+        <VaultShell
+          campaign={selectedCampaign}
+          onError={reportError}
+          onOpenSettings={openSettings}
+          onCampaignUpdated={handleCampaignUpdated}
+        />
+      )}
+    </SiteShell>
   );
 
   if (selectedCampaign === null || !onboardingResolved) {
@@ -152,7 +154,11 @@ function AppShell(): ReactElement {
       campaignId={selectedCampaign.id}
       initialView={initialVaultView}
     >
-      <ActiveSessionProvider campaignId={selectedCampaign.id}>{shell}</ActiveSessionProvider>
+      <ActiveSessionProvider campaignId={selectedCampaign.id}>
+        <TabletopLiveProvider>
+          <ImagePreviewProvider onError={reportError}>{shell}</ImagePreviewProvider>
+        </TabletopLiveProvider>
+      </ActiveSessionProvider>
     </VaultNavigationProvider>
   );
 }

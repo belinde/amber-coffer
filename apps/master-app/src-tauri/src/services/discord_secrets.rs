@@ -23,6 +23,10 @@ pub struct StoredOAuthSession {
     pub expires_at: i64,
     #[serde(default)]
     pub scope: Option<String>,
+    #[serde(default)]
+    pub discord_user_id: Option<String>,
+    #[serde(default)]
+    pub discord_username: Option<String>,
 }
 
 impl StoredOAuthSession {
@@ -213,7 +217,16 @@ pub fn oauth_session_from_token_response(
         refresh_token,
         expires_at,
         scope,
+        discord_user_id: None,
+        discord_username: None,
     }
+}
+
+pub fn gm_discord_user_id() -> Option<String> {
+    load_oauth_session()
+        .ok()
+        .flatten()
+        .and_then(|s| s.discord_user_id.filter(|id| !id.is_empty()))
 }
 
 #[cfg(test)]
@@ -228,6 +241,8 @@ mod tests {
             refresh_token: None,
             expires_at: now + 5_000,
             scope: None,
+            discord_user_id: None,
+            discord_username: None,
         };
         assert!(session.is_valid(now));
         assert!(!session.is_valid(now + 10_000));

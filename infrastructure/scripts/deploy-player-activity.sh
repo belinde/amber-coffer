@@ -8,15 +8,16 @@ if [[ "$ENV_NAME" != "prod" && "$ENV_NAME" != "dev" ]]; then
   exit 1
 fi
 
-REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/aws-env.sh
+source "${SCRIPT_DIR}/lib/aws-env.sh"
+
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 # shellcheck source=/dev/null
 [[ -s "$NVM_DIR/nvm.sh" ]] && . "$NVM_DIR/nvm.sh"
 cd "$REPO_ROOT"
 nvm use 2>/dev/null || true
-
-AWS_PROFILE="${AWS_PROFILE:-belinde}"
-export AWS_PROFILE
 
 BUCKET="$(aws ssm get-parameter \
   --name "/amber-coffer/${ENV_NAME}/web/player-activity-bucket-name" \

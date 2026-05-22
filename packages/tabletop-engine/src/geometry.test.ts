@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   BENCH_SLOTS_DEFAULT,
   benchSlotToPercent,
+  boardCellToGridPlacement,
   boardCellToPercent,
   cellKey,
   nearestFreeBenchSlot,
@@ -48,6 +49,19 @@ describe('pxToBenchSlot', () => {
     expect(pxToBenchSlot({ clientY: 0, rect })).toEqual({ slot: 0 });
     expect(pxToBenchSlot({ clientY: 60, rect })).toEqual({
       slot: Math.floor((60 / 120) * BENCH_SLOTS_DEFAULT),
+    });
+  });
+});
+
+describe('boardCellToGridPlacement', () => {
+  it('uses explicit single-cell grid areas (1-based)', () => {
+    expect(boardCellToGridPlacement({ xCell: 0, yCell: 0 })).toEqual({
+      gridColumn: '1 / 2',
+      gridRow: '1 / 2',
+    });
+    expect(boardCellToGridPlacement({ xCell: 5, yCell: 7 })).toEqual({
+      gridColumn: '6 / 7',
+      gridRow: '8 / 9',
     });
   });
 });

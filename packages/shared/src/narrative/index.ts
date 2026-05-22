@@ -1,6 +1,7 @@
 export * from './session.js';
 export * from './recording.js';
 export * from './session-recording-view.schema.js';
+export * from './session-discord-participant.schema.js';
 export * from './transcript.js';
 export * from './canon-diff.js';
 export * from './audio-source.schema.js';

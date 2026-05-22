@@ -107,6 +107,10 @@ Sorgente POC: `personaggi/*.md`. Owner: GM, ma legato a un `playerDiscordId` (Di
 
 Rappresenta un PG o PNG sulla mappa attiva. Il controllo drag in Discord Activity non dipende da `entityKind`: usa `controlledByPlayerDiscordId`.
 
+**Pre-creazione PG:** per ogni `character` con `status = active` esiste al più un token per mappa (`UNIQUE(map_id, entity_kind, entity_id)`). I token PG mancanti vengono creati in panchina da `ensure_character_tokens` (all'apertura del tavolo, alla creazione PG/mappa). Alla creazione, `controlledByPlayerDiscordId` copia `Character.playerDiscordId` se presente; su ensure successivi si aggiorna solo se il controller è ancora `NULL`.
+
+**Etichette letterali:** lo snapshot `tabletop.snapshot` include `tokenLabels` (iniziali) e `tokenNames` (nome completo per accessibilità); nessuna immagine sul token in questa fase.
+
 | Campo                         | Tipo                   | Note                                                                                  |
 | ----------------------------- | ---------------------- | ------------------------------------------------------------------------------------- |
 | `entityKind`                  | `'character' \| 'npc'` | Riferimento all'entità sotto il token                                                 |

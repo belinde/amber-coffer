@@ -1,12 +1,14 @@
 export { TabletopControlView } from './TabletopControlView.js';
 export {
   createHandout,
-  hideHandout,
+  ensureCampaignCharacterTokens,
   listHandouts,
   moveToken,
   placeToken,
   publishTabletopSnapshot,
   removeToken,
   resolveTokenMoveRequest,
-  shareHandout,
+  setTokenController,
+  setTokenVisibility,
 } from './bridge.js';
+export { hideHandout, shareHandout } from '../../bridge/handouts.js';

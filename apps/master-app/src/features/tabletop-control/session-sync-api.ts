@@ -1,4 +1,6 @@
 import {
+  sessionHandshakeChannelLinkRequestSchema,
+  sessionHandshakeChannelLinkResponseSchema,
   sessionMasterTokenRequestSchema,
   sessionMasterTokenResponseSchema,
   sessionSyncApiErrorSchema,
@@ -22,7 +24,7 @@ export class MasterSessionTokenError extends Error {
   }
 }
 
-function syncApiBaseUrl(): string {
+export function getSyncApiBaseUrl(): string {
   const url: unknown = import.meta.env.VITE_AMBER_SYNC_API_BASE_URL;
   if (typeof url !== 'string' || url.trim().length === 0) {
     throw new Error('VITE_AMBER_SYNC_API_BASE_URL not configured');
@@ -34,14 +36,20 @@ export async function fetchMasterSessionToken(args: {
   campaignId: Campaign['id'];
   sessionId: string;
   discordAccessToken: string;
-}): Promise<{ sessionToken: string; pollIntervalMs: number }> {
+  channelId?: string | undefined;
+}): Promise<{
+  sessionToken: string;
+  pollIntervalMs: number;
+  handshakeChannelLinked?: boolean | undefined;
+}> {
   const body = sessionMasterTokenRequestSchema.parse({
     campaignId: args.campaignId,
     sessionId: args.sessionId,
     discordAccessToken: args.discordAccessToken,
+    channelId: args.channelId,
   });
 
-  const res = await fetch(`${syncApiBaseUrl()}/session/master/token`, {
+  const res = await fetch(`${getSyncApiBaseUrl()}/session/master/token`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
@@ -56,7 +64,40 @@ export async function fetchMasterSessionToken(args: {
   }
 
   const parsed = sessionMasterTokenResponseSchema.parse(json);
-  return { sessionToken: parsed.sessionToken, pollIntervalMs: parsed.pollIntervalMs };
+  return {
+    sessionToken: parsed.sessionToken,
+    pollIntervalMs: parsed.pollIntervalMs,
+    handshakeChannelLinked: parsed.handshakeChannelLinked,
+  };
+}
+
+/** Point Player Activity handshake at the master's current live session for this voice channel. */
+export async function registerHandshakeChannel(args: {
+  sessionToken: string;
+  channelId: string;
+}): Promise<void> {
+  const body = sessionHandshakeChannelLinkRequestSchema.parse({
+    channelId: args.channelId,
+  });
+
+  const res = await fetch(`${getSyncApiBaseUrl()}/session/handshake/channel`, {
+    method: 'PUT',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${args.sessionToken}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const json: unknown = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const parsed = sessionSyncApiErrorSchema.safeParse(json);
+    const code = parsed.success ? parsed.data.error : 'handshake_channel_link_failed';
+    const message = parsed.success ? parsed.data.message : undefined;
+    throw new MasterSessionTokenError(res.status, code, message);
+  }
+
+  sessionHandshakeChannelLinkResponseSchema.parse(json);
 }
 
 export async function putSessionSnapshot(args: {
@@ -72,7 +113,7 @@ export async function putSessionSnapshot(args: {
     snapshot,
   });
 
-  const res = await fetch(`${syncApiBaseUrl()}/session/sync/snapshot`, {
+  const res = await fetch(`${getSyncApiBaseUrl()}/session/sync/snapshot`, {
     method: 'PUT',
     headers: {
       'content-type': 'application/json',
@@ -90,7 +131,7 @@ export async function getSessionSyncState(args: {
   sessionToken: string;
   sinceVersion?: number;
 }): Promise<{ status: 200; state: SessionSyncStateResponse } | { status: 304 }> {
-  let path = `${syncApiBaseUrl()}/session/sync/state`;
+  let path = `${getSyncApiBaseUrl()}/session/sync/state`;
   if (args.sinceVersion !== undefined) {
     path += `?sinceVersion=${encodeURIComponent(String(args.sinceVersion))}`;
   }

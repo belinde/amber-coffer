@@ -67,6 +67,8 @@ impl DiscordOAuthState {
 pub struct DiscordOauthStatus {
     pub connected: bool,
     pub expires_at: Option<i64>,
+    pub discord_user_id: Option<String>,
+    pub discord_username: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -340,12 +342,18 @@ async fn refresh_oauth_session(session: &StoredOAuthSession) -> AppResult<Stored
         .await
         .map_err(|e| AppError::Internal(format!("oauth refresh parse: {e}")))?;
 
-    Ok(oauth_session_from_token_response(
+    let base = oauth_session_from_token_response(
         token.access_token,
         token.refresh_token.or(session.refresh_token.clone()),
         token.expires_in,
         token.scope.or(session.scope.clone()),
-    ))
+    );
+    let mut enriched = enrich_oauth_session_with_user(&client, base).await?;
+    if enriched.discord_user_id.is_none() {
+        enriched.discord_user_id = session.discord_user_id.clone();
+        enriched.discord_username = session.discord_username.clone();
+    }
+    Ok(enriched)
 }
 
 pub async fn ensure_user_access_token(
@@ -383,14 +391,20 @@ pub fn oauth_status() -> AppResult<DiscordOauthStatus> {
         Some(session) if session.is_valid(now) => Ok(DiscordOauthStatus {
             connected: true,
             expires_at: Some(session.expires_at),
+            discord_user_id: session.discord_user_id.clone(),
+            discord_username: session.discord_username.clone(),
         }),
         Some(session) => Ok(DiscordOauthStatus {
             connected: false,
             expires_at: Some(session.expires_at),
+            discord_user_id: session.discord_user_id.clone(),
+            discord_username: session.discord_username.clone(),
         }),
         None => Ok(DiscordOauthStatus {
             connected: false,
             expires_at: None,
+            discord_user_id: None,
+            discord_username: None,
         }),
     }
 }
@@ -430,12 +444,47 @@ async fn exchange_authorization_code(code: &str, verifier: &str) -> AppResult<St
         .await
         .map_err(|e| AppError::Internal(format!("oauth token parse: {e}")))?;
 
-    Ok(oauth_session_from_token_response(
+    let client = http_client()?;
+    let base = oauth_session_from_token_response(
         token.access_token,
         token.refresh_token,
         token.expires_in,
         token.scope,
-    ))
+    );
+    enrich_oauth_session_with_user(&client, base).await
+}
+
+#[derive(Debug, Deserialize)]
+struct DiscordMeResponse {
+    id: String,
+    username: String,
+}
+
+async fn enrich_oauth_session_with_user(
+    client: &Client,
+    mut session: StoredOAuthSession,
+) -> AppResult<StoredOAuthSession> {
+    if session.discord_user_id.is_some() {
+        return Ok(session);
+    }
+    let res = client
+        .get("https://discord.com/api/v10/users/@me")
+        .bearer_auth(&session.access_token)
+        .send()
+        .await
+        .map_err(|e| AppError::Internal(format!("discord @me: {e}")))?;
+    if !res.status().is_success() {
+        let body = res.text().await.unwrap_or_default();
+        tracing::warn!("discord @me failed: {body}");
+        return Ok(session);
+    }
+    let me: DiscordMeResponse = res
+        .json()
+        .await
+        .map_err(|e| AppError::Internal(format!("discord @me parse: {e}")))?;
+    session.discord_user_id = Some(me.id);
+    session.discord_username = Some(me.username);
+    Ok(session)
 }
 
 /// Decodes the first dot-separated segment of a Discord bot token (unpadded standard base64).

@@ -381,6 +381,7 @@
     "editTitle": "Edit session",
     "empty": "No sessions yet.",
     "deleteConfirm": "Delete session {{name}}?",
+    "deleteConfirmFull": "Permanently delete session {{name}}?\n\nThis removes all session data from the campaign database (recordings metadata, transcripts, Discord assignments, session handouts, custom tabletop tokens) and deletes the on-disk workspace (audio files and transcripts).\n\nThis cannot be undone.",
     "numbered": "Session {{number}}",
     "number": "Number",
     "numberAuto": "Number is assigned automatically (next available).",
@@ -423,6 +424,23 @@
     "recordingTrackDiscord": "Discord {{id}}",
     "recordingTrackUnassigned": "No character assigned.",
     "recordingTrackAssign": "Assign in characters",
+    "participantsTitle": "Recording participants",
+    "participantCount": "Participants",
+    "playerCountLabel": "Players",
+    "playerCount": "{{count}} players",
+    "noParticipants": "No voice participants recorded.",
+    "participantGm": "Game Master",
+    "participantGmHint": "Narrator voice on Discord. Not linked to a player character.",
+    "participantPlayersTitle": "Players",
+    "participantDefaultCharacter": "Campaign link: {{name}}",
+    "participantNoDefaultCharacter": "No character linked in campaign.",
+    "participantSessionCharacter": "Character for this session",
+    "participantUnassigned": "Unassigned",
+    "participantSharedAccount": "Shared account",
+    "participantSharedAccountHint": "Two or more characters on the same Discord account: transcription cannot split voices; attribution happens during analysis.",
+    "participantAddSharedCharacter": "Add character (same account)",
+    "participantAddSharedCharacterPlaceholder": "Choose character…",
+    "participantEditCampaignLinks": "Campaign links",
     "stepTranscribe": "Transcription",
     "stepTranscribeHint": "Run offline Whisper only while recording is stopped and audio files exist.",
     "transcriptionStarting": "Starting transcription…",
@@ -477,7 +495,10 @@
     "postShowTabletop": "Show tabletop",
     "postHideTabletop": "Hide tabletop",
     "deleteSession": "Delete session",
-    "editDetailsLockedLive": "End the live session before editing dates or deleting."
+    "deleteBlockedLive": "End the live session before deleting.",
+    "deleteBlockedRecording": "Stop recording before deleting.",
+    "deleteBlockedTranscription": "Wait for transcription to finish before deleting.",
+    "editDetailsLockedLive": "End the live session before editing dates."
   },
   "sessionSync": {
     "errors": {
@@ -487,6 +508,39 @@
       "tokenFailed": "Could not obtain sync token ({{code}})."
     }
   },
+  "sessions": {
+    "tabletop": {
+      "tokenPanelAria": "Token management",
+      "tokenPanelTitle": "Tokens",
+      "selectToken": "Selected token",
+      "noTokenSelected": "— None —",
+      "visibleToPlayers": "Visible to players",
+      "assignController": "Player who can move",
+      "controllerNone": "— GM only (no player drag) —",
+      "controllerUnlinked": "Unlinked player ({{id}})",
+      "controllerNeedLinked": "Link a character to Discord in the vault to assign control.",
+      "removeToken": "Remove token",
+      "placeCharacter": "Add player character token",
+      "chooseCharacter": "— Choose character —",
+      "placeCharacterButton": "Place on bench",
+      "restoreAllCharacters": "Restore all missing PCs ({{count}})",
+      "placeNpc": "Add NPC token",
+      "chooseNpc": "— Choose NPC —",
+      "placeNpcButton": "Place on bench",
+      "placeCustomTitle": "Session-only token",
+      "customTokenName": "Label",
+      "customTokenNamePlaceholder": "e.g. Fire elemental",
+      "placeCustomButton": "Add custom token",
+      "customTokenHint": "Not linked to vault NPCs. Visible only in this session; removed when the session is deleted.",
+      "entityKindCustom": "custom"
+    }
+  },
+  "tabletop": {
+    "setMapBackground": "Set as table background",
+    "changeMapBackground": "Change map background",
+    "backgroundUpdated": "Map background updated for players.",
+    "backgroundNoActiveMap": "Select an active map on the tabletop first."
+  },
   "images": {
     "listTitle": "Campaign images",
     "create": "New image",
@@ -495,6 +549,7 @@
     "linkCount": "{{count}} links",
     "previewAlt": "Preview",
     "closePreview": "Close preview",
+    "showToPlayers": "Show to players",
     "thumbnailFailed": "Preview unavailable",
     "noFile": "No file attached",
     "chooseFile": "Choose file…",

@@ -12,6 +12,8 @@ const sampleToken: Token = {
   mapId: mapAId,
   entityKind: 'character',
   entityId: 'char-1',
+  sessionId: null,
+  displayName: null,
   position: { zone: 'board', xCell: 0, yCell: 0 },
   visibleToPlayers: true,
   controlledByPlayerDiscordId: null,
@@ -39,6 +41,8 @@ describe('tabletopReducer', () => {
       activeMapId: mapAId,
       maps: [],
       tokens: [sampleToken],
+      tokenLabels: { [tokenId]: 'CH' },
+      tokenNames: { [tokenId]: 'Character One' },
       visibleHandouts: [sampleHandout],
     });
     expect(next.activeMapId).toBe(mapAId);

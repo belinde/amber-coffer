@@ -13,6 +13,11 @@ import {
   SYNC_CORS_HEADERS,
 } from '../../shared/http-response.js';
 import {
+  createSessionAssetPresign,
+  validatePresignBody,
+  type PresignBody,
+} from '../../shared/session-assets-presign.js';
+import {
   appendPendingEvents,
   getSessionSyncRow,
   putSessionSnapshot,
@@ -23,6 +28,8 @@ const secrets = new SecretsManagerClient({});
 
 const TABLE_NAME = process.env.SESSION_SYNC_TABLE_NAME ?? '';
 const SESSION_AUTH_SECRET_ARN = process.env.SESSION_AUTH_SECRET_ARN ?? '';
+const SESSION_ASSETS_BUCKET_NAME = process.env.SESSION_ASSETS_BUCKET_NAME ?? '';
+const SESSION_ASSETS_PUBLIC_PREFIX = process.env.SESSION_ASSETS_PUBLIC_PREFIX ?? '/session-assets';
 
 let cachedAuthSecret: string | null = null;
 
@@ -54,6 +61,10 @@ async function authenticate(
 
 function requireConfigured(): boolean {
   return Boolean(TABLE_NAME && SESSION_AUTH_SECRET_ARN);
+}
+
+function requireAssetsConfigured(): boolean {
+  return Boolean(SESSION_ASSETS_BUCKET_NAME);
 }
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
@@ -118,6 +129,47 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     return jsonResponse(200, rowToStateResponse(row), { etag: etagForVersion(row.version) });
   }
 
+  if (path === '/session/assets/presign' && method === 'POST') {
+    if (!requireAssetsConfigured()) {
+      return jsonResponse(503, { error: 'session_assets_not_configured' });
+    }
+
+    const claims = await authenticate(event.headers.authorization);
+    if (!claims || claims.role !== 'master') {
+      return jsonResponse(403, { error: 'master_role_required' });
+    }
+
+    let body: PresignBody;
+    try {
+      body = JSON.parse(event.body ?? '{}') as PresignBody;
+    } catch {
+      return jsonResponse(400, { error: 'invalid_json' });
+    }
+
+    const validated = validatePresignBody(body, claims);
+    if (!validated.ok) {
+      return jsonResponse(400, { error: validated.error });
+    }
+
+    try {
+      const result = await createSessionAssetPresign({
+        bucketName: SESSION_ASSETS_BUCKET_NAME,
+        publicPrefix: SESSION_ASSETS_PUBLIC_PREFIX,
+        campaignId: validated.normalized.campaignId,
+        sessionId: validated.normalized.sessionId,
+        assetKind: validated.normalized.assetKind,
+        contentType: validated.normalized.contentType,
+        ...(validated.normalized.contentLength !== undefined
+          ? { contentLength: validated.normalized.contentLength }
+          : {}),
+      });
+      return jsonResponse(200, result);
+    } catch (err) {
+      console.error('session_assets_presign_failed', err);
+      return jsonResponse(500, { error: 'presign_failed' });
+    }
+  }
+
   if (path === '/session/sync/events' && method === 'POST') {
     const claims = await authenticate(event.headers.authorization);
     if (!claims || claims.role !== 'player') {
@@ -135,11 +187,22 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       return jsonResponse(400, { error: 'missing_events' });
     }
 
+    const enrichedEvents = body.events.map((event) => {
+      if (typeof event !== 'object' || event === null) {
+        return event;
+      }
+      const record = event as Record<string, unknown>;
+      if (record.kind === 'token.move.request') {
+        return { ...record, senderDiscordId: claims.sub };
+      }
+      return event;
+    });
+
     const row = await appendPendingEvents({
       tableName: TABLE_NAME,
       campaignId: claims.campaignId,
       sessionId: claims.sessionId,
-      events: body.events,
+      events: enrichedEvents,
     });
 
     return jsonResponse(200, { ok: true, version: row.version });

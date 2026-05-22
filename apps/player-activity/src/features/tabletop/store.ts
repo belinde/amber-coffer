@@ -47,6 +47,8 @@ class TabletopStore {
           activeMapId: payload.activeMapId,
           maps: payload.maps,
           tokens: payload.tokens,
+          tokenLabels: payload.tokenLabels,
+          tokenNames: payload.tokenNames,
           visibleHandouts: payload.visibleHandouts,
         });
         return;
@@ -65,6 +67,9 @@ class TabletopStore {
         return;
       case 'token.removed':
         this.dispatch({ type: 'token.removed', tokenId: payload.tokenId });
+        return;
+      case 'map.updated':
+        this.dispatch({ type: 'map.updated', map: payload.map });
         return;
       case 'handout.shown':
         this.dispatch({ type: 'handout.shown', handout: payload.handout });

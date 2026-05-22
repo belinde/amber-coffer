@@ -1,0 +1,212 @@
+.tabletop-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0.5rem;
+  min-width: 0;
+  width: 100%;
+  overflow: visible;
+  touch-action: none;
+  user-select: none;
+}
+
+.tabletop-board-area {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: visible;
+}
+
+.tabletop-board {
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background-image: var(--board-bg-image, none);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.tabletop-board__grid {
+  --token-fill: 0.9;
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols, 24), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--grid-rows, 18), minmax(0, 1fr));
+  width: 100%;
+  aspect-ratio: var(--grid-aspect-ratio, 4 / 3);
+  position: relative;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size:
+    calc(100% / var(--grid-cols, 24)) calc(100% / var(--grid-rows, 18));
+}
+
+.tabletop-bench {
+  position: relative;
+  flex: 0 0 3.5rem;
+  align-self: stretch;
+  min-height: 12rem;
+  border: 1px dashed var(--panel-border);
+  border-radius: 6px;
+  background: var(--panel);
+}
+
+.tabletop-token-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: clamp(0.45rem, 38cqmin, 0.75rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: var(--tabletop-token-label-color, #1a1612);
+  user-select: none;
+}
+
+.tabletop-ghost {
+  pointer-events: none;
+  border: 2px dashed var(--accent);
+  border-radius: 50%;
+  opacity: 0.6;
+  z-index: 5;
+  place-self: center;
+  width: calc(100% * var(--token-fill, 0.9));
+  max-width: 100%;
+  max-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1;
+  box-sizing: border-box;
+}
+
+.tabletop-ghost--bench {
+  position: absolute;
+  place-self: auto;
+  transform: translate(-50%, -50%);
+  width: 2.5rem;
+  height: 2.5rem;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: auto;
+}
+
+.tabletop-token {
+  container-type: size;
+  user-select: none;
+  place-self: center;
+  width: calc(100% * var(--token-fill, 0.9));
+  max-width: 100%;
+  max-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--tabletop-token-bg, #c9a227);
+  border: 2px solid var(--tabletop-token-border, #f0e6c8);
+  cursor: grab;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.tabletop-token.dragging {
+  opacity: 0.85;
+  cursor: grabbing;
+  z-index: 10;
+}
+
+.tabletop-token--player-default {
+  cursor: default;
+}
+
+.tabletop-token--owned {
+  cursor: grab;
+}
+
+.tabletop-token--owned.dragging {
+  opacity: 0.85;
+  cursor: grabbing;
+  z-index: 10;
+}
+
+.tabletop-token--locked {
+  cursor: default;
+  opacity: 0.9;
+}
+
+.tabletop-token--bench {
+  position: absolute;
+  width: 2.5rem;
+  height: 2.5rem;
+  aspect-ratio: auto;
+  max-width: none;
+  max-height: none;
+  place-self: auto;
+  transform: translate(-50%, -50%);
+}
+
+.tabletop-token--bench.tabletop-token--owned {
+  transform: translate(-50%, -50%);
+}
+
+.tabletop-handouts {
+  flex: 0 0 12rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 20rem;
+  overflow: auto;
+}
+
+.tabletop-handout {
+  padding: 0.5rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: var(--panel);
+  font-size: 0.85rem;
+}
+
+.tabletop-handout header {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.tabletop-handout img {
+  max-width: 100%;
+  border-radius: 4px;
+}
+
+.dev-panel {
+  padding: 0.75rem 1rem;
+  border: 1px dashed var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.dev-panel__title {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+}
+
+.dev-panel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.dev-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

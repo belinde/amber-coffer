@@ -35,6 +35,8 @@ export type DiscordGuildMemberOption = z.infer<typeof discordGuildMemberOptionSc
 export const discordOauthStatusSchema = z.object({
   connected: z.boolean(),
   expiresAt: z.number().int().nullable().optional(),
+  discordUserId: z.string().nullable().optional(),
+  discordUsername: z.string().nullable().optional(),
 });
 
 export type DiscordOauthStatus = z.infer<typeof discordOauthStatusSchema>;

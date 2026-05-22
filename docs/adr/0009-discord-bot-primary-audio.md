@@ -13,8 +13,10 @@ La decisione di prodotto (2026-05-17) allinea l'implementazione al bot Discord c
 
 1. **`discord_capture` è la sorgente audio primaria** per le sessioni live: processo `apps/discord-bot` (Node + discord.js + @discordjs/voice) orchestrato dal master-app.
 2. **Layout file** sotto `$APPDATA/amber-coffer/worlds/<storageUuid>/sessions/<sessionNumber>/` (vedi [ADR 0002](./0002-local-first-storage.md)):
-   - `audio/discord/<discordUserId>/<NNNN>.ogg` — chunk Opus per burst vocale / riconnessione (manifest v2, `sessionOffsetMs`)
-   - `audio/manifest.json` — metadati a fine registrazione (`version: 2`, array `chunks`)
+   - `audio/discord/<discordUserId>/track.ogg` — traccia consolidata per partecipante (dopo ingest)
+   - `audio/discord/<discordUserId>/<NNNN>.ogg` — chunk grezzi opzionali (handoff bot, poi `superseded` in DB)
+   - `audio/manifest.json` — handoff bot + snapshot esportato da SQLite per Whisper
+   - **SQLite campagna** (fonte di verità post-ingest): `recording_segments`, `recordings`, `session_discord_assignments`
    - Legacy v1: singolo `<discordUserId>.wav` per partecipante (ancora leggibile da Whisper)
    - `transcripts/raw-merged.txt` — trascrizione grezza merged (in attesa di refinement)
    - `transcripts/segments.json` — segmenti strutturati Whisper

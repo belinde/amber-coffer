@@ -1,117 +1,92 @@
-import type { Token } from '@amber/shared';
-import {
-  BENCH_SLOTS_DEFAULT,
-  benchSlotToPercent,
-  boardCellToPercent,
-} from '@amber/tabletop-engine';
-import type { CSSProperties, ReactElement } from 'react';
+import { TabletopBoard } from '@amber/ui';
+import type { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { sessionAssetUrl } from './session-asset-url.js';
 import { useTabletopState } from './store.js';
 
-const DEFAULT_GRID_SIZE_PX = 50;
-
-/**
- * Read-only tabletop view rendered inside the Discord Activity iframe.
- */
 type Props = {
   gridCols: number;
   gridRows: number;
   benchSlots?: number;
   gridSizePx?: number;
-  /** CSS aspect-ratio value, e.g. `4 / 3` or `1920 / 1080`. */
-  boardAspectRatio?: string;
 };
 
+/**
+ * Read-only tabletop view (legacy export; live Activity uses {@link TabletopPlayerView}).
+ */
 export function TabletopView({
   gridCols,
   gridRows,
-  benchSlots = BENCH_SLOTS_DEFAULT,
-  gridSizePx = DEFAULT_GRID_SIZE_PX,
-  boardAspectRatio = '4 / 3',
+  benchSlots = 12,
+  gridSizePx = 50,
 }: Props): ReactElement {
+  const { t } = useTranslation();
   const state = useTabletopState();
-  const grid = { cols: gridCols, rows: gridRows };
+  const tokenNames = state.tokenNames;
 
-  const boardTokens = state.tokens.filter((t) => t.position.zone === 'board');
-  const benchTokens = state.tokens.filter((t) => t.position.zone === 'bench');
+  const activeMap =
+    state.activeMapId !== null
+      ? (state.maps.find((m) => m.id === state.activeMapId) ?? null)
+      : null;
 
-  const boardStyle = {
-    '--board-aspect-ratio': boardAspectRatio,
-    '--cell-size': `${gridSizePx}px`,
-    '--grid-cols': grid.cols,
-    '--grid-rows': grid.rows,
-  } as CSSProperties;
+  const map =
+    activeMap ??
+    ({
+      imagePath: '',
+      widthPx: 0,
+      heightPx: 0,
+      gridCols,
+      gridRows,
+      gridSizePx,
+      benchSlots,
+    } as const);
+
+  const backgroundImageUrl =
+    activeMap?.backgroundPublicPath != null
+      ? (sessionAssetUrl(activeMap.backgroundPublicPath) ?? null)
+      : null;
 
   return (
-    <div className="tabletop-wrap">
-      <div className="tabletop-board-area">
-        <div className="tabletop-board" style={boardStyle}>
-          <div className="tabletop-board__grid" role="application" aria-label="Tabletop">
-            {boardTokens.map((token) => (
-              <TokenChip key={token.id} token={token} grid={grid} />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <aside className="tabletop-bench" aria-label="Off-board tokens">
-        {benchTokens.map((token) => (
-          <BenchTokenChip key={token.id} token={token} benchSlots={benchSlots} />
-        ))}
-      </aside>
-
+    <TabletopBoard
+      map={map}
+      tokens={state.tokens}
+      tokenLabels={state.tokenLabels}
+      backgroundImageUrl={backgroundImageUrl}
+      labels={{
+        boardAria: t('tabletop.boardAria', { defaultValue: 'Tabletop' }),
+        benchAria: t('tabletop.benchAria', { defaultValue: 'Off-board tokens' }),
+      }}
+      canDragToken={() => false}
+      getTokenInteraction={(token) => {
+        const name = tokenNames[token.id] ?? token.entityId;
+        return {
+          className:
+            token.position.zone === 'bench'
+              ? 'tabletop-token tabletop-token--bench'
+              : 'tabletop-token',
+          role: 'img',
+          ariaLabel: name,
+          title: name,
+        };
+      }}
+    >
       {state.visibleHandouts.length > 0 ? (
-        <section className="tabletop-handouts" aria-label="Shared handouts">
+        <section
+          className="tabletop-handouts"
+          aria-label={t('tabletop.handoutsAria', { defaultValue: 'Shared handouts' })}
+        >
           {state.visibleHandouts.map((h) => (
             <article key={h.id} className="tabletop-handout">
               <header>{h.label}</header>
-              {h.image?.thumbnailUrl ? <img src={h.image.thumbnailUrl} alt={h.label} /> : null}
+              {sessionAssetUrl(h.image?.thumbnailUrl) ? (
+                <img src={sessionAssetUrl(h.image?.thumbnailUrl) ?? ''} alt={h.label} />
+              ) : null}
               {h.body ? <p>{h.body}</p> : null}
             </article>
           ))}
         </section>
       ) : null}
-    </div>
-  );
-}
-
-function TokenChip({
-  token,
-  grid,
-}: {
-  token: Token;
-  grid: { cols: number; rows: number };
-}): ReactElement | null {
-  if (token.position.zone !== 'board') return null;
-  const style = boardCellToPercent({
-    xCell: token.position.xCell,
-    yCell: token.position.yCell,
-    grid,
-  });
-  return (
-    <div className="tabletop-token" style={style} role="img" aria-label={`Token ${token.entityId}`}>
-      <span className="tabletop-token-dot" />
-    </div>
-  );
-}
-
-function BenchTokenChip({
-  token,
-  benchSlots,
-}: {
-  token: Token;
-  benchSlots: number;
-}): ReactElement | null {
-  if (token.position.zone !== 'bench') return null;
-  const style = benchSlotToPercent({ slot: token.position.slot, benchSlots });
-  return (
-    <div
-      className="tabletop-token tabletop-token--bench"
-      style={style}
-      role="img"
-      aria-label={`Bench token ${token.entityId}`}
-    >
-      <span className="tabletop-token-dot" />
-    </div>
+    </TabletopBoard>
   );
 }

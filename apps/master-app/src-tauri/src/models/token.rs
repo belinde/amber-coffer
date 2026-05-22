@@ -6,6 +6,8 @@ pub struct TokenRow {
     pub map_id: String,
     pub entity_kind: String,
     pub entity_id: String,
+    pub session_id: Option<String>,
+    pub display_name: Option<String>,
     pub zone: String,
     pub x_cell: Option<i32>,
     pub y_cell: Option<i32>,
@@ -36,12 +38,27 @@ pub struct Token {
     pub map_id: String,
     pub entity_kind: String,
     pub entity_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub session_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display_name: Option<String>,
     pub position: TokenPosition,
     pub visible_to_players: bool,
     pub controlled_by_player_discord_id: Option<String>,
     pub created_at: i64,
     pub updated_at: i64,
     pub version: i32,
+}
+
+pub fn normalize_optional_discord_id(id: Option<String>) -> Option<String> {
+    id.and_then(|value| {
+        let trimmed = value.trim();
+        if trimmed.is_empty() {
+            None
+        } else {
+            Some(trimmed.to_string())
+        }
+    })
 }
 
 impl Token {
@@ -66,9 +83,11 @@ impl Token {
             map_id: row.map_id,
             entity_kind: row.entity_kind,
             entity_id: row.entity_id,
+            session_id: row.session_id,
+            display_name: row.display_name,
             position,
             visible_to_players: row.visible_to_players != 0,
-            controlled_by_player_discord_id: row.controlled_by_discord_id,
+            controlled_by_player_discord_id: normalize_optional_discord_id(row.controlled_by_discord_id),
             created_at: row.created_at,
             updated_at: row.updated_at,
             version: row.version,

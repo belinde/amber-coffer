@@ -13,6 +13,7 @@ export const itemIdSchema = uuidV7Schema.brand<'ItemId'>();
 export const relationshipIdSchema = uuidV7Schema.brand<'RelationshipId'>();
 export const sessionIdSchema = uuidV7Schema.brand<'SessionId'>();
 export const recordingIdSchema = uuidV7Schema.brand<'RecordingId'>();
+export const sessionDiscordAssignmentIdSchema = uuidV7Schema.brand<'SessionDiscordAssignmentId'>();
 export const transcriptIdSchema = uuidV7Schema.brand<'TranscriptId'>();
 export const canonDiffIdSchema = uuidV7Schema.brand<'CanonDiffId'>();
 export const mapIdSchema = uuidV7Schema.brand<'MapId'>();
@@ -25,6 +26,12 @@ export const campaignImageIdSchema = uuidV7Schema.brand<'CampaignImageId'>();
 export const discordChannelIdSchema = z.string().min(1).brand<'DiscordChannelId'>();
 export const discordGuildIdSchema = z.string().min(1).brand<'DiscordGuildId'>();
 export const discordUserIdSchema = z.string().min(1).brand<'DiscordUserId'>();
+
+/** SQLite / forms may emit `""`; treat as unset for optional Discord links. */
+export const nullableDiscordUserIdSchema = z.preprocess(
+  (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
+  discordUserIdSchema.nullable(),
+);
 
 export const entityKindSchema = z.enum([
   'character',
@@ -39,4 +46,4 @@ export const entityKindSchema = z.enum([
 
 export const entityOwnerKindSchema = z.enum(['character', 'npc', 'location', 'faction']);
 
-export const tokenEntityKindSchema = z.enum(['character', 'npc']);
+export const tokenEntityKindSchema = z.enum(['character', 'npc', 'custom']);

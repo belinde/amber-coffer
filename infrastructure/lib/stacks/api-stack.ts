@@ -97,6 +97,8 @@ export class ApiStack extends cdk.Stack {
       environment: {
         SESSION_SYNC_TABLE_NAME: props.sessionSyncTable.tableName,
         SESSION_AUTH_SECRET_ARN: props.sessionAuthSecret.secretArn,
+        SESSION_ASSETS_BUCKET_NAME: props.playerActivityBucket.bucketName,
+        SESSION_ASSETS_PUBLIC_PREFIX: '/session-assets',
       },
     });
 
@@ -116,13 +118,16 @@ export class ApiStack extends cdk.Stack {
       },
       environment: {
         SESSION_AUTH_SECRET_ARN: props.sessionAuthSecret.secretArn,
+        HANDSHAKE_TABLE_NAME: props.handshakeTable.tableName,
         POLL_INTERVAL_MS,
         DISCORD_APPLICATION_ID: '1505870393007935598',
       },
     });
 
-    props.handshakeTable.grantReadData(handshakeFn);
+    props.handshakeTable.grantReadWriteData(handshakeFn);
+    props.handshakeTable.grantReadWriteData(masterTokenFn);
     props.sessionSyncTable.grantReadWriteData(sessionSyncFn);
+    props.playerActivityBucket.grantPut(sessionSyncFn, 'session-assets/*');
     props.sessionAuthSecret.grantRead(handshakeFn);
     props.sessionAuthSecret.grantRead(sessionSyncFn);
     props.sessionAuthSecret.grantRead(masterTokenFn);
@@ -163,6 +168,12 @@ export class ApiStack extends cdk.Stack {
     });
 
     this.httpApi.addRoutes({
+      path: '/session/handshake/channel',
+      methods: [apigwv2.HttpMethod.PUT, apigwv2.HttpMethod.OPTIONS],
+      integration: handshakeIntegration,
+    });
+
+    this.httpApi.addRoutes({
       path: '/session/sync/state',
       methods: [apigwv2.HttpMethod.GET, apigwv2.HttpMethod.OPTIONS],
       integration: syncIntegration,
@@ -184,6 +195,12 @@ export class ApiStack extends cdk.Stack {
       path: '/session/master/token',
       methods: [apigwv2.HttpMethod.POST, apigwv2.HttpMethod.OPTIONS],
       integration: masterTokenIntegration,
+    });
+
+    this.httpApi.addRoutes({
+      path: '/session/assets/presign',
+      methods: [apigwv2.HttpMethod.POST, apigwv2.HttpMethod.OPTIONS],
+      integration: syncIntegration,
     });
 
     const domainName = new apigwv2.DomainName(this, 'ApiDomain', {
@@ -239,6 +256,16 @@ export class ApiStack extends cdk.Stack {
     new ssm.StringParameter(this, 'SyncStateUrlParam', {
       parameterName: ssmPath(props.envName, 'api', 'sync-state-url'),
       stringValue: `https://${apiHostname}/session/sync/state`,
+    });
+
+    new ssm.StringParameter(this, 'SessionAssetsPresignUrlParam', {
+      parameterName: ssmPath(props.envName, 'api', 'session-assets-presign-url'),
+      stringValue: `https://${apiHostname}/session/assets/presign`,
+    });
+
+    new ssm.StringParameter(this, 'SessionAssetsPublicPrefixParam', {
+      parameterName: ssmPath(props.envName, 'web', 'session-assets-public-prefix'),
+      stringValue: '/session-assets',
     });
   }
 }

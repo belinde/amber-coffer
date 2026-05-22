@@ -6,15 +6,29 @@ import { useTranslation } from 'react-i18next';
 import { Button } from './Button.js';
 import { ActionIcons } from './icons.js';
 
+type SessionActions = {
+  busy: boolean;
+  onShowToPlayers: () => void;
+  onSetTableBackground?: () => void;
+};
+
 type Props = {
   open: boolean;
   src: string | null;
   alt: string;
   title?: string | undefined;
   onClose: () => void;
+  sessionActions?: SessionActions;
 };
 
-export function ImagePreviewModal({ open, src, alt, title, onClose }: Props): ReactElement | null {
+export function ImagePreviewModal({
+  open,
+  src,
+  alt,
+  title,
+  onClose,
+  sessionActions,
+}: Props): ReactElement | null {
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -57,6 +71,27 @@ export function ImagePreviewModal({ open, src, alt, title, onClose }: Props): Re
         <div className="image-preview-modal__stage">
           <img className="image-preview-modal__img" src={src} alt={alt} />
         </div>
+        {sessionActions ? (
+          <footer className="image-preview-modal__actions">
+            <Button
+              type="button"
+              variant="primary"
+              disabled={sessionActions.busy}
+              onClick={sessionActions.onShowToPlayers}
+            >
+              {t('images.showToPlayers')}
+            </Button>
+            {sessionActions.onSetTableBackground ? (
+              <Button
+                type="button"
+                disabled={sessionActions.busy}
+                onClick={sessionActions.onSetTableBackground}
+              >
+                {t('tabletop.setMapBackground')}
+              </Button>
+            ) : null}
+          </footer>
+        ) : null}
       </div>
     </div>,
     document.body,

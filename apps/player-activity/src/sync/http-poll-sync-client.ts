@@ -1,4 +1,4 @@
-import type { CampaignId, MqttMessage, SessionId, SyncChannel } from '@amber/shared';
+import type { CampaignId, MqttMessage, SessionId, SyncChannel, Token } from '@amber/shared';
 import { mqttMessageSchema } from '@amber/shared';
 import { buildSyncTopic } from '@amber/shared';
 
@@ -32,6 +32,15 @@ export class HttpPollSyncClient implements SyncClientLike {
   private callbacks: HttpPollSyncCallbacks = {};
   private gotSnapshot = false;
 
+  /**
+   * Tracks optimistic token positions posted via postEvents() but not yet
+   * confirmed by a server pendingEvent. Prevents snapshot clobbering.
+   */
+  private pendingMoves = new Map<
+    Token['id'],
+    { mapId: Token['mapId']; position: Token['position'] }
+  >();
+
   subscribe(channel: SyncChannel, handler: SyncMessageHandler): () => void {
     const set = this.handlers.get(channel) ?? new Set();
     set.add(handler);
@@ -63,6 +72,7 @@ export class HttpPollSyncClient implements SyncClientLike {
     this.callbacks = args.callbacks ?? {};
     this.lastVersion = 0;
     this.gotSnapshot = false;
+    this.pendingMoves.clear();
     this.running = true;
     void this.pollOnce();
   }
@@ -80,6 +90,17 @@ export class HttpPollSyncClient implements SyncClientLike {
     if (!token) {
       throw new SessionSyncError(0, 'sync_not_started');
     }
+
+    // Track optimistic moves for token.move.request events
+    for (const event of events) {
+      if (event.kind === 'token.move.request') {
+        this.pendingMoves.set(event.tokenId, {
+          mapId: event.mapId,
+          position: event.requestedPosition,
+        });
+      }
+    }
+
     await postSessionSyncEvents(token, events, {
       useDiscordProxy: options?.useDiscordProxy ?? this.useDiscordProxy,
     });
@@ -118,17 +139,47 @@ export class HttpPollSyncClient implements SyncClientLike {
       }
 
       if (state.sessionEnded) {
+        this.pendingMoves.clear();
         this.callbacks.onSessionEnded?.();
         this.stop();
         return;
       }
 
+      // 1. Process pendingEvents — clear confirmed optimistic moves
+      for (const rawEvent of state.pendingEvents) {
+        const parsed = mqttMessageSchema.parse(rawEvent);
+
+        // Clear optimistic move when server confirms a token.moved
+        if (parsed.kind === 'token.moved') {
+          this.pendingMoves.delete(parsed.tokenId);
+        }
+      }
+
+      // 2. Apply snapshot if present (base state, possibly stale)
       if (state.snapshot) {
         const snapshot = mqttMessageSchema.parse(state.snapshot);
         this.dispatch('snapshot', snapshot);
         if (!this.gotSnapshot) {
           this.gotSnapshot = true;
           this.callbacks.onFirstSnapshot?.();
+        }
+      }
+
+      // 3. Apply pendingEvents on top of snapshot (they are newer confirmed deltas)
+      for (const rawEvent of state.pendingEvents) {
+        const parsed = mqttMessageSchema.parse(rawEvent);
+        this.dispatchEvent(parsed);
+      }
+
+      // 4. Re-overlay any remaining optimistic moves not yet confirmed
+      if (this.pendingMoves.size > 0) {
+        for (const [tokenId, { mapId, position }] of this.pendingMoves) {
+          this.dispatchEvent({
+            kind: 'token.moved',
+            tokenId,
+            mapId,
+            position,
+          });
         }
       }
     } catch (err) {
@@ -146,6 +197,46 @@ export class HttpPollSyncClient implements SyncClientLike {
     }
     for (const handler of handlers) {
       handler(payload);
+    }
+  }
+
+  /**
+   * Routes a parsed MqttMessage to the appropriate channel based on its kind.
+   * Used for dispatching pendingEvents and optimistic move re-overlays.
+   */
+  private dispatchEvent(payload: MqttMessage): void {
+    const channel = this.channelForKind(payload.kind);
+    if (channel) {
+      this.dispatch(channel, payload);
+    }
+  }
+
+  private channelForKind(kind: MqttMessage['kind']): SyncChannel | null {
+    switch (kind) {
+      case 'token.moved':
+      case 'token.move.request':
+      case 'token.created':
+      case 'token.removed':
+        return 'tokens';
+      case 'map.activated':
+      case 'map.updated':
+        return 'maps';
+      case 'fog.revealed':
+      case 'fog.hidden':
+        return 'fog';
+      case 'handout.shown':
+      case 'handout.hidden':
+        return 'handouts';
+      case 'entity.updated':
+        return 'entities';
+      case 'session.handshake':
+      case 'session.heartbeat':
+      case 'session.ended':
+        return 'control';
+      case 'tabletop.snapshot':
+        return 'snapshot';
+      default:
+        return null;
     }
   }
 }

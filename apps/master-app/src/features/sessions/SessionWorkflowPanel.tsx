@@ -1,4 +1,4 @@
-import type { Session } from '@amber/shared';
+import type { Campaign, Session } from '@amber/shared';
 import type { ReactElement } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ import { SessionRecordingControls } from './SessionRecordingControls.js';
 
 type Props = {
   session: Session;
+  campaignId: Campaign['id'];
   onSessionUpdated: (session: Session) => void;
   onError: (message: string) => void;
   onConfigureDiscord?: () => void;
@@ -33,6 +34,7 @@ function stepClass(state: StepState): string {
 
 export function SessionWorkflowPanel({
   session,
+  campaignId,
   onSessionUpdated,
   onError,
   onConfigureDiscord,
@@ -62,7 +64,15 @@ export function SessionWorkflowPanel({
 
   const botReady = pipeline?.hasBotToken === true;
   const transcriptionActive = pipeline?.transcriptionActive === true;
-  const isTranscribing = session.status === 'transcribing' || transcriptionActive;
+  const transcriptionProgress = pipeline?.transcriptionProgress ?? null;
+  const transcriptionInFlight =
+    transcriptionActive ||
+    session.status === 'transcribing' ||
+    (pipeline?.transcriptionAttempted === true &&
+      transcriptionProgress !== null &&
+      transcriptionProgress < 1 &&
+      pipeline?.hasRawTranscript !== true);
+  const isTranscribing = transcriptionInFlight;
 
   useEffect(() => {
     if (!isTranscribing && !transcriptionLaunching) return;
@@ -99,12 +109,12 @@ export function SessionWorkflowPanel({
     botReady &&
     pipeline !== null &&
     !recordingActive &&
-    !transcriptionActive &&
+    !transcriptionInFlight &&
     hasAudio &&
     ['recorded', 'transcribed'].includes(session.status);
 
   const transcriptionStalled =
-    session.status === 'transcribing' && !transcriptionActive && !pipeline?.hasRawTranscript;
+    session.status === 'transcribing' && !transcriptionInFlight && !pipeline?.hasRawTranscript;
 
   const canRetryTranscription =
     transcriptionStalled && botReady && pipeline !== null && !recordingActive && hasAudio;
@@ -116,7 +126,7 @@ export function SessionWorkflowPanel({
     !transcriptionLaunching &&
     !showTranscriptionProgress;
 
-  const transcriptionProgressPercent = Math.round((pipeline?.transcriptionProgress ?? 0) * 100);
+  const transcriptionProgressPercent = Math.round((transcriptionProgress ?? 0) * 100);
 
   const recordState: StepState = pipeline?.transcriptionAttempted
     ? 'done'
@@ -193,6 +203,7 @@ export function SessionWorkflowPanel({
             </div>
             <SessionRecordingControls
               session={session}
+              campaignId={campaignId}
               onSessionUpdated={(updated) => {
                 onSessionUpdated(updated);
                 void refresh();

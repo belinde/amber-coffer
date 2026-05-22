@@ -163,16 +163,16 @@ Risposte utente (Fase 1, 2026-05-17) e ADR generati:
 
 Decisioni successive (Fase 4):
 
-| Decisione                                  | Esito                                                                                                                                | Riferimento                                                  |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| Token: coordinate cella vs pixel           | **Cell-based** (`xCell`/`yCell`)                                                                                                     | [tabletop-porting-notes.md](./tabletop-porting-notes.md) §D1 |
-| Bench off-board                            | **Sì**, slot verticali                                                                                                               | [tabletop-porting-notes.md](./tabletop-porting-notes.md) §D2 |
-| Movimento token da player                  | **Diretto** su token con `controlledByPlayerDiscordId` → `token.moved` (`senderRole: player`); `token.move.request` opzionale/futuro | Activity + validazione master (sprint 2)                     |
-| Handout                                    | **Entità first-class** (tabella `handouts`, schema Zod, messaggi `handout.shown`/`hidden`)                                           | §D4                                                          |
-| Presenza player nel tabletop               | **Solo Discord** (niente lobby dedicata)                                                                                             | §D5                                                          |
-| Bootstrap nuovo player a sessione in corso | **Snapshot retained MQTT** (`tabletop.snapshot`)                                                                                     | §D6                                                          |
-| Codice tabletop dove vive                  | **Nuovo package `@amber/tabletop-engine`** + feature in entrambe le app                                                              | §D7                                                          |
-| Cleanup symlink legacy-cloud               | **Rimosso in Fase 6** (port completato, residuo documentato)                                                                         | [\_readonly/README.md](../../_readonly/README.md)            |
+| Decisione                                  | Esito                                                                                                                           | Riferimento                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Token: coordinate cella vs pixel           | **Cell-based** (`xCell`/`yCell`)                                                                                                | [tabletop-porting-notes.md](./tabletop-porting-notes.md) §D1 |
+| Bench off-board                            | **Sì**, slot verticali                                                                                                          | [tabletop-porting-notes.md](./tabletop-porting-notes.md) §D2 |
+| Movimento token da player                  | `token.move.request` via HTTP sync; master valida `controlledByPlayerDiscordId` + `senderDiscordId` (JWT) prima di `move_token` | Implementato (ADR 0014)                                      |
+| Handout                                    | **Entità first-class** (tabella `handouts`, schema Zod, messaggi `handout.shown`/`hidden`)                                      | §D4                                                          |
+| Presenza player nel tabletop               | **Solo Discord** (niente lobby dedicata)                                                                                        | §D5                                                          |
+| Bootstrap nuovo player a sessione in corso | **Snapshot retained MQTT** (`tabletop.snapshot`)                                                                                | §D6                                                          |
+| Codice tabletop dove vive                  | **Nuovo package `@amber/tabletop-engine`** + feature in entrambe le app                                                         | §D7                                                          |
+| Cleanup symlink legacy-cloud               | **Rimosso in Fase 6** (port completato, residuo documentato)                                                                    | [\_readonly/README.md](../../_readonly/README.md)            |
 
 Punti ancora aperti (da decidere alla loro fase):
 

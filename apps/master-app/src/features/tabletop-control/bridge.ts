@@ -1,6 +1,5 @@
 import {
   tokenSchema,
-  type Handout,
   type Map as TabletopMap,
   type Session,
   type Token,
@@ -8,36 +7,52 @@ import {
 } from '@amber/shared';
 import { invoke } from '@tauri-apps/api/core';
 
-type HandoutId = Handout['id'];
 type MapId = TabletopMap['id'];
 type SessionId = Session['id'];
 type TokenId = Token['id'];
 type TokenPosition = Token['position'];
 
-/**
- * Typed Tauri bridge for the tabletop feature.
- *
- * The Rust commands live in `apps/master-app/src-tauri/src/commands/tabletop.rs` and
- * `commands/handouts.rs`. They are stubs for now (return `NotImplemented`); the renderer
- * keeps this typed surface to avoid magic strings.
- */
 export async function placeToken(args: {
   mapId: MapId;
   entityKind: TokenEntityKind;
   entityId: string;
-  position: TokenPosition;
-}): Promise<unknown> {
-  return invoke<unknown>('place_token', {
+  position?: TokenPosition;
+}): Promise<Token> {
+  const raw = await invoke<unknown>('place_token', {
     mapId: args.mapId,
     entityKind: args.entityKind,
     entityId: args.entityId,
-    positionJson: args.position,
+    positionJson: args.position ?? null,
   });
+  return tokenSchema.parse(raw);
 }
 
-export async function listTokens(mapId: MapId): Promise<Token[]> {
-  const raw = await invoke<unknown[]>('list_tokens', { mapId });
+export async function listTokens(mapId: MapId, sessionId?: SessionId | null): Promise<Token[]> {
+  const raw = await invoke<unknown[]>('list_tokens', {
+    mapId,
+    sessionId: sessionId ?? null,
+  });
   return raw.map((row) => tokenSchema.parse(row));
+}
+
+export async function createCustomSessionToken(args: {
+  sessionId: SessionId;
+  mapId: MapId;
+  displayName: string;
+  controlledByDiscordId?: string | null;
+  position?: TokenPosition;
+}): Promise<Token> {
+  const controlledByDiscordId = args.controlledByDiscordId?.trim()
+    ? args.controlledByDiscordId.trim()
+    : null;
+  const raw = await invoke<unknown>('create_custom_session_token', {
+    sessionId: args.sessionId,
+    mapId: args.mapId,
+    displayName: args.displayName.trim(),
+    controlledByDiscordId,
+    positionJson: args.position ?? null,
+  });
+  return tokenSchema.parse(raw);
 }
 
 export async function moveToken(args: {
@@ -55,11 +70,13 @@ export async function resolveTokenMoveRequest(args: {
   tokenId: TokenId;
   accepted: boolean;
   finalPosition?: TokenPosition;
+  requesterDiscordId?: string | null;
 }): Promise<unknown> {
   return invoke<unknown>('resolve_token_move_request', {
     tokenId: args.tokenId,
     accepted: args.accepted,
     finalPositionJson: args.finalPosition ?? null,
+    requesterDiscordId: args.requesterDiscordId ?? null,
   });
 }
 
@@ -67,12 +84,33 @@ export async function removeToken(tokenId: TokenId): Promise<void> {
   return invoke<void>('remove_token', { tokenId });
 }
 
-export async function shareHandout(handoutId: HandoutId): Promise<unknown> {
-  return invoke<unknown>('share_handout', { handoutId });
+export async function setTokenController(args: {
+  tokenId: TokenId;
+  controlledByDiscordId: string | null;
+}): Promise<Token> {
+  const controlledByDiscordId = args.controlledByDiscordId?.trim()
+    ? args.controlledByDiscordId.trim()
+    : null;
+  const raw = await invoke<unknown>('set_token_controller', {
+    tokenId: args.tokenId,
+    controlledByDiscordId,
+  });
+  return tokenSchema.parse(raw);
 }
 
-export async function hideHandout(handoutId: HandoutId): Promise<void> {
-  return invoke<void>('hide_handout', { handoutId });
+export async function setTokenVisibility(args: {
+  tokenId: TokenId;
+  visibleToPlayers: boolean;
+}): Promise<Token> {
+  const raw = await invoke<unknown>('set_token_visibility', {
+    tokenId: args.tokenId,
+    visibleToPlayers: args.visibleToPlayers,
+  });
+  return tokenSchema.parse(raw);
+}
+
+export async function ensureCampaignCharacterTokens(campaignId: string): Promise<number> {
+  return invoke<number>('ensure_campaign_character_tokens', { campaignId });
 }
 
 export async function buildTabletopSnapshot(

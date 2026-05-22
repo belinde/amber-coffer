@@ -1,0 +1,94 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  font-size: var(--font-size-root);
+  background-color: var(--bg);
+  color-scheme: dark only;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: var(--font-family);
+  line-height: 1.7;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text);
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: var(--accent);
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+button,
+select,
+input,
+textarea {
+  font: inherit;
+}
+
+button,
+.btn {
+  cursor: pointer;
+  background: var(--btn-surface);
+  color: inherit;
+  border: 1px solid var(--btn-border);
+  border-radius: 6px;
+  padding: 0.45rem 0.75rem;
+}
+
+button:hover,
+.btn:hover {
+  background: var(--btn-surface-hover);
+}
+
+button.primary,
+.btn.primary {
+  background: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border);
+}
+
+button.secondary,
+.btn.secondary {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: var(--panel-border);
+}
+
+button.danger,
+.btn.danger {
+  background: #4a2828;
+  border-color: #6a3838;
+}
+
+button.success,
+.btn.success {
+  background: #2a4a32;
+  border-color: #4a8a5c;
+  color: #d8f0dc;
+}
+
+button.success:hover,
+.btn.success:hover {
+  background: #356840;
+  border-color: #5aa06c;
+}
+
+.empty-state {
+  color: var(--muted);
+  font-style: italic;
+}

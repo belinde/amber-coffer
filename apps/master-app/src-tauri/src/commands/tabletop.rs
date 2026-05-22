@@ -1,19 +1,22 @@
-use tauri::{AppHandle, State};
+use std::collections::HashMap;
 
+use tauri::{AppHandle, State};
+use uuid::Uuid;
+
+use crate::db::validate::ensure_entity_in_campaign;
 use crate::db::AppState;
 use crate::error::{AppError, AppResult};
-use crate::models::{Map, Token, TokenPosition, TokenRow};
+use crate::models::{Handout, HandoutRow, Map, Token, TokenPosition, TokenRow, normalize_optional_discord_id};
+use crate::services::tabletop_tokens::{
+    self, campaign_id_for_map, character_player_discord_id, discord_id_linked_to_campaign,
+    fetch_token, first_free_bench_slot, normalize_display_name, player_can_move_token,
+    token_literal_label, TOKEN_SELECT,
+};
 use crate::util::now_ms;
 
-const TOKEN_SELECT: &str = r#"
-        SELECT id, map_id, entity_kind, entity_id, zone, x_cell, y_cell, bench_slot,
-               visible_to_players, controlled_by_discord_id, created_at, updated_at, version
-        FROM tokens
-"#;
-
 const MAP_SELECT: &str = r#"
-        SELECT id, campaign_id, name, image_path, width_px, height_px, grid_size_px,
-               grid_cols, grid_rows, bench_slots, created_at, updated_at, version
+        SELECT id, campaign_id, name, image_path, background_public_path, width_px, height_px,
+               grid_size_px, grid_cols, grid_rows, bench_slots, created_at, updated_at, version
         FROM maps
 "#;
 
@@ -27,23 +30,48 @@ fn parse_position(value: serde_json::Value) -> AppResult<TokenPosition> {
     }
 }
 
+fn validate_token_entity_kind(kind: &str) -> AppResult<()> {
+    if kind == "character" || kind == "npc" {
+        Ok(())
+    } else {
+        Err(AppError::Internal(format!(
+            "unsupported token entity kind: {kind}"
+        )))
+    }
+}
+
+async fn load_token_row(pool: &sqlx::SqlitePool, token_id: &str) -> AppResult<Token> {
+    fetch_token(pool, token_id).await
+}
+
 #[tauri::command]
 pub async fn list_tokens(
     map_id: String,
+    session_id: Option<String>,
     app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<Vec<Token>, AppError> {
     let pool = state.pool_for_entity_id(&app, &map_id).await?;
-    let query = format!("{TOKEN_SELECT} WHERE map_id = ? ORDER BY created_at");
-    let rows = sqlx::query_as::<_, TokenRow>(&query)
-        .bind(&map_id)
-        .fetch_all(&pool)
-        .await?;
+    let rows = if let Some(ref session_id) = session_id {
+        let query = format!(
+            "{TOKEN_SELECT} WHERE map_id = ? AND (entity_kind != 'custom' OR session_id = ?) ORDER BY created_at"
+        );
+        sqlx::query_as::<_, TokenRow>(&query)
+            .bind(&map_id)
+            .bind(session_id)
+            .fetch_all(&pool)
+            .await?
+    } else {
+        let query =
+            format!("{TOKEN_SELECT} WHERE map_id = ? AND entity_kind != 'custom' ORDER BY created_at");
+        sqlx::query_as::<_, TokenRow>(&query)
+            .bind(&map_id)
+            .fetch_all(&pool)
+            .await?
+    };
 
     rows.into_iter()
-        .map(|row| {
-            Token::from_row(row).map_err(|e| AppError::Internal(e))
-        })
+        .map(|row| Token::from_row(row).map_err(AppError::Internal))
         .collect()
 }
 
@@ -89,25 +117,287 @@ pub async fn move_token(
         return Err(AppError::NotFound(format!("token {token_id}")));
     }
 
-    let query = format!("{TOKEN_SELECT} WHERE id = ?");
-    let row = sqlx::query_as::<_, TokenRow>(&query)
-        .bind(&token_id)
-        .fetch_optional(&pool)
-        .await?
-        .ok_or_else(|| AppError::NotFound(format!("token {token_id}")))?;
-
-    Token::from_row(row).map_err(|e| AppError::Internal(e))
+    load_token_row(&pool, &token_id).await
 }
 
-/// Place a new token on a map. Stub — business logic not implemented yet.
 #[tauri::command]
 pub async fn place_token(
-    _map_id: String,
-    _entity_kind: String,
-    _entity_id: String,
-    _position_json: serde_json::Value,
-) -> Result<serde_json::Value, AppError> {
-    Err(AppError::NotImplemented("place_token".into()))
+    map_id: String,
+    entity_kind: String,
+    entity_id: String,
+    position_json: Option<serde_json::Value>,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<Token, AppError> {
+    validate_token_entity_kind(&entity_kind)?;
+
+    let pool = state.pool_for_entity_id(&app, &map_id).await?;
+    let campaign_id = campaign_id_for_map(&pool, &map_id).await?;
+    ensure_entity_in_campaign(&pool, &campaign_id, &entity_kind, &entity_id).await?;
+
+    let exists: Option<i64> = sqlx::query_scalar(
+        "SELECT 1 FROM tokens WHERE map_id = ? AND entity_kind = ? AND entity_id = ?",
+    )
+    .bind(&map_id)
+    .bind(&entity_kind)
+    .bind(&entity_id)
+    .fetch_optional(&pool)
+    .await?;
+    if exists.is_some() {
+        return Err(AppError::Internal(
+            "token already exists for this entity on this map".into(),
+        ));
+    }
+
+    let bench_slots: i32 = sqlx::query_scalar("SELECT bench_slots FROM maps WHERE id = ?")
+        .bind(&map_id)
+        .fetch_one(&pool)
+        .await?;
+
+    let position = match position_json {
+        Some(json) => parse_position(json)?,
+        None => TokenPosition {
+            zone: "bench".into(),
+            x_cell: None,
+            y_cell: None,
+            slot: Some(first_free_bench_slot(&pool, &map_id, bench_slots).await?),
+        },
+    };
+
+    let controlled_by = normalize_optional_discord_id(
+        if entity_kind == "character" {
+            character_player_discord_id(&pool, &campaign_id, &entity_id).await?
+        } else {
+            None
+        },
+    );
+
+    let (zone, x_cell, y_cell, bench_slot) = match position.zone.as_str() {
+        "board" => (
+            "board",
+            position.x_cell,
+            position.y_cell,
+            None::<i32>,
+        ),
+        "bench" => ("bench", None, None, position.slot),
+        _ => return Err(AppError::Internal("invalid token zone".into())),
+    };
+
+    let id = Uuid::now_v7().to_string();
+    let now = now_ms();
+    sqlx::query(
+        r#"
+        INSERT INTO tokens (
+            id, map_id, entity_kind, entity_id, session_id, display_name, zone, x_cell, y_cell, bench_slot,
+            visible_to_players, controlled_by_discord_id, created_at, updated_at, version
+        ) VALUES (?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?, 1, ?, ?, ?, 1)
+        "#,
+    )
+    .bind(&id)
+    .bind(&map_id)
+    .bind(&entity_kind)
+    .bind(&entity_id)
+    .bind(zone)
+    .bind(x_cell)
+    .bind(y_cell)
+    .bind(bench_slot)
+    .bind(&controlled_by)
+    .bind(now)
+    .bind(now)
+    .execute(&pool)
+    .await?;
+
+    load_token_row(&pool, &id).await
+}
+
+#[tauri::command]
+pub async fn create_custom_session_token(
+    session_id: String,
+    map_id: String,
+    display_name: String,
+    controlled_by_discord_id: Option<String>,
+    position_json: Option<serde_json::Value>,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<Token, AppError> {
+    let pool = state.pool_for_entity_id(&app, &session_id).await?;
+    let display_name = normalize_display_name(&display_name)?;
+
+    let session_campaign: Option<String> = sqlx::query_scalar(
+        "SELECT campaign_id FROM sessions WHERE id = ?",
+    )
+    .bind(&session_id)
+    .fetch_optional(&pool)
+    .await?;
+    let campaign_id = session_campaign
+        .ok_or_else(|| AppError::NotFound(format!("session {session_id}")))?;
+
+    let map_campaign = campaign_id_for_map(&pool, &map_id).await?;
+    if map_campaign != campaign_id {
+        return Err(AppError::Internal(
+            "map does not belong to the session campaign".into(),
+        ));
+    }
+
+    let controlled_by = normalize_optional_discord_id(controlled_by_discord_id);
+    if let Some(ref discord_id) = controlled_by {
+        if !discord_id_linked_to_campaign(&pool, &campaign_id, discord_id).await? {
+            return Err(AppError::Internal(
+                "discord user is not linked to a player character in this campaign".into(),
+            ));
+        }
+    }
+
+    let bench_slots: i32 = sqlx::query_scalar("SELECT bench_slots FROM maps WHERE id = ?")
+        .bind(&map_id)
+        .fetch_one(&pool)
+        .await?;
+
+    let position = match position_json {
+        Some(json) => parse_position(json)?,
+        None => TokenPosition {
+            zone: "bench".into(),
+            x_cell: None,
+            y_cell: None,
+            slot: Some(first_free_bench_slot(&pool, &map_id, bench_slots).await?),
+        },
+    };
+
+    let (zone, x_cell, y_cell, bench_slot) = match position.zone.as_str() {
+        "board" => (
+            "board",
+            position.x_cell,
+            position.y_cell,
+            None::<i32>,
+        ),
+        "bench" => ("bench", None, None, position.slot),
+        _ => return Err(AppError::Internal("invalid token zone".into())),
+    };
+
+    let id = Uuid::now_v7().to_string();
+    let now = now_ms();
+    sqlx::query(
+        r#"
+        INSERT INTO tokens (
+            id, map_id, entity_kind, entity_id, session_id, display_name, zone, x_cell, y_cell, bench_slot,
+            visible_to_players, controlled_by_discord_id, created_at, updated_at, version
+        ) VALUES (?, ?, 'custom', ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, 1)
+        "#,
+    )
+    .bind(&id)
+    .bind(&map_id)
+    .bind(&id)
+    .bind(&session_id)
+    .bind(&display_name)
+    .bind(zone)
+    .bind(x_cell)
+    .bind(y_cell)
+    .bind(bench_slot)
+    .bind(&controlled_by)
+    .bind(now)
+    .bind(now)
+    .execute(&pool)
+    .await?;
+
+    load_token_row(&pool, &id).await
+}
+
+#[tauri::command]
+pub async fn remove_token(
+    token_id: String,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<(), AppError> {
+    let pool = state.pool_for_entity_id(&app, &token_id).await?;
+    let deleted = sqlx::query("DELETE FROM tokens WHERE id = ?")
+        .bind(&token_id)
+        .execute(&pool)
+        .await?;
+    if deleted.rows_affected() == 0 {
+        return Err(AppError::NotFound(format!("token {token_id}")));
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn set_token_controller(
+    token_id: String,
+    controlled_by_discord_id: Option<String>,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<Token, AppError> {
+    let pool = state.pool_for_entity_id(&app, &token_id).await?;
+    let token = load_token_row(&pool, &token_id).await?;
+    let campaign_id = campaign_id_for_map(&pool, &token.map_id).await?;
+    let controlled_by_discord_id = normalize_optional_discord_id(controlled_by_discord_id);
+
+    if let Some(ref discord_id) = controlled_by_discord_id {
+        if !discord_id_linked_to_campaign(&pool, &campaign_id, discord_id).await? {
+            return Err(AppError::Internal(
+                "discord user is not linked to a player character in this campaign".into(),
+            ));
+        }
+    }
+
+    let now = now_ms();
+    let updated = sqlx::query(
+        r#"
+        UPDATE tokens
+        SET controlled_by_discord_id = ?, updated_at = ?, version = version + 1
+        WHERE id = ?
+        "#,
+    )
+    .bind(&controlled_by_discord_id)
+    .bind(now)
+    .bind(&token_id)
+    .execute(&pool)
+    .await?;
+
+    if updated.rows_affected() == 0 {
+        return Err(AppError::NotFound(format!("token {token_id}")));
+    }
+
+    load_token_row(&pool, &token_id).await
+}
+
+#[tauri::command]
+pub async fn set_token_visibility(
+    token_id: String,
+    visible_to_players: bool,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<Token, AppError> {
+    let pool = state.pool_for_entity_id(&app, &token_id).await?;
+    let now = now_ms();
+    let visible = if visible_to_players { 1 } else { 0 };
+    let updated = sqlx::query(
+        r#"
+        UPDATE tokens
+        SET visible_to_players = ?, updated_at = ?, version = version + 1
+        WHERE id = ?
+        "#,
+    )
+    .bind(visible)
+    .bind(now)
+    .bind(&token_id)
+    .execute(&pool)
+    .await?;
+
+    if updated.rows_affected() == 0 {
+        return Err(AppError::NotFound(format!("token {token_id}")));
+    }
+
+    load_token_row(&pool, &token_id).await
+}
+
+#[tauri::command]
+pub async fn ensure_campaign_character_tokens(
+    campaign_id: String,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<u32, AppError> {
+    let pool = state.pool_for_campaign(&app, &campaign_id).await?;
+    tabletop_tokens::ensure_character_tokens_for_campaign(&pool, &campaign_id).await
 }
 
 #[tauri::command]
@@ -115,32 +405,64 @@ pub async fn resolve_token_move_request(
     token_id: String,
     accepted: bool,
     final_position_json: Option<serde_json::Value>,
+    requester_discord_id: Option<String>,
     app: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<serde_json::Value, AppError> {
     if !accepted {
         return Ok(serde_json::json!({ "accepted": false }));
     }
+
+    let pool = state.pool_for_entity_id(&app, &token_id).await?;
+
+    if let Some(ref requester) = requester_discord_id {
+        let token = load_token_row(&pool, &token_id).await?;
+        if !player_can_move_token(&token, requester) {
+            return Ok(serde_json::json!({ "accepted": false, "reason": "not_authorized" }));
+        }
+    }
+
     let position = final_position_json.ok_or_else(|| {
         AppError::Internal("final position required when accepting move".into())
     })?;
     let token = move_token(token_id, position, app, state).await?;
-    Ok(serde_json::to_value(token).map_err(|e| AppError::Internal(e.to_string()))?)
+    Ok(serde_json::json!({ "accepted": true, "token": token }))
 }
 
-#[tauri::command]
-pub async fn remove_token(_token_id: String) -> Result<(), AppError> {
-    Err(AppError::NotImplemented("remove_token".into()))
-}
+async fn build_token_display_maps(
+    pool: &sqlx::SqlitePool,
+    campaign_id: &str,
+    tokens: &[Token],
+) -> AppResult<(HashMap<String, String>, HashMap<String, String>)> {
+    let mut labels: HashMap<String, String> = HashMap::new();
+    let mut names: HashMap<String, String> = HashMap::new();
 
-#[tauri::command]
-pub async fn share_handout(_handout_id: String) -> Result<serde_json::Value, AppError> {
-    Err(AppError::NotImplemented("share_handout".into()))
-}
+    for token in tokens {
+        let name: Option<String> = match token.entity_kind.as_str() {
+            "character" => {
+                sqlx::query_scalar("SELECT name FROM characters WHERE id = ? AND campaign_id = ?")
+                    .bind(&token.entity_id)
+                    .bind(campaign_id)
+                    .fetch_optional(pool)
+                    .await?
+            }
+            "npc" => {
+                sqlx::query_scalar("SELECT name FROM npcs WHERE id = ? AND campaign_id = ?")
+                    .bind(&token.entity_id)
+                    .bind(campaign_id)
+                    .fetch_optional(pool)
+                    .await?
+            }
+            "custom" => token.display_name.clone(),
+            _ => None,
+        };
+        if let Some(name) = name {
+            labels.insert(token.id.clone(), token_literal_label(&name));
+            names.insert(token.id.clone(), name);
+        }
+    }
 
-#[tauri::command]
-pub async fn hide_handout(_handout_id: String) -> Result<(), AppError> {
-    Err(AppError::NotImplemented("hide_handout".into()))
+    Ok((labels, names))
 }
 
 #[tauri::command]
@@ -170,9 +492,12 @@ pub async fn build_tabletop_snapshot_json(
 
     let mut all_tokens: Vec<Token> = Vec::new();
     for map in &maps {
-        let query = format!("{TOKEN_SELECT} WHERE map_id = ? AND visible_to_players = 1");
+        let query = format!(
+            "{TOKEN_SELECT} WHERE map_id = ? AND visible_to_players = 1 AND (entity_kind != 'custom' OR session_id = ?)"
+        );
         let rows = sqlx::query_as::<_, TokenRow>(&query)
             .bind(&map.id)
+            .bind(&session_id)
             .fetch_all(&pool)
             .await?;
         for row in rows {
@@ -180,9 +505,31 @@ pub async fn build_tabletop_snapshot_json(
         }
     }
 
+    let (token_labels, token_names) =
+        build_token_display_maps(&pool, &campaign_id, &all_tokens).await?;
+
     let active_map_id = active_map_id
         .filter(|id| maps.iter().any(|m| m.id == *id))
         .or_else(|| maps.first().map(|m| m.id.clone()));
+
+    let handout_rows = sqlx::query_as::<_, HandoutRow>(
+        r#"
+        SELECT id, campaign_id, session_id, label, body,
+               image_local_path, image_thumbnail_url, image_canon_url, image_hash,
+               visible_to_players, shown_at, created_at, updated_at, version
+        FROM handouts
+        WHERE session_id = ? AND visible_to_players = 1
+        ORDER BY shown_at ASC, created_at ASC
+        "#,
+    )
+    .bind(&session_id)
+    .fetch_all(&pool)
+    .await?;
+
+    let visible_handouts: Vec<Handout> = handout_rows
+        .into_iter()
+        .map(Handout::from_row)
+        .collect();
 
     let snapshot_at = now_ms();
     let maps_json: Vec<serde_json::Value> = maps
@@ -193,6 +540,10 @@ pub async fn build_tabletop_snapshot_json(
         .iter()
         .map(|t| serde_json::to_value(t).map_err(|e| AppError::Internal(e.to_string())))
         .collect::<Result<Vec<_>, _>>()?;
+    let handouts_json: Vec<serde_json::Value> = visible_handouts
+        .iter()
+        .map(|h| serde_json::to_value(h).map_err(|e| AppError::Internal(e.to_string())))
+        .collect::<Result<Vec<_>, _>>()?;
 
     Ok(serde_json::json!({
         "kind": "tabletop.snapshot",
@@ -200,7 +551,9 @@ pub async fn build_tabletop_snapshot_json(
         "activeMapId": active_map_id,
         "maps": maps_json,
         "tokens": tokens_json,
-        "visibleHandouts": [],
+        "tokenLabels": token_labels,
+        "tokenNames": token_names,
+        "visibleHandouts": handouts_json,
         "snapshotAt": snapshot_at,
     }))
 }

@@ -49,6 +49,16 @@ export {
   type DiscordVoiceChannelOption,
 } from './discord-setup.js';
 export { listSessionRecordings, type SessionRecordingView } from './session-recordings.js';
+export {
+  addSessionSharedAccountCharacter,
+  discordConnectedUser,
+  listSessionDiscordParticipants,
+  removeSessionDiscordAssignment,
+  upsertSessionDiscordAssignment,
+  type DiscordConnectedUser,
+  type SessionDiscordAssignment,
+  type SessionDiscordParticipant,
+} from './session-discord-participants.js';
 
 export async function ping(): Promise<string> {
   return invoke<string>('ping');

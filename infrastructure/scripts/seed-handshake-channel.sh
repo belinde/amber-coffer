@@ -2,6 +2,10 @@
 # Maps a Discord voice channel_id to an active campaign/session for Player Activity handshake.
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/aws-env.sh
+source "${SCRIPT_DIR}/lib/aws-env.sh"
+
 ENV="${1:-dev}"
 CHANNEL_ID="${2:?channel_id required}"
 CAMPAIGN_ID="${3:?campaign_id required}"

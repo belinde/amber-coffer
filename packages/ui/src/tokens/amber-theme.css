@@ -1,0 +1,80 @@
+/* Canonical design tokens — aligned with POC tools/pubblicazione/assets/site.css */
+:root {
+  color-scheme: dark only;
+  --bg: #12100d;
+  --panel: #1a1713;
+  --panel-border: #2f2a23;
+  --text: #f5efe5;
+  --muted: #c4b8a5;
+  --accent: #d39c4a;
+  --accent-hover: #efb867;
+  --accent-soft: rgba(211, 156, 74, 0.16);
+  --shadow: rgba(0, 0, 0, 0.28);
+  --content-max-width: 1600px;
+  --image-max-longest-side: 1920px;
+  --sidebar-width: 220px;
+  --chrome-surface: rgba(10, 8, 6, 0.98);
+  --chrome-divider: rgba(0, 0, 0, 0.42);
+  --sidebar-link-border: rgba(255, 255, 255, 0.07);
+  --card-body-line-clamp: 8;
+  --layout-content-offset: 2rem;
+  --page-card-pad: 1.8rem;
+  --bg-gradient:
+    radial-gradient(
+      ellipse 115% 72% at 6% -14%,
+      rgba(211, 156, 74, 0.09) 0%,
+      rgba(211, 156, 74, 0.05) 30%,
+      transparent 54%
+    ),
+    radial-gradient(ellipse 85% 55% at 95% 105%, rgba(72, 48, 28, 0.28) 0%, transparent 50%),
+    linear-gradient(168deg, #1c1813 0%, #12100d 45%, #0a0907 100%);
+  --chrome-header-gradient: linear-gradient(
+    180deg,
+    rgba(36, 30, 22, 0.99) 0%,
+    rgba(22, 18, 14, 0.98) 55%,
+    rgba(14, 11, 9, 0.99) 100%
+  );
+  --chrome-sidebar-gradient: linear-gradient(
+    185deg,
+    rgba(30, 25, 18, 0.99) 0%,
+    rgba(18, 15, 12, 0.98) 48%,
+    rgba(10, 8, 6, 1) 100%
+  );
+  --sidebar-link-gradient: linear-gradient(
+    152deg,
+    rgba(58, 48, 38, 0.96) 0%,
+    rgba(40, 34, 28, 0.94) 100%
+  );
+  --sidebar-link-gradient-hover: linear-gradient(
+    152deg,
+    rgba(72, 58, 42, 0.98) 0%,
+    rgba(50, 42, 34, 0.96) 100%
+  );
+  --form-surface: #1a1610;
+  --form-surface-raised: #222018;
+  --form-text: #d4c4a8;
+  --form-text-option: #e8e0cc;
+  --form-border: #4a443a;
+  /* Browser default is 16px; +2px scales all rem-based UI text. */
+  --font-size-root: 18px;
+  --font-family: Georgia, 'Times New Roman', serif;
+  --font-family-mono: ui-monospace, Menlo, Monaco, 'Cascadia Mono', monospace;
+  --color-danger-border: #c45c5c;
+  --color-danger-bg: rgba(72, 28, 28, 0.55);
+  --color-danger-text: #ffe0e0;
+  --color-info-border: #6a9e8c;
+  --color-info-bg: rgba(32, 52, 48, 0.55);
+  --color-info-text: #d4ebe4;
+  --btn-surface: #2a2620;
+  --btn-surface-hover: #353028;
+  --btn-border: #4a443a;
+  --btn-primary-bg: #6b4f2a;
+  --btn-primary-border: #8a6535;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --page-card-pad: 1.2rem;
+    --card-body-line-clamp: 11;
+  }
+}

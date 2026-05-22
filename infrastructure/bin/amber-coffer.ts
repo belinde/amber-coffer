@@ -46,13 +46,15 @@ const handshakeStack = new SessionHandshakeStack(
   amberStackProps,
 );
 
-new ApiStack(app, `AmberCoffer-Api-${envName}`, {
+const apiStack = new ApiStack(app, `AmberCoffer-Api-${envName}`, {
   ...amberStackProps,
   handshakeTable: handshakeStack.table,
   sessionSyncTable: handshakeStack.sessionSyncTable,
   sessionAuthSecret: handshakeStack.sessionAuthSecret,
+  playerActivityBucket: webStack.playerActivityBucket,
 });
-// Api stack references handshake resources via props (no IoT dependency).
+apiStack.addDependency(webStack);
+// Api stack references handshake + web bucket via props (no IoT dependency).
 
 new PublicCanonStack(app, `AmberCoffer-Canon-${envName}`, amberStackProps);
 new AiBedrockStack(app, `AmberCoffer-Bedrock-${envName}`, amberStackProps);

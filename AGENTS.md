@@ -35,8 +35,11 @@ pnpm test         # Vitest
 pnpm build        # Build turbo
 
 cd apps/master-app/src-tauri && cargo check
+export AWS_PROFILE=ambercoffer CDK_DEFAULT_REGION=eu-west-1
 cd infrastructure && pnpm build && pnpm cdk synth -c env=prod
 ```
+
+**AWS:** per CLI/CDK/deploy usare **sempre** `AWS_PROFILE=ambercoffer` (mai `default` o `belinde`). Gli script in `infrastructure/scripts/` lo impostano da soli.
 
 ## Dove cercare cosa
 

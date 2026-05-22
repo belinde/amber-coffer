@@ -1,10 +1,7 @@
-import type { TokenPosition } from '@amber/shared';
+import { TABLETOP_BENCH_SLOTS, type TokenPosition } from '@amber/shared';
 
-/**
- * Default number of off-board "bench" parking slots when a Map does not override it.
- * Mirrors the POC behaviour (`BENCH_SLOTS = 12`).
- */
-export const BENCH_SLOTS_DEFAULT = 12;
+/** @deprecated Use `TABLETOP_BENCH_SLOTS` from `@amber/shared`. */
+export const BENCH_SLOTS_DEFAULT = TABLETOP_BENCH_SLOTS;
 
 export type Grid = {
   cols: number;
@@ -46,11 +43,9 @@ export function pxToBoardCell(args: {
  * Maps a pointer event inside the bench element to a bench slot index.
  * The bench is rendered as a vertical column; only the Y coordinate matters.
  */
-export function pxToBenchSlot(args: {
-  clientY: number;
-  rect: Rect;
-  benchSlots?: number;
-}): { slot: number } {
+export function pxToBenchSlot(args: { clientY: number; rect: Rect; benchSlots?: number }): {
+  slot: number;
+} {
   const { clientY, rect } = args;
   const slots = args.benchSlots ?? BENCH_SLOTS_DEFAULT;
   const relY = (clientY - rect.top) / rect.height;
@@ -75,10 +70,23 @@ export function boardCellToPercent(args: {
   };
 }
 
-export function benchSlotToPercent(args: {
-  slot: number;
-  benchSlots?: number;
-}): { left: string; top: string } {
+/** 1-based CSS grid placement for a single board cell (`display: grid` on the board). */
+export function boardCellToGridPlacement(args: { xCell: number; yCell: number }): {
+  gridColumn: string;
+  gridRow: string;
+} {
+  const col = args.xCell + 1;
+  const row = args.yCell + 1;
+  return {
+    gridColumn: `${col} / ${col + 1}`,
+    gridRow: `${row} / ${row + 1}`,
+  };
+}
+
+export function benchSlotToPercent(args: { slot: number; benchSlots?: number }): {
+  left: string;
+  top: string;
+} {
   const slots = args.benchSlots ?? BENCH_SLOTS_DEFAULT;
   return {
     left: '50%',
@@ -154,4 +162,11 @@ export function nearestFreeBenchSlot(args: {
     if (right < slots && !args.occupied.has(key(right))) return { slot: right };
   }
   return { slot: args.startSlot };
+}
+
+/** Whether client coordinates fall inside a layout rect (e.g. from `getBoundingClientRect`). */
+export function pointerInRect(x: number, y: number, rect: Rect): boolean {
+  return (
+    x >= rect.left && x <= rect.left + rect.width && y >= rect.top && y <= rect.top + rect.height
+  );
 }

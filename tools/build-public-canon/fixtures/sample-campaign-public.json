@@ -1,0 +1,21 @@
+{
+  "campaignTitle": "Sample Campaign",
+  "tagline": "A living chronicle of the table.",
+  "characters": [
+    {
+      "slug": "aldric",
+      "title": "Aldric Vale",
+      "meta": "Chronicler",
+      "excerpt": "Keeps the party's history in ink and rumor."
+    }
+  ],
+  "sessions": [
+    {
+      "slug": "sessione-001",
+      "title": "The Amber Road",
+      "badge": "Session 1",
+      "meta": "Played 2026-05-01",
+      "excerpt": "The company departs Silverton at dawn."
+    }
+  ]
+}

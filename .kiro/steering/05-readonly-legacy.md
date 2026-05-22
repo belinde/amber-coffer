@@ -1,0 +1,40 @@
+---
+inclusion: always
+---
+
+# Legacy read-only access (`_readonly/`)
+
+La cartella `_readonly/` contiene **symlink temporanei** verso progetti esterni usati come fonte per la migrazione verso Amber Coffer.
+
+Stato attuale dei symlink (vedi [\_readonly/README.md](mdc:_readonly/README.md)):
+
+- `campagna-poc` → `/home/belinde/Campagna` — **attivo**, fixture per `tools/migrate-from-poc/` (Fase 5).
+- `legacy-cloud` — **rimosso in Fase 6** dopo il port del tabletop. La sintesi vive in [docs/migration/legacy-cloud-delta.md](mdc:docs/migration/legacy-cloud-delta.md) e [docs/migration/tabletop-porting-notes.md](mdc:docs/migration/tabletop-porting-notes.md). Ricreabile in un comando `ln -sfn` se serve ri-analisi.
+
+## Regole assolute
+
+1. **MAI modificare file** sotto `_readonly/**`.
+2. **MAI committare** il contenuto dei target: i path sono in `.gitignore`.
+3. **Solo lettura** dai symlink: import e analisi finiscono fuori da `_readonly/`.
+4. **Niente copy-paste cieco** del codice legacy: ogni riuso passa per inventario in [docs/migration/inventory.md](mdc:docs/migration/inventory.md) e ADR in [docs/adr/](mdc:docs/adr/).
+5. **Se un symlink rimosso serve di nuovo**: ri-crearlo con `ln -sfn` come da `_readonly/README.md`, fare l'analisi puntuale, **rimuoverlo subito dopo**. Mai farlo vivere indefinitamente.
+
+## Esclusioni dure (mai importare)
+
+- Audio sessione: `_readonly/campagna-poc/sessione/audio/**`
+- Segreti: `.env*`, token Hugging Face, credenziali AWS / Cognito / Discord
+
+## Quando un import non è banale
+
+**Interrompere e chiedere all'utente** con `AskQuestion` prima di procedere. Trigger tipici:
+
+- Modello dati POC diverso dallo schema corrente (es. campi `Regione`, `Ambito`, `Promemoria` non mappati 1:1)
+- Due implementazioni possibili (es. audio dual-track POC vs bot Discord blueprint)
+- Conflitto con ADR esistenti
+- Import di dati di campagna reale
+
+Decisione registrata in `docs/migration/` o nuovo ADR prima di scrivere codice non banale.
+
+## Lifecycle
+
+I symlink vivono solo il tempo necessario alla migrazione delle relative feature. Il POC sparirà a chiusura Fase 5 (extractor completi); la documentazione in `docs/migration/` resta come storico.

@@ -14,6 +14,7 @@ import { CrudPanel } from '../crud/CrudPanel.js';
 import { applyValidationFailure } from '../validation/apply-validation-failure.js';
 
 import { formatSessionLabel } from './session-label.js';
+import { isSessionPlayLocked } from './session-phase.js';
 
 type CampaignId = Campaign['id'];
 
@@ -46,11 +47,11 @@ export function SessionsPanel({ campaignId, onError, onOpenSession }: Props): Re
       listTitleKey="session.listTitle"
       createKey="session.create"
       emptyKey="session.empty"
-      deleteConfirmKey="session.deleteConfirm"
-      hideDelete
+      deleteConfirmKey="session.deleteConfirmFull"
       openItemKey="sessionDetail.openSession"
       listFn={() => listSessions(campaignId)}
       deleteFn={deleteSession}
+      canDelete={(s) => !isSessionPlayLocked(s)}
       getLabel={(s) => formatSessionLabel(s, t)}
       getListRow={(s) => sessionListRow(s, t)}
       onOpenItem={(session) => onOpenSession(session.id)}

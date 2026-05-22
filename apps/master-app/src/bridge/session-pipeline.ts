@@ -20,6 +20,8 @@ const sessionPipelineStateSchema = z.object({
   hasRefinedTranscript: z.boolean(),
   transcriptionAttempted: z.boolean(),
   recordingCount: z.number().int().nonnegative(),
+  participantCount: z.number().int().nonnegative(),
+  playerParticipantCount: z.number().int().nonnegative(),
 });
 
 export type SessionPipelineState = z.infer<typeof sessionPipelineStateSchema>;

@@ -381,6 +381,7 @@
     "editTitle": "Editar sesión",
     "empty": "No hay sesiones registradas.",
     "deleteConfirm": "¿Eliminar la sesión {{name}}?",
+    "deleteConfirmFull": "¿Eliminar definitivamente la sesión {{name}}?\n\nSe eliminarán todos los datos de sesión de la base de la campaña (metadatos de grabación, transcripciones, asignaciones de Discord, handouts de sesión, fichas de tabletop personalizadas) y la carpeta en disco (archivos de audio y transcripciones).\n\nEsta acción no se puede deshacer.",
     "numbered": "Sesión {{number}}",
     "number": "Número",
     "numberAuto": "El número se asigna automáticamente (siguiente disponible).",
@@ -423,6 +424,23 @@
     "recordingTrackDiscord": "Discord {{id}}",
     "recordingTrackUnassigned": "Sin personaje asignado.",
     "recordingTrackAssign": "Asignar en personajes",
+    "participantsTitle": "Participantes en la grabación",
+    "participantCount": "Participantes",
+    "playerCountLabel": "Jugadores",
+    "playerCount": "{{count}} jugadores",
+    "noParticipants": "Ningún participante de voz registrado.",
+    "participantGm": "Master",
+    "participantGmHint": "Voz del narrador en Discord. No asociada a un personaje jugador.",
+    "participantPlayersTitle": "Jugadores",
+    "participantDefaultCharacter": "Enlace de campaña: {{name}}",
+    "participantNoDefaultCharacter": "Ningún personaje enlazado en la campaña.",
+    "participantSessionCharacter": "Personaje para esta sesión",
+    "participantUnassigned": "Sin asignar",
+    "participantSharedAccount": "Cuenta compartida",
+    "participantSharedAccountHint": "Dos o más personajes en la misma cuenta de Discord: la transcripción no separa voces; la atribución ocurre en el análisis.",
+    "participantAddSharedCharacter": "Añadir personaje (misma cuenta)",
+    "participantAddSharedCharacterPlaceholder": "Elegir personaje…",
+    "participantEditCampaignLinks": "Enlaces de campaña",
     "stepTranscribe": "Transcripción",
     "stepTranscribeHint": "Ejecuta Whisper solo con la grabación detenida y archivos de audio presentes.",
     "transcriptionStarting": "Iniciando transcripción…",
@@ -476,8 +494,11 @@
     "liveInGamePlaceholder": "La ricerca rapida sul canone durante il gioco arriverà presto (PG, PNG, luoghi, ambientazione).",
     "postShowTabletop": "Mostra tabletop",
     "postHideTabletop": "Nascondi tabletop",
-    "deleteSession": "Elimina sessione",
-    "editDetailsLockedLive": "Finaliza la sesión en vivo antes de editar fechas o eliminar."
+    "deleteSession": "Eliminar sesión",
+    "deleteBlockedLive": "Finaliza la sesión en vivo antes de eliminar.",
+    "deleteBlockedRecording": "Detén la grabación antes de eliminar.",
+    "deleteBlockedTranscription": "Espera a que termine la transcripción antes de eliminar.",
+    "editDetailsLockedLive": "Finaliza la sesión en vivo antes de editar fechas."
   },
   "sessionSync": {
     "errors": {
@@ -487,6 +508,39 @@
       "tokenFailed": "No se pudo obtener el token de sync ({{code}})."
     }
   },
+  "sessions": {
+    "tabletop": {
+      "tokenPanelAria": "Gestión de fichas",
+      "tokenPanelTitle": "Fichas",
+      "selectToken": "Ficha seleccionada",
+      "noTokenSelected": "— Ninguna —",
+      "visibleToPlayers": "Visible para jugadores",
+      "assignController": "Jugador que puede mover",
+      "controllerNone": "— Solo DJ (sin arrastre de jugador) —",
+      "controllerUnlinked": "Jugador no vinculado ({{id}})",
+      "controllerNeedLinked": "Vincula un personaje a Discord en la bóveda para asignar el control.",
+      "removeToken": "Quitar ficha",
+      "placeCharacter": "Añadir ficha de personaje",
+      "chooseCharacter": "— Elegir personaje —",
+      "placeCharacterButton": "Colocar en banquillo",
+      "restoreAllCharacters": "Restaurar todos los PJ faltantes ({{count}})",
+      "placeNpc": "Añadir ficha de PNJ",
+      "chooseNpc": "— Elegir PNJ —",
+      "placeNpcButton": "Colocar en banquillo",
+      "placeCustomTitle": "Ficha solo de sesión",
+      "customTokenName": "Etiqueta",
+      "customTokenNamePlaceholder": "p. ej. Elemental de fuego",
+      "placeCustomButton": "Añadir ficha personalizada",
+      "customTokenHint": "No vinculada a PNJ del archivo. Visible solo en esta sesión; se elimina al borrar la sesión.",
+      "entityKindCustom": "personalizada"
+    }
+  },
+  "tabletop": {
+    "setMapBackground": "Usar como fondo de mesa",
+    "changeMapBackground": "Cambiar fondo del mapa",
+    "backgroundUpdated": "Fondo del mapa actualizado para los jugadores.",
+    "backgroundNoActiveMap": "Selecciona primero un mapa activo en la mesa."
+  },
   "images": {
     "listTitle": "Imágenes de campaña",
     "create": "Nueva imagen",
@@ -495,6 +549,7 @@
     "linkCount": "{{count}} enlaces",
     "previewAlt": "Vista previa",
     "closePreview": "Cerrar vista previa",
+    "showToPlayers": "Mostrar a los jugadores",
     "thumbnailFailed": "Vista previa no disponible",
     "noFile": "Sin archivo adjunto",
     "chooseFile": "Elegir archivo…",

@@ -10,44 +10,14 @@ use uuid::Uuid;
 use crate::db::{RecordingRuntime, RecordingState, TranscriptionRuntime, TranscriptionState};
 use crate::error::{AppError, AppResult};
 use crate::models::{normalize_play_language, Session};
-use crate::services::character_discord;
 use crate::services::discord_secrets;
+use crate::services::recording_ingest;
+use crate::services::session_discord;
 use crate::services::session_paths::{
     self, campaign_root, ensure_session_dirs, relative_to_campaign, session_manifest_path,
     session_raw_merged_transcript_path,
 };
 use crate::util::now_ms;
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct ManifestTrack {
-    discord_user_id: String,
-    relative_path: String,
-    duration_ms: Option<i64>,
-    sample_rate: Option<i32>,
-    channels: Option<i32>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct ManifestChunk {
-    discord_user_id: String,
-    relative_path: String,
-    duration_ms: i64,
-    sample_rate: Option<i32>,
-    channels: Option<i32>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct RecordingManifest {
-    version: u8,
-    source_kind: String,
-    #[serde(default)]
-    tracks: Vec<ManifestTrack>,
-    #[serde(default)]
-    chunks: Vec<ManifestChunk>,
-}
 
 pub fn read_bot_token(handle: &AppHandle) -> AppResult<String> {
     discord_secrets::load_bot_token_after_migration(handle)
@@ -236,7 +206,7 @@ pub async fn stop_recording(
 
     let session = load_session(pool, session_id).await?;
     let session_dir = session_paths::session_dir(handle, &session.campaign_id, session.number)?;
-    ingest_manifest(handle, pool, &session, &session_dir).await?;
+    recording_ingest::ingest_recording_handoff(handle, pool, &session, &session_dir).await?;
 
     let now = now_ms();
     sqlx::query(
@@ -253,119 +223,6 @@ pub async fn stop_recording(
     .await?;
 
     Ok(load_session(pool, session_id).await?)
-}
-
-async fn ingest_manifest(
-    _handle: &AppHandle,
-    pool: &SqlitePool,
-    session: &Session,
-    session_dir: &std::path::Path,
-) -> AppResult<()> {
-    let manifest_path = session_manifest_path(session_dir);
-    if !manifest_path.exists() {
-        tracing::warn!(path = %manifest_path.display(), "recording manifest missing");
-        return Ok(());
-    }
-
-    let raw = fs::read_to_string(&manifest_path).map_err(|e| AppError::Internal(e.to_string()))?;
-    let manifest: RecordingManifest =
-        serde_json::from_str(&raw).map_err(|e| AppError::Internal(e.to_string()))?;
-
-    let now = now_ms();
-
-    sqlx::query("DELETE FROM recordings WHERE session_id = ?")
-        .bind(&session.id)
-        .execute(pool)
-        .await?;
-
-    if manifest.version >= 2 && !manifest.chunks.is_empty() {
-        for chunk in manifest.chunks {
-            log_recording_character_resolution(pool, &session.campaign_id, &chunk.discord_user_id)
-                .await;
-            let id = Uuid::now_v7().to_string();
-            let rel = format!(
-                "sessions/{}/{}",
-                session.number, chunk.relative_path
-            );
-
-            sqlx::query(
-                r#"
-                INSERT INTO recordings (
-                  id, session_id, user_discord_id, source_kind, file_path,
-                  duration_ms, sample_rate, channels, created_at, updated_at, version
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
-                "#,
-            )
-            .bind(&id)
-            .bind(&session.id)
-            .bind(&chunk.discord_user_id)
-            .bind(&manifest.source_kind)
-            .bind(&rel)
-            .bind(chunk.duration_ms)
-            .bind(chunk.sample_rate)
-            .bind(chunk.channels)
-            .bind(now)
-            .bind(now)
-            .execute(pool)
-            .await?;
-        }
-    } else {
-        for track in manifest.tracks {
-            log_recording_character_resolution(pool, &session.campaign_id, &track.discord_user_id)
-                .await;
-            let id = Uuid::now_v7().to_string();
-            let rel = track.relative_path.clone();
-
-            sqlx::query(
-                r#"
-                INSERT INTO recordings (
-                  id, session_id, user_discord_id, source_kind, file_path,
-                  duration_ms, sample_rate, channels, created_at, updated_at, version
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
-                "#,
-            )
-            .bind(&id)
-            .bind(&session.id)
-            .bind(&track.discord_user_id)
-            .bind(&manifest.source_kind)
-            .bind(&rel)
-            .bind(track.duration_ms)
-            .bind(track.sample_rate)
-            .bind(track.channels)
-            .bind(now)
-            .bind(now)
-            .execute(pool)
-            .await?;
-        }
-    }
-
-    Ok(())
-}
-
-async fn log_recording_character_resolution(
-    pool: &SqlitePool,
-    campaign_id: &str,
-    discord_user_id: &str,
-) {
-    match character_discord::resolve_character_for_discord_user(pool, campaign_id, discord_user_id)
-        .await
-    {
-        Ok(Some(resolved)) => tracing::debug!(
-            discord_user_id = %discord_user_id,
-            character_id = %resolved.character_id,
-            character_name = %resolved.name,
-            "recording track mapped to character"
-        ),
-        Ok(None) => tracing::debug!(
-            discord_user_id = %discord_user_id,
-            "recording track has no linked character"
-        ),
-        Err(e) => tracing::warn!(
-            discord_user_id = %discord_user_id,
-            error = %e,
-            "failed to resolve recording track character"
-        ),
-    }
 }
 
 const TRANSCRIPTION_PROGRESS_FILE: &str = "transcripts/transcription-progress.json";
@@ -472,7 +329,7 @@ fn spawn_whisper_transcription(session_dir: &std::path::Path) -> AppResult<Child
         .arg(&progress_path)
         .current_dir(&whisper_root)
         .stdout(Stdio::null())
-        .stderr(Stdio::piped())
+        .stderr(Stdio::inherit())
         .spawn()
         .map_err(|e| AppError::Internal(format!("failed to spawn whisper sidecar: {e}")))
 }
@@ -528,19 +385,21 @@ async fn finalize_transcription_success(
     .execute(pool)
     .await?;
 
+    recording_ingest::attribute_transcript_speakers(pool, session_id, &session_dir).await?;
+
     Ok(())
 }
 
-async fn revert_transcription_to_recorded(pool: &SqlitePool, session_id: &str) -> AppResult<()> {
+async fn revert_transcription_to_recorded(pool: &SqlitePool, session_id: &str) -> AppResult<bool> {
     let now = now_ms();
-    sqlx::query(
+    let result = sqlx::query(
         "UPDATE sessions SET status = 'recorded', updated_at = ?, version = version + 1 WHERE id = ? AND status = 'transcribing'",
     )
     .bind(now)
     .bind(session_id)
     .execute(pool)
     .await?;
-    Ok(())
+    Ok(result.rows_affected() > 0)
 }
 
 fn clear_transcription_slot(transcription_state: &TranscriptionState, session_id: &str) {
@@ -555,32 +414,28 @@ fn clear_transcription_slot(transcription_state: &TranscriptionState, session_id
     }
 }
 
-fn transcription_child_running(
-    transcription_state: &TranscriptionState,
-    session_id: &str,
-) -> AppResult<bool> {
-    let mut guard = transcription_state
+fn transcription_slot_active(transcription_state: &TranscriptionState, session_id: &str) -> AppResult<bool> {
+    let guard = transcription_state
         .0
         .lock()
         .map_err(|_| AppError::Internal("transcription state lock poisoned".into()))?;
-    let Some(rt) = guard.as_mut() else {
-        return Ok(false);
+    Ok(guard
+        .as_ref()
+        .is_some_and(|rt| rt.session_id == session_id))
+}
+
+fn clear_transcription_slot_after_wait(
+    transcription_state: &TranscriptionState,
+    session_id: &str,
+) {
+    let Ok(mut guard) = transcription_state.0.lock() else {
+        return;
     };
-    if rt.session_id != session_id {
-        return Ok(false);
-    }
-    let Some(child) = rt.child.as_mut() else {
-        return Ok(true);
-    };
-    match child.try_wait() {
-        Ok(None) => Ok(true),
-        Ok(Some(_status)) => {
-            *guard = None;
-            Ok(false)
-        }
-        Err(e) => Err(AppError::Internal(format!(
-            "failed to poll transcription process: {e}"
-        ))),
+    if guard
+        .as_ref()
+        .is_some_and(|rt| rt.session_id == session_id)
+    {
+        *guard = None;
     }
 }
 
@@ -592,25 +447,26 @@ fn spawn_transcription_completion_task(
 ) {
     let sid = session_id.clone();
     tauri::async_runtime::spawn(async move {
-        let exit_status = {
-            let child = {
-                let mut guard = match transcription_state.0.lock() {
-                    Ok(g) => g,
-                    Err(_) => return,
-                };
-                let Some(rt) = guard.take() else {
-                    return;
-                };
-                if rt.session_id != sid {
-                    return;
-                }
-                rt.child
+        let child = {
+            let mut guard = match transcription_state.0.lock() {
+                Ok(g) => g,
+                Err(_) => return,
             };
-            let Some(mut child) = child else {
+            let Some(rt) = guard.as_mut() else {
                 return;
             };
-            child.wait()
+            if rt.session_id != sid {
+                return;
+            }
+            rt.child.take()
         };
+        let Some(mut child) = child else {
+            let _ = revert_transcription_to_recorded(&pool, &sid).await;
+            clear_transcription_slot_after_wait(&transcription_state, &sid);
+            return;
+        };
+
+        let exit_status = child.wait();
 
         match exit_status {
             Ok(status) if status.success() => {
@@ -628,6 +484,8 @@ fn spawn_transcription_completion_task(
                 let _ = revert_transcription_to_recorded(&pool, &sid).await;
             }
         }
+
+        clear_transcription_slot_after_wait(&transcription_state, &sid);
     });
 }
 
@@ -658,16 +516,9 @@ pub async fn start_transcription(
     }
 
     let session_dir = session_paths::session_dir(&handle, &session.campaign_id, session.number)?;
+    recording_ingest::export_manifest_from_db(&pool, &session, &session_dir).await?;
+    recording_ingest::export_speaker_labels(&pool, &session_id, &session_dir).await?;
     mark_transcription_attempted(&session_dir)?;
-
-    let now = now_ms();
-    sqlx::query(
-        "UPDATE sessions SET status = 'transcribing', updated_at = ?, version = version + 1 WHERE id = ?",
-    )
-    .bind(now)
-    .bind(&session_id)
-    .execute(&pool)
-    .await?;
 
     {
         let mut guard = transcription_state
@@ -679,6 +530,15 @@ pub async fn start_transcription(
             child: None,
         });
     }
+
+    let now = now_ms();
+    sqlx::query(
+        "UPDATE sessions SET status = 'transcribing', updated_at = ?, version = version + 1 WHERE id = ?",
+    )
+    .bind(now)
+    .bind(&session_id)
+    .execute(&pool)
+    .await?;
 
     let handle_bg = handle.clone();
     let pool_bg = pool.clone();
@@ -707,7 +567,7 @@ pub async fn start_transcription(
             }
         };
 
-        {
+        let attach_failed = {
             let mut guard = match transcription_state_bg.0.lock() {
                 Ok(g) => g,
                 Err(_) => {
@@ -715,15 +575,24 @@ pub async fn start_transcription(
                     return;
                 }
             };
-            let Some(rt) = guard.as_mut() else {
-                let _ = child.kill();
-                return;
-            };
-            if rt.session_id != session_id_bg {
-                let _ = child.kill();
-                return;
+            match guard.as_mut() {
+                None => {
+                    let _ = child.kill();
+                    true
+                }
+                Some(rt) if rt.session_id != session_id_bg => {
+                    let _ = child.kill();
+                    true
+                }
+                Some(rt) => {
+                    rt.child = Some(child);
+                    false
+                }
             }
-            rt.child = Some(child);
+        };
+        if attach_failed {
+            let _ = revert_transcription_to_recorded(&pool_bg, &session_id_bg).await;
+            return;
         }
 
         spawn_transcription_completion_task(
@@ -752,6 +621,8 @@ pub struct SessionPipelineState {
     pub has_refined_transcript: bool,
     pub transcription_attempted: bool,
     pub recording_count: i64,
+    pub participant_count: i64,
+    pub player_participant_count: i64,
 }
 
 pub async fn pipeline_state(
@@ -761,7 +632,7 @@ pub async fn pipeline_state(
     recording_active: bool,
     transcription_state: &TranscriptionState,
 ) -> AppResult<SessionPipelineState> {
-    let session = load_session(pool, session_id).await?;
+    let mut session = load_session(pool, session_id).await?;
     let session_dir = session_paths::session_dir(handle, &session.campaign_id, session.number).ok();
     let has_manifest = session_dir
         .as_ref()
@@ -772,16 +643,42 @@ pub async fn pipeline_state(
         .map(|d| session_raw_merged_transcript_path(d).exists())
         .unwrap_or(false);
 
-    let transcription_active = transcription_child_running(transcription_state, session_id)?;
+    let mut transcription_active = transcription_slot_active(transcription_state, session_id)?;
+
     let transcription_progress = session_dir
         .as_ref()
         .and_then(|d| read_transcription_progress(d));
+
+    let progress_in_flight = transcription_progress.is_some_and(|p| p < 1.0);
+
+    if transcription_active && session.status == "recorded" && !has_raw {
+        let now = now_ms();
+        sqlx::query(
+            "UPDATE sessions SET status = 'transcribing', updated_at = ?, version = version + 1 WHERE id = ? AND status = 'recorded'",
+        )
+        .bind(now)
+        .bind(session_id)
+        .execute(pool)
+        .await?;
+        session = load_session(pool, session_id).await?;
+    }
+
+    if session.status == "transcribing" && !transcription_active && !has_raw && !progress_in_flight {
+        if revert_transcription_to_recorded(pool, session_id).await? {
+            tracing::info!(session_id = %session_id, "recovered stale transcribing session status");
+            session = load_session(pool, session_id).await?;
+        }
+        transcription_active = false;
+    }
 
     let (recording_count,): (i64,) =
         sqlx::query_as("SELECT COUNT(*) FROM recordings WHERE session_id = ?")
             .bind(session_id)
             .fetch_one(pool)
             .await?;
+
+    let (participant_count, player_participant_count) =
+        session_discord::participant_counts(pool, session_id).await.unwrap_or((0, 0));
 
     let transcription_attempted = transcription_was_attempted(
         pool,
@@ -816,5 +713,7 @@ pub async fn pipeline_state(
         has_refined_transcript: has_refined > 0,
         transcription_attempted,
         recording_count,
+        participant_count,
+        player_participant_count,
     })
 }

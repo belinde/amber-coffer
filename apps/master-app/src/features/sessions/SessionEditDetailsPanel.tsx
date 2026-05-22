@@ -4,14 +4,13 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getSessionPipelineState } from '../../bridge/session-pipeline.js';
-import { deleteSession, updateSession } from '../../bridge/sessions.js';
+import { updateSession } from '../../bridge/sessions.js';
 import { Button } from '../../components/ui/Button.js';
 import { ActionIcons } from '../../components/ui/icons.js';
 import { applyValidationFailure } from '../validation/apply-validation-failure.js';
 import { fieldErrorAt } from '../validation/field-error-helpers.js';
 
 import { fromDatetimeLocalValue, toDatetimeLocalValue } from './session-datetime.js';
-import { formatSessionLabel } from './session-label.js';
 import { isSessionPlayLocked } from './session-phase.js';
 
 type Props = {
@@ -19,7 +18,6 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSessionUpdated: (session: Session) => void;
-  onDeleted: () => void;
   onError: (message: string) => void;
 };
 
@@ -28,7 +26,6 @@ export function SessionEditDetailsPanel({
   open,
   onOpenChange,
   onSessionUpdated,
-  onDeleted,
   onError,
 }: Props): ReactElement {
   const { t } = useTranslation();
@@ -36,7 +33,6 @@ export function SessionEditDetailsPanel({
   const [startedAt, setStartedAt] = useState(toDatetimeLocalValue(session.startedAt));
   const [endedAt, setEndedAt] = useState(toDatetimeLocalValue(session.endedAt));
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [recordingActive, setRecordingActive] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const fe = (fieldPath: string) => fieldErrorAt(fieldErrors, fieldPath);
@@ -84,21 +80,6 @@ export function SessionEditDetailsPanel({
       }
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function handleDelete(): Promise<void> {
-    if (!window.confirm(t('session.deleteConfirm', { name: formatSessionLabel(session, t) }))) {
-      return;
-    }
-    setDeleting(true);
-    try {
-      await deleteSession(session.id);
-      onDeleted();
-    } catch (err) {
-      onError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setDeleting(false);
     }
   }
 
@@ -162,17 +143,6 @@ export function SessionEditDetailsPanel({
               disabled={saving || fieldsDisabled}
             >
               {saving ? t('common.saving') : t('common.save')}
-            </Button>
-          </div>
-          <div className="form-actions form-actions--destructive">
-            <Button
-              type="button"
-              variant="danger"
-              icon={ActionIcons.delete}
-              disabled={deleting || playLocked || recordingActive}
-              onClick={() => void handleDelete()}
-            >
-              {deleting ? t('common.delete') : t('sessionDetail.deleteSession')}
             </Button>
           </div>
         </form>

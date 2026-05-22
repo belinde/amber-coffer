@@ -3,6 +3,7 @@ packages:
   - 'packages/*'
   - 'infrastructure'
   - 'tools/migrate-from-poc'
+  - 'tools/build-public-canon'
 
 # New workspace checklist: register here (if needed), add glob + lint script — see .cursor/rules/15-eslint-monorepo.mdc
 

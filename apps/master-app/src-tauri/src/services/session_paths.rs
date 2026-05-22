@@ -52,6 +52,19 @@ pub fn ensure_session_dirs(handle: &AppHandle, campaign_id: &str, session_number
     Ok(root)
 }
 
+/// Removes the on-disk workspace (`sessions/<number>/`) if it exists.
+pub fn remove_session_workspace(
+    handle: &AppHandle,
+    campaign_id: &str,
+    session_number: i32,
+) -> AppResult<()> {
+    let root = session_dir(handle, campaign_id, session_number)?;
+    if root.is_dir() {
+        std::fs::remove_dir_all(&root).map_err(|e| AppError::Internal(e.to_string()))?;
+    }
+    Ok(())
+}
+
 pub fn discord_bot_entry_script() -> PathBuf {
     monorepo_root().join("apps/discord-bot/dist/cli.js")
 }

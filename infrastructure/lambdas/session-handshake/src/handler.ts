@@ -3,7 +3,13 @@ import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-sec
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import type { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 
-import { signActivitySessionToken } from '../../shared/activity-session-token.js';
+import {
+  extractBearerToken,
+  signActivitySessionToken,
+  verifyActivitySessionToken,
+} from '../../shared/activity-session-token.js';
+import { upsertHandshakeChannelMapping } from '../../shared/handshake-channel-store.js';
+import { jsonResponse, SYNC_CORS_HEADERS } from '../../shared/http-response.js';
 
 const dynamo = new DynamoDBClient({});
 const secrets = new SecretsManagerClient({});
@@ -13,13 +19,6 @@ const SESSION_AUTH_SECRET_ARN = process.env.SESSION_AUTH_SECRET_ARN ?? '';
 const POLL_INTERVAL_MS = Number.parseInt(process.env.POLL_INTERVAL_MS ?? '2000', 10);
 const DISCORD_APPLICATION_ID = process.env.DISCORD_APPLICATION_ID ?? '';
 const DISCORD_CLIENT_SECRET_ARN = process.env.DISCORD_CLIENT_SECRET_ARN ?? '';
-
-const CORS_HEADERS = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-headers': 'content-type, authorization',
-  'access-control-allow-methods': 'POST, OPTIONS',
-  'content-type': 'application/json',
-};
 
 type HandshakeRow = {
   channel_id: string;
@@ -35,17 +34,6 @@ type DiscordTokenResponse = {
 type DiscordUser = {
   id: string;
 };
-
-function json(
-  statusCode: number,
-  body: unknown,
-): { statusCode: number; headers: typeof CORS_HEADERS; body: string } {
-  return {
-    statusCode,
-    headers: CORS_HEADERS,
-    body: JSON.stringify(body),
-  };
-}
 
 async function exchangeDiscordCode(args: {
   code: string;
@@ -124,39 +112,24 @@ async function loadSessionAuthSecret(): Promise<string> {
   return value;
 }
 
-export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  if (event.requestContext.http.method === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
-  }
-
-  if (event.requestContext.http.method !== 'POST') {
-    return json(405, { error: 'method_not_allowed' });
-  }
-
-  const path = event.rawPath ?? event.requestContext.http.path;
-  if (path !== '/session/handshake') {
-    return json(404, { error: 'not_found' });
-  }
-
-  if (
-    !TABLE_NAME ||
-    !SESSION_AUTH_SECRET_ARN ||
-    !DISCORD_APPLICATION_ID ||
-    !DISCORD_CLIENT_SECRET_ARN
-  ) {
-    return json(503, { error: 'handshake_not_configured' });
+async function handlePlayerHandshake(event: Parameters<APIGatewayProxyHandlerV2>[0]) {
+  if (!DISCORD_CLIENT_SECRET_ARN) {
+    return jsonResponse(503, { error: 'handshake_not_configured' });
   }
 
   let body: { code?: string; channelId?: string; redirectUri?: string };
   try {
     body = JSON.parse(event.body ?? '{}') as typeof body;
   } catch {
-    return json(400, { error: 'invalid_json' });
+    return jsonResponse(400, { error: 'invalid_json' });
   }
 
   const { code, channelId, redirectUri } = body;
   if (!code || !channelId || !redirectUri) {
-    return json(400, { error: 'missing_fields', message: 'code, channelId, redirectUri required' });
+    return jsonResponse(400, {
+      error: 'missing_fields',
+      message: 'code, channelId, redirectUri required',
+    });
   }
 
   try {
@@ -165,14 +138,14 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     );
     const clientSecret = secretResult.SecretString;
     if (!clientSecret || clientSecret === 'REPLACE_ME') {
-      return json(503, { error: 'discord_client_secret_not_configured' });
+      return jsonResponse(503, { error: 'discord_client_secret_not_configured' });
     }
 
     const accessToken = await exchangeDiscordCode({ code, redirectUri, clientSecret });
     const user = await fetchDiscordUser(accessToken);
     const row = await loadHandshakeRow(channelId);
     if (!row) {
-      return json(404, {
+      return jsonResponse(404, {
         error: 'channel_not_linked',
         message: 'No campaign mapped to this voice channel',
       });
@@ -192,7 +165,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       authSecret,
     );
 
-    return json(200, {
+    return jsonResponse(200, {
       campaignId: row.campaign_id,
       sessionId: row.session_id,
       playerDiscordId: user.id,
@@ -205,8 +178,75 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     console.error('handshake_failed', err);
     const message = err instanceof Error ? err.message : 'unknown_error';
     if (message.startsWith('discord_')) {
-      return json(401, { error: 'discord_auth_failed', message });
+      return jsonResponse(401, { error: 'discord_auth_failed', message });
     }
-    return json(500, { error: 'handshake_failed', message });
+    return jsonResponse(500, { error: 'handshake_failed', message });
   }
+}
+
+async function handleMasterChannelLink(event: Parameters<APIGatewayProxyHandlerV2>[0]) {
+  const bearer = extractBearerToken(event.headers?.authorization);
+  if (!bearer) {
+    return jsonResponse(401, { error: 'unauthorized' });
+  }
+
+  let body: { channelId?: string };
+  try {
+    body = JSON.parse(event.body ?? '{}') as typeof body;
+  } catch {
+    return jsonResponse(400, { error: 'invalid_json' });
+  }
+
+  const { channelId } = body;
+  if (!channelId) {
+    return jsonResponse(400, { error: 'missing_fields', message: 'channelId required' });
+  }
+
+  try {
+    const authSecret = await loadSessionAuthSecret();
+    const claims = verifyActivitySessionToken(bearer, authSecret);
+    if (!claims || claims.role !== 'master') {
+      return jsonResponse(401, { error: 'unauthorized' });
+    }
+
+    await upsertHandshakeChannelMapping({
+      tableName: TABLE_NAME,
+      channelId,
+      campaignId: claims.campaignId,
+      sessionId: claims.sessionId,
+    });
+
+    return jsonResponse(200, {
+      campaignId: claims.campaignId,
+      sessionId: claims.sessionId,
+      channelId,
+    });
+  } catch (err) {
+    console.error('handshake_channel_link_failed', err);
+    const message = err instanceof Error ? err.message : 'unknown_error';
+    return jsonResponse(500, { error: 'handshake_channel_link_failed', message });
+  }
+}
+
+export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+  if (event.requestContext.http.method === 'OPTIONS') {
+    return { statusCode: 204, headers: SYNC_CORS_HEADERS, body: '' };
+  }
+
+  if (!TABLE_NAME || !SESSION_AUTH_SECRET_ARN || !DISCORD_APPLICATION_ID) {
+    return jsonResponse(503, { error: 'handshake_not_configured' });
+  }
+
+  const path = event.rawPath ?? event.requestContext.http.path;
+  const method = event.requestContext.http.method;
+
+  if (path === '/session/handshake/channel' && method === 'PUT') {
+    return handleMasterChannelLink(event);
+  }
+
+  if (path === '/session/handshake' && method === 'POST') {
+    return handlePlayerHandshake(event);
+  }
+
+  return jsonResponse(404, { error: 'not_found' });
 };

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import {
   campaignIdSchema,
   discordChannelIdSchema,
+  discordUserIdSchema,
   entityKindSchema,
   fogRegionIdSchema,
   handoutIdSchema,
@@ -26,6 +27,8 @@ const tokenMoveRequestSchema = z.object({
   tokenId: tokenIdSchema,
   mapId: mapIdSchema,
   requestedPosition: tokenPositionSchema,
+  /** Set by session-sync Lambda from the player JWT; not sent by the client. */
+  senderDiscordId: discordUserIdSchema.optional(),
 });
 
 const tokenCreatedSchema = z.object({
@@ -107,6 +110,10 @@ export const tabletopSnapshotSchema = z.object({
   activeMapId: mapIdSchema.nullable(),
   maps: z.array(mapSchema),
   tokens: z.array(tokenSchema),
+  /** Short literal labels keyed by token id (no portrait images). */
+  tokenLabels: z.record(z.string(), z.string()).default({}),
+  /** Full entity names for accessibility, keyed by token id. */
+  tokenNames: z.record(z.string(), z.string()).default({}),
   visibleHandouts: z.array(handoutSchema),
   snapshotAt: z.number().int().nonnegative(),
 });

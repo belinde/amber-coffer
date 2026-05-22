@@ -1,5 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, stat, unlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import * as readline from 'node:readline';
 import type { Readable } from 'node:stream';
@@ -23,6 +23,7 @@ import ffmpegStatic from 'ffmpeg-static';
 import prism from 'prism-media';
 
 import { playRecordingAnnouncement } from './play-announcement.js';
+import { chunkFileName, MIN_OGG_BYTES, restoreChunkCountersFromManifest } from './record-utils.js';
 
 type RecordOptions = {
   token: string;
@@ -48,10 +49,6 @@ type CompletedChunk = RecordingManifestChunk;
 
 function ffmpegPath(): string {
   return typeof ffmpegStatic === 'string' ? ffmpegStatic : 'ffmpeg';
-}
-
-function chunkFileName(index: number): string {
-  return `${String(index).padStart(4, '0')}.ogg`;
 }
 
 /** Opus-in-Ogg via ffmpeg; faster-whisper decodes via libav/ffmpeg. */
@@ -116,6 +113,17 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
   const activeSegments = new Map<string, ActiveSegment>();
   const completedChunks: CompletedChunk[] = [];
   const chunkCounters = new Map<string, number>();
+  const finalizeTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  const SPEAKING_END_DEBOUNCE_MS = 2000;
+  const manifestPath = join(opts.outputDir, 'audio', 'manifest.json');
+
+  try {
+    const existingRaw = await readFile(manifestPath, 'utf8');
+    const existing = recordingManifestV2Schema.parse(JSON.parse(existingRaw));
+    restoreChunkCountersFromManifest(existing.chunks, chunkCounters);
+  } catch {
+    // No prior manifest for this session.
+  }
 
   const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
@@ -124,7 +132,16 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
   let connection: VoiceConnection | null = null;
   let voiceChannel: VoiceBasedChannel | null = null;
 
+  const clearFinalizeTimer = (userId: string): void => {
+    const timer = finalizeTimers.get(userId);
+    if (timer !== undefined) {
+      clearTimeout(timer);
+      finalizeTimers.delete(userId);
+    }
+  };
+
   const finalizeSegment = async (userId: string): Promise<void> => {
+    clearFinalizeTimer(userId);
     const segment = activeSegments.get(userId);
     if (!segment) return;
 
@@ -133,6 +150,11 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
 
     try {
       await closeOggEncoder(segment.ffmpegProc);
+      const fileStat = await stat(segment.filePath);
+      if (fileStat.size < MIN_OGG_BYTES) {
+        await unlink(segment.filePath).catch(() => undefined);
+        return;
+      }
       const durationMs = Math.max(0, Date.now() - segment.wallStartedAt);
       completedChunks.push({
         discordUserId: discordUserIdSchema.parse(segment.discordUserId),
@@ -146,6 +168,7 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
       });
     } catch (err: unknown) {
       console.error(`failed to finalize chunk for ${userId}:`, err);
+      await unlink(segment.filePath).catch(() => undefined);
     }
   };
 
@@ -203,23 +226,30 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
     });
   };
 
+  const scheduleFinalize = (userId: string): void => {
+    clearFinalizeTimer(userId);
+    const timer = setTimeout(() => {
+      finalizeTimers.delete(userId);
+      void finalizeSegment(userId);
+    }, SPEAKING_END_DEBOUNCE_MS);
+    finalizeTimers.set(userId, timer);
+  };
+
   const onSpeakingStart = (userId: string): void => {
     if (userId === client.user?.id) return;
-    void (async () => {
-      if (activeSegments.has(userId)) {
-        await finalizeSegment(userId);
-      }
-      await startSegment(userId);
-    })();
+    clearFinalizeTimer(userId);
+    void startSegment(userId);
   };
 
   const finish = async (): Promise<void> => {
     const endedAt = Date.now();
+    for (const userId of finalizeTimers.keys()) {
+      clearFinalizeTimer(userId);
+    }
     await finalizeAllSegments();
 
     let mergedChunks = completedChunks;
     let manifestStartedAt = sessionStartedAt;
-    const manifestPath = join(opts.outputDir, 'audio', 'manifest.json');
     try {
       const existingRaw = await readFile(manifestPath, 'utf8');
       const existing = recordingManifestV2Schema.parse(JSON.parse(existingRaw));
@@ -298,7 +328,8 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
   const receiver = connection.receiver;
   receiver.speaking.on('start', onSpeakingStart);
   receiver.speaking.on('end', (userId) => {
-    void finalizeSegment(userId);
+    if (userId === client.user?.id) return;
+    scheduleFinalize(userId);
   });
 
   client.on('voiceStateUpdate', (_oldState, newState) => {

@@ -1,4 +1,4 @@
-import type { Session } from '@amber/shared';
+import type { Campaign, Session } from '@amber/shared';
 import type { ReactElement } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,15 +10,14 @@ import {
   sessionStopRecording,
   type SessionPipelineState,
 } from '../../bridge/session-pipeline.js';
-import {
-  listSessionRecordings,
-  type SessionRecordingView,
-} from '../../bridge/session-recordings.js';
 import { Button } from '../../components/ui/Button.js';
 import { ActionIcons } from '../../components/ui/icons.js';
 
+import { SessionDiscordParticipantsPanel } from './SessionDiscordParticipantsPanel.js';
+
 type Props = {
   session: Session;
+  campaignId: Campaign['id'];
   onSessionUpdated: (session: Session) => void;
   onError: (message: string) => void;
   onConfigureDiscord?: (() => void) | undefined;
@@ -28,6 +27,7 @@ type Props = {
 
 export function SessionRecordingControls({
   session,
+  campaignId,
   onSessionUpdated,
   onError,
   onConfigureDiscord,
@@ -36,17 +36,12 @@ export function SessionRecordingControls({
 }: Props): ReactElement {
   const { t } = useTranslation();
   const [pipeline, setPipeline] = useState<SessionPipelineState | null>(null);
-  const [recordings, setRecordings] = useState<SessionRecordingView[]>([]);
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
-      const [pipe, tracks] = await Promise.all([
-        getSessionPipelineState(session.id),
-        listSessionRecordings(session.id),
-      ]);
+      const pipe = await getSessionPipelineState(session.id);
       setPipeline(pipe);
-      setRecordings(tracks);
     } catch (err) {
       onError(formatInvokeErrorMessage(err));
     }
@@ -126,41 +121,21 @@ export function SessionRecordingControls({
           <dd>{recordingActive ? t('liveSession.valueYes') : t('liveSession.valueNo')}</dd>
         </div>
         <div>
-          <dt>{t('liveSession.trackCount')}</dt>
-          <dd>{pipeline.recordingCount}</dd>
+          <dt>{t('sessionDetail.participantCount')}</dt>
+          <dd>{pipeline.participantCount}</dd>
+        </div>
+        <div>
+          <dt>{t('sessionDetail.playerCountLabel')}</dt>
+          <dd>{pipeline.playerParticipantCount}</dd>
         </div>
       </dl>
-      {recordings.length > 0 ? (
-        <section
-          className="session-recording-tracks"
-          aria-labelledby="session-recording-tracks-heading"
-        >
-          <h5 id="session-recording-tracks-heading">{t('sessionDetail.recordingTracksTitle')}</h5>
-          <ul className="session-recording-tracks__list">
-            {recordings.map((track) => (
-              <li key={track.id} className="session-recording-tracks__item">
-                <span className="session-recording-tracks__speaker">
-                  {t('sessionDetail.recordingTrackDiscord', { id: track.userDiscordId })}
-                </span>
-                {track.characterName ? (
-                  <span className="session-recording-tracks__character">{track.characterName}</span>
-                ) : (
-                  <span className="session-recording-tracks__unassigned">
-                    {t('sessionDetail.recordingTrackUnassigned')}
-                    {onOpenCharacters ? (
-                      <>
-                        {' '}
-                        <Button type="button" variant="default" onClick={onOpenCharacters}>
-                          {t('sessionDetail.recordingTrackAssign')}
-                        </Button>
-                      </>
-                    ) : null}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
+      {pipeline.participantCount > 0 ? (
+        <SessionDiscordParticipantsPanel
+          session={session}
+          campaignId={campaignId}
+          onError={onError}
+          onOpenCharacters={onOpenCharacters}
+        />
       ) : null}
       {showRecordingActions ? (
         <div className="session-workflow__actions">

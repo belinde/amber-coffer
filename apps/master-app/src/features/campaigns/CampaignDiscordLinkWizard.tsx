@@ -1,4 +1,5 @@
 import type { Campaign, DiscordGuildOption, DiscordVoiceChannelOption } from '@amber/shared';
+import type { TFunction } from 'i18next';
 import type { ReactElement } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +30,7 @@ function isUserOauthExpired(err: unknown): boolean {
   return validation?.issues.some((issue) => issue.code === USER_OAUTH_EXPIRED) ?? false;
 }
 
-function formatDiscordWizardError(err: unknown, t: (key: string) => string): string {
+function formatDiscordWizardError(err: unknown, t: TFunction): string {
   const validation = parseInvokeError(err);
   if (validation) {
     const mapped = translateFieldErrors(t, validation.issues);

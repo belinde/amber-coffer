@@ -1,0 +1,12 @@
+---
+inclusion: fileMatch
+fileMatchPattern: ['packages/shared/**']
+---
+
+# packages/shared
+
+- **Nessun import** da `apps/*` o `infrastructure/*`
+- Ogni entità: `*.schema.ts` (Zod) + re-export tipo in `*.ts`
+- Nuovi ID: aggiungere a `ids/branded.ts`, `ids/schemas.ts`, migrare SQL se persistente
+- MQTT: estendere `mqttMessageSchema` con nuovo `kind` literal, non stringhe libere
+- Test unitari per utility pure (es. `uuid-v7`, `buildSyncTopic`)

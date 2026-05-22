@@ -14,6 +14,8 @@ function baseToken(overrides: Partial<Token> = {}): Token {
     mapId,
     entityKind: 'character',
     entityId: 'char-1',
+    sessionId: null,
+    displayName: null,
     position: { zone: 'board', xCell: 0, yCell: 0 },
     visibleToPlayers: true,
     controlledByPlayerDiscordId: playerA,

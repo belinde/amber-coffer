@@ -4,6 +4,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { getCampaign } from '../../bridge/campaigns.js';
 import { discordEnsureUserOauth } from '../../bridge/discord-setup.js';
 
 import { resolveTokenMoveRequest } from './bridge.js';
@@ -15,6 +16,7 @@ import {
   MasterSessionTokenError,
   putSessionSnapshot,
 } from './session-sync-api.js';
+import { registerTabletopSnapshotBump } from './tabletop-sync-bump.js';
 
 const DEFAULT_POLL_MS = 2000;
 
@@ -28,10 +30,13 @@ type Args = {
   sessionId: string;
   activeMapId: string | null;
   onError?: (message: string) => void;
+  onTokensChanged?: () => void;
 };
 
 export function useTabletopSyncPoll(args: Args): void {
-  const { enabled, campaignId, sessionId, activeMapId, onError } = args;
+  const { enabled, campaignId, sessionId, activeMapId, onError, onTokensChanged } = args;
+  const onTokensChangedRef = useRef(onTokensChanged);
+  onTokensChangedRef.current = onTokensChanged;
   const { t } = useTranslation();
   const lastPublishedHashRef = useRef<string | null>(null);
   const lastVersionRef = useRef(0);
@@ -39,17 +44,23 @@ export function useTabletopSyncPoll(args: Args): void {
   const pollMsRef = useRef(DEFAULT_POLL_MS);
   const runningRef = useRef(false);
   const discordRetryRef = useRef(false);
+  const discordChannelIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!enabled) {
       runningRef.current = false;
       sessionTokenRef.current = null;
       discordRetryRef.current = false;
+      discordChannelIdRef.current = null;
       return;
     }
 
     runningRef.current = true;
     let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const unregisterBump = registerTabletopSnapshotBump(() => {
+      lastPublishedHashRef.current = null;
+    });
 
     function reportError(err: unknown): void {
       const key = formatMasterSyncPollError(err);
@@ -77,6 +88,7 @@ export function useTabletopSyncPoll(args: Args): void {
           campaignId,
           sessionId,
           discordAccessToken,
+          channelId: discordChannelIdRef.current ?? undefined,
         });
         sessionTokenRef.current = issued.sessionToken;
         pollMsRef.current = issued.pollIntervalMs;
@@ -99,6 +111,13 @@ export function useTabletopSyncPoll(args: Args): void {
     async function tick(): Promise<void> {
       if (!runningRef.current) {
         return;
+      }
+
+      try {
+        const campaign = await getCampaign(campaignId);
+        discordChannelIdRef.current = campaign?.discordChannelId ?? null;
+      } catch (err) {
+        reportError(err);
       }
 
       const token = await ensureToken();
@@ -133,16 +152,25 @@ export function useTabletopSyncPoll(args: Args): void {
             lastVersionRef.current = stateResult.state.version;
           }
 
+          let acceptedMove = false;
           for (const raw of stateResult.state.pendingEvents) {
             const event = mqttMessageSchema.parse(raw);
             if (!isPlayerMoveRequest(event)) {
               continue;
             }
-            await resolveTokenMoveRequest({
+            const result = (await resolveTokenMoveRequest({
               tokenId: event.tokenId,
               accepted: true,
               finalPosition: event.requestedPosition,
-            });
+              requesterDiscordId: event.senderDiscordId ?? null,
+            })) as { accepted?: boolean };
+            if (result.accepted) {
+              acceptedMove = true;
+            }
+          }
+          if (acceptedMove) {
+            lastPublishedHashRef.current = null;
+            onTokensChangedRef.current?.();
           }
         }
       } catch (err) {
@@ -159,6 +187,7 @@ export function useTabletopSyncPoll(args: Args): void {
 
     return () => {
       runningRef.current = false;
+      unregisterBump();
       if (timer !== null) {
         clearTimeout(timer);
       }

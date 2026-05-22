@@ -25,7 +25,8 @@ Servono **due Application Discord concettuali**:
 - **Bot registrazione**: resta il bot creato dal GM nel portale; il wizard genera l’URL di invito usando il `client_id` estratto dal token del GM, non l’Application Amber.
 - **OAuth persistito**: sessione utente (access + refresh) in keyring (`discord-user-oauth`); refresh automatico; comandi `discord_oauth_status`, `discord_ensure_user_oauth`, `discord_oauth_logout`. Il wizard non cancella più la sessione al salvataggio del canale.
 - **Collegamento PG ↔ Discord**: `campaign.discordGuildId` + `Character.playerDiscordId`; roster server via REST bot (`GET /guilds/{id}/members` e search); richiede **Server Members Intent** sul bot del GM.
-- **Risoluzione audio**: `recordings.user_discord_id` → personaggio tramite `player_discord_id` (nessuna FK su `recordings`).
+- **Risoluzione audio**: default campagna via `Character.playerDiscordId`; override per sessione in `session_discord_assignments` (ruolo `gm` | `player`, più PG sullo stesso account ammessi). OAuth utente persiste `discordUserId` per marcare il GM in VC.
+- **Risoluzione audio (legacy)**: `recordings.user_discord_id` → personaggio tramite `player_discord_id` se non c’è override di sessione.
 
 ### Checklist Developer Portal
 

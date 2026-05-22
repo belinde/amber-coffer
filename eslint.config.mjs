@@ -8,7 +8,11 @@ import { nodeOverlays } from '@amber/eslint-config/node';
 import { reactOverlays } from '@amber/eslint-config/react';
 import tseslint from 'typescript-eslint';
 
-const reactFiles = ['apps/master-app/**/*.{ts,tsx}', 'apps/player-activity/**/*.{ts,tsx}'];
+const reactFiles = [
+  'apps/master-app/**/*.{ts,tsx}',
+  'apps/player-activity/**/*.{ts,tsx}',
+  'packages/ui/**/*.{ts,tsx}',
+];
 
 const nodeFiles = [
   'apps/discord-bot/**/*.{ts,tsx,js,mjs}',
@@ -17,6 +21,7 @@ const nodeFiles = [
   'packages/eslint-config/**/*.js',
   'infrastructure/**/*.{ts,js}',
   'tools/migrate-from-poc/**/*.{ts,tsx}',
+  'tools/build-public-canon/**/*.{ts,tsx}',
 ];
 
 /** Paths linted without typescript-eslint project service (still get import/order, etc.). */

@@ -1,3 +1,4 @@
+import { Button } from '@amber/ui';
 import { useEffect, useMemo, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -95,9 +96,14 @@ export function PlayerActivityShell(): ReactElement {
           <p className="session-shell__error-technical">{errorView.technical}</p>
         ) : null}
         {embedded ? (
-          <button type="button" className="session-shell__retry" onClick={retrySessionBootstrap}>
+          <Button
+            type="button"
+            variant="primary"
+            className="session-shell__retry"
+            onClick={retrySessionBootstrap}
+          >
             {t('session.retry')}
-          </button>
+          </Button>
         ) : null}
       </section>
     );

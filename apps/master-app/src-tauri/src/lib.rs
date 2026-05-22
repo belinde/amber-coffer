@@ -3,6 +3,7 @@ pub mod db;
 pub mod error;
 mod models;
 mod services;
+mod tabletop_defaults;
 mod validation_issue;
 mod util;
 
@@ -134,23 +135,35 @@ pub fn run() {
             commands::session_run_transcription,
             commands::get_session_pipeline_state,
             commands::list_session_recordings,
+            commands::list_session_discord_participants,
+            commands::upsert_session_discord_assignment,
+            commands::remove_session_discord_assignment,
+            commands::add_session_shared_account_character,
+            commands::discord_connected_user,
             commands::import_campaign_dump,
             commands::repair_campaign_image_portraits,
             commands::repair_poc_campaign_portraits,
             commands::list_maps,
             commands::create_map,
+            commands::update_map_background,
             commands::list_tokens,
             commands::discord_user_access_token,
             commands::build_tabletop_snapshot_json,
             commands::place_token,
+            commands::create_custom_session_token,
             commands::move_token,
             commands::resolve_token_move_request,
             commands::remove_token,
+            commands::set_token_controller,
+            commands::set_token_visibility,
+            commands::ensure_campaign_character_tokens,
             commands::share_handout,
             commands::hide_handout,
             commands::publish_tabletop_snapshot,
             commands::list_handouts,
             commands::create_handout,
+            commands::share_image_as_handout,
+            commands::preview_public_canon_build,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -7,6 +7,8 @@ pub struct Map {
     pub campaign_id: String,
     pub name: String,
     pub image_path: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub background_public_path: String,
     pub width_px: i32,
     pub height_px: i32,
     pub grid_size_px: i32,

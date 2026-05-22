@@ -381,6 +381,7 @@
     "editTitle": "Modifier la session",
     "empty": "Aucune session enregistrée.",
     "deleteConfirm": "Supprimer la session {{name}} ?",
+    "deleteConfirmFull": "Supprimer définitivement la session {{name}} ?\n\nCela supprime toutes les données de session de la base de campagne (métadonnées d'enregistrement, transcriptions, affectations Discord, handouts de session, jetons de tabletop personnalisés) et le dossier sur disque (fichiers audio et transcriptions).\n\nCette action est irréversible.",
     "numbered": "Session {{number}}",
     "number": "Numéro",
     "numberAuto": "Le numéro est attribué automatiquement (prochain disponible).",
@@ -423,6 +424,23 @@
     "recordingTrackDiscord": "Discord {{id}}",
     "recordingTrackUnassigned": "Aucun personnage assigné.",
     "recordingTrackAssign": "Assigner dans les PJ",
+    "participantsTitle": "Participants à l'enregistrement",
+    "participantCount": "Participants",
+    "playerCountLabel": "Joueurs",
+    "playerCount": "{{count}} joueurs",
+    "noParticipants": "Aucun participant vocal enregistré.",
+    "participantGm": "Maître de jeu",
+    "participantGmHint": "Voix du narrateur sur Discord. Non liée à un personnage joueur.",
+    "participantPlayersTitle": "Joueurs",
+    "participantDefaultCharacter": "Lien campagne : {{name}}",
+    "participantNoDefaultCharacter": "Aucun personnage lié en campagne.",
+    "participantSessionCharacter": "Personnage pour cette session",
+    "participantUnassigned": "Non assigné",
+    "participantSharedAccount": "Compte partagé",
+    "participantSharedAccountHint": "Deux personnages ou plus sur le même compte Discord : la transcription ne sépare pas les voix ; l'attribution se fait en analyse.",
+    "participantAddSharedCharacter": "Ajouter un personnage (même compte)",
+    "participantAddSharedCharacterPlaceholder": "Choisir un personnage…",
+    "participantEditCampaignLinks": "Liens campagne",
     "stepTranscribe": "Transcription",
     "stepTranscribeHint": "Lancez Whisper uniquement à l'arrêt, avec des fichiers audio présents.",
     "transcriptionStarting": "Démarrage de la transcription…",
@@ -476,8 +494,11 @@
     "liveInGamePlaceholder": "La ricerca rapida sul canone durante il gioco arriverà presto (PG, PNG, luoghi, ambientazione).",
     "postShowTabletop": "Mostra tabletop",
     "postHideTabletop": "Nascondi tabletop",
-    "deleteSession": "Elimina sessione",
-    "editDetailsLockedLive": "Terminez la session en direct avant de modifier les dates ou supprimer."
+    "deleteSession": "Supprimer la session",
+    "deleteBlockedLive": "Terminez la session en direct avant de supprimer.",
+    "deleteBlockedRecording": "Arrêtez l'enregistrement avant de supprimer.",
+    "deleteBlockedTranscription": "Attendez la fin de la transcription avant de supprimer.",
+    "editDetailsLockedLive": "Terminez la session en direct avant de modifier les dates."
   },
   "sessionSync": {
     "errors": {
@@ -487,6 +508,39 @@
       "tokenFailed": "Impossible d’obtenir le jeton de sync ({{code}})."
     }
   },
+  "sessions": {
+    "tabletop": {
+      "tokenPanelAria": "Gestion des pions",
+      "tokenPanelTitle": "Pions",
+      "selectToken": "Pion sélectionné",
+      "noTokenSelected": "— Aucun —",
+      "visibleToPlayers": "Visible pour les joueurs",
+      "assignController": "Joueur autorisé à déplacer",
+      "controllerNone": "— MJ seul (pas de déplacement joueur) —",
+      "controllerUnlinked": "Joueur non lié ({{id}})",
+      "controllerNeedLinked": "Liez un personnage à Discord dans le coffre pour assigner le contrôle.",
+      "removeToken": "Retirer le pion",
+      "placeCharacter": "Ajouter un pion de personnage",
+      "chooseCharacter": "— Choisir un personnage —",
+      "placeCharacterButton": "Placer sur le banc",
+      "restoreAllCharacters": "Restaurer tous les PJ manquants ({{count}})",
+      "placeNpc": "Ajouter un pion PNJ",
+      "chooseNpc": "— Choisir un PNJ —",
+      "placeNpcButton": "Placer sur le banc",
+      "placeCustomTitle": "Pion propre à la session",
+      "customTokenName": "Libellé",
+      "customTokenNamePlaceholder": "ex. Élémentaire de feu",
+      "placeCustomButton": "Ajouter un pion personnalisé",
+      "customTokenHint": "Non lié aux PNJ de l'archive. Visible uniquement dans cette session ; supprimé avec la session.",
+      "entityKindCustom": "personnalisé"
+    }
+  },
+  "tabletop": {
+    "setMapBackground": "Définir comme fond de table",
+    "changeMapBackground": "Changer le fond de carte",
+    "backgroundUpdated": "Fond de carte mis à jour pour les joueurs.",
+    "backgroundNoActiveMap": "Sélectionnez d'abord une carte active sur la table."
+  },
   "images": {
     "listTitle": "Images de campagne",
     "create": "Nouvelle image",
@@ -495,6 +549,7 @@
     "linkCount": "{{count}} liens",
     "previewAlt": "Aperçu",
     "closePreview": "Fermer l'aperçu",
+    "showToPlayers": "Montrer aux joueurs",
     "thumbnailFailed": "Aperçu indisponible",
     "noFile": "Aucun fichier joint",
     "chooseFile": "Choisir un fichier…",

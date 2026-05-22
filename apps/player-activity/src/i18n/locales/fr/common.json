@@ -38,8 +38,8 @@
     "boardAria": "Carte tactique",
     "benchAria": "Jetons hors scène",
     "handoutsAria": "Documents partagés",
-    "tokenOwned": "Jeton contrôlé {{id}}",
-    "tokenLocked": "Jeton verrouillé {{id}}"
+    "tokenOwned": "Votre pion : {{name}}",
+    "tokenLocked": "Pion verrouillé : {{name}}"
   },
   "discord": {
     "loading": "Discord…",

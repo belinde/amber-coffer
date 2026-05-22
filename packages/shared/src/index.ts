@@ -6,3 +6,4 @@ export * from './sync/index.js';
 export * from './discord/index.js';
 export * from './validation/index.js';
 export * from './migration/index.js';
+export * from './tabletop/index.js';

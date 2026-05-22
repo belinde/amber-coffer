@@ -2,6 +2,7 @@ pub mod import_dump;
 mod campaign;
 mod campaign_image;
 mod character;
+mod handout;
 mod faction;
 mod item;
 mod location;
@@ -23,6 +24,9 @@ pub use campaign_image::{
     CampaignImage, CampaignImageRow, CreateCampaignImageInput, UpdateCampaignImageInput,
 };
 pub use character::{Character, CharacterRow, CreateCharacterInput, UpdateCharacterInput};
+pub use handout::{
+    Handout, HandoutRow, ShareImageAsHandoutInput, UpdateMapBackgroundInput,
+};
 pub use faction::{CreateFactionInput, Faction, FactionRow, UpdateFactionInput};
 pub use item::{CreateItemInput, Item, UpdateItemInput};
 pub use location::{CreateLocationInput, Location, LocationRow, UpdateLocationInput};
@@ -37,4 +41,4 @@ pub use relationship::{
 };
 pub use recording::Recording;
 pub use session::{CreateSessionInput, Session, UpdateSessionInput};
-pub use token::{Token, TokenPosition, TokenRow};
+pub use token::{normalize_optional_discord_id, Token, TokenPosition, TokenRow};

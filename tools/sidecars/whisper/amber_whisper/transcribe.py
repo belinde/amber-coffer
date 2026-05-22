@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Iterator
 
 MANIFEST_NAME = "manifest.json"
+SPEAKER_LABELS_NAME = "speaker-labels.json"
 AUDIO_DISCORD = Path("audio") / "discord"
 TRANSCRIPTS_DIR = Path("transcripts")
 RAW_MERGED = TRANSCRIPTS_DIR / "raw-merged.txt"
@@ -49,17 +50,30 @@ def _load_manifest(session_dir: Path) -> dict[str, Any] | None:
     return json.loads(manifest_path.read_text(encoding="utf-8"))
 
 
-def _speaker_lookup(manifest: dict[str, Any] | None) -> dict[str, str]:
-    if manifest is None:
+def _load_speaker_labels(session_dir: Path) -> dict[str, str]:
+    labels_path = session_dir / TRANSCRIPTS_DIR / SPEAKER_LABELS_NAME
+    if not labels_path.is_file():
         return {}
-    names: dict[str, str] = {}
+    try:
+        raw = json.loads(labels_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+    if not isinstance(raw, dict):
+        return {}
+    return {str(k): str(v) for k, v in raw.items()}
+
+
+def _speaker_lookup(manifest: dict[str, Any] | None, session_dir: Path) -> dict[str, str]:
+    names = _load_speaker_labels(session_dir)
+    if manifest is None:
+        return names
     for track in manifest.get("tracks", []):
         user_id = str(track.get("discordUserId", ""))
-        if user_id:
+        if user_id and user_id not in names:
             names[user_id] = str(track.get("displayName") or user_id)
     for chunk in manifest.get("chunks", []):
         user_id = str(chunk.get("discordUserId", ""))
-        if user_id:
+        if user_id and user_id not in names:
             names[user_id] = str(chunk.get("displayName") or user_id)
     return names
 
@@ -76,7 +90,7 @@ def _resolve_session_path(session_dir: Path, relative_path: str) -> Path:
 
 
 def _iter_audio_sources(session_dir: Path, manifest: dict[str, Any] | None) -> Iterator[AudioSource]:
-    names = _speaker_lookup(manifest)
+    names = _speaker_lookup(manifest, session_dir)
     audio_dir = session_dir / AUDIO_DISCORD
 
     if manifest and manifest.get("version") == 2:

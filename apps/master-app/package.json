@@ -5,9 +5,9 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "predev": "pnpm --filter @amber/shared build",
-    "prebuild": "pnpm --filter @amber/shared build",
-    "pretauri": "pnpm --filter @amber/shared build",
+    "predev": "pnpm --filter @amber/shared build && pnpm --filter @amber/ui build",
+    "prebuild": "pnpm --filter @amber/shared build && pnpm --filter @amber/ui build",
+    "pretauri": "pnpm --filter @amber/shared build && pnpm --filter @amber/ui build",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
@@ -19,6 +19,7 @@
   "dependencies": {
     "@amber/shared": "workspace:*",
     "@amber/tabletop-engine": "workspace:*",
+    "@amber/ui": "workspace:*",
     "@phosphor-icons/react": "^2.1.10",
     "@tauri-apps/api": "^2.2.0",
     "@tauri-apps/plugin-dialog": "^2.2.0",

@@ -8,19 +8,39 @@ import {
   entersState,
   type VoiceConnection,
 } from '@discordjs/voice';
-import { Routes, type Client } from 'discord.js';
+import { ChannelType, Routes, type Client } from 'discord.js';
 
 import type { AnnouncementKind } from './announcement-copy.js';
 import { resolveAnnouncementPath } from './announcement-path.js';
 
-async function setBotSelfMute(client: Client, guildId: string, muted: boolean): Promise<void> {
+function isUnsupportedVoiceStateChannel(err: unknown): boolean {
+  if (err === null || typeof err !== 'object') return false;
+  const code: unknown = Reflect.get(err, 'code');
+  return code === 50024;
+}
+
+async function setBotSelfMute(
+  client: Client,
+  connection: VoiceConnection,
+  muted: boolean,
+): Promise<void> {
   const userId = client.user?.id;
   if (!userId) return;
+
+  const { channelId, guildId } = connection.joinConfig;
+  if (!guildId || !channelId) return;
+
+  const channel = await client.channels.fetch(channelId).catch(() => null);
+  if (channel?.type === ChannelType.GuildStageVoice) {
+    return;
+  }
+
   try {
     await client.rest.patch(Routes.guildVoiceState(guildId, userId), {
       body: { self_mute: muted },
     });
   } catch (err: unknown) {
+    if (isUnsupportedVoiceStateChannel(err)) return;
     console.warn('failed to set bot self mute:', err);
   }
 }
@@ -33,13 +53,11 @@ export async function playRecordingAnnouncement(
 ): Promise<void> {
   const playLanguage = parsePlayLanguage(locale);
   const { path } = resolveAnnouncementPath(playLanguage, kind);
-  const guildId = connection.joinConfig.guildId;
-
   const player = createAudioPlayer();
   const resource = createAudioResource(createReadStream(path));
   const subscription = connection.subscribe(player);
 
-  await setBotSelfMute(client, guildId, false);
+  await setBotSelfMute(client, connection, false);
   player.play(resource);
 
   try {
@@ -48,6 +66,6 @@ export async function playRecordingAnnouncement(
   } finally {
     player.stop();
     subscription?.unsubscribe();
-    await setBotSelfMute(client, guildId, true);
+    await setBotSelfMute(client, connection, true);
   }
 }

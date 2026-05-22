@@ -38,8 +38,8 @@
     "boardAria": "Mapa táctico",
     "benchAria": "Fichas fuera de escena",
     "handoutsAria": "Documentos compartidos",
-    "tokenOwned": "Ficha controlada {{id}}",
-    "tokenLocked": "Ficha bloqueada {{id}}"
+    "tokenOwned": "Tu ficha: {{name}}",
+    "tokenLocked": "Ficha bloqueada: {{name}}"
   },
   "discord": {
     "loading": "Discord…",

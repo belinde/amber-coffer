@@ -40,3 +40,22 @@ export const sessionHandshakeErrorSchema = z.object({
 });
 
 export type SessionHandshakeError = z.infer<typeof sessionHandshakeErrorSchema>;
+
+/** PUT /session/handshake/channel — master registers the live session for a voice channel. */
+export const sessionHandshakeChannelLinkRequestSchema = z.object({
+  channelId: discordChannelIdSchema,
+});
+
+export type SessionHandshakeChannelLinkRequest = z.infer<
+  typeof sessionHandshakeChannelLinkRequestSchema
+>;
+
+export const sessionHandshakeChannelLinkResponseSchema = z.object({
+  campaignId: campaignIdSchema,
+  sessionId: sessionIdSchema,
+  channelId: discordChannelIdSchema,
+});
+
+export type SessionHandshakeChannelLinkResponse = z.infer<
+  typeof sessionHandshakeChannelLinkResponseSchema
+>;

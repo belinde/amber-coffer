@@ -37,6 +37,7 @@ export function SessionLivePanel({
         <h3 id="session-live-rec-heading">{t('sessionDetail.liveRecordingTitle')}</h3>
         <SessionRecordingControls
           session={session}
+          campaignId={campaignId}
           onSessionUpdated={onSessionUpdated}
           onError={onError}
           onConfigureDiscord={onConfigureDiscord}
