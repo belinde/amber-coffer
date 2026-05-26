@@ -1,3 +1,4 @@
+import type { Handout } from '@amber/shared';
 import type { ReactElement } from 'react';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -8,7 +9,9 @@ import { ActionIcons } from './icons.js';
 
 type SessionActions = {
   busy: boolean;
+  sharedHandoutId: Handout['id'] | null;
   onShowToPlayers: () => void;
+  onHideFromPlayers: () => void;
   onSetTableBackground?: () => void;
 };
 
@@ -49,6 +52,34 @@ export function ImagePreviewModal({
 
   const heading = title?.trim() || alt;
 
+  function renderHandoutButton(): ReactElement | null {
+    if (!sessionActions) return null;
+
+    if (sessionActions.sharedHandoutId) {
+      return (
+        <Button
+          type="button"
+          variant="primary"
+          disabled={sessionActions.busy}
+          onClick={sessionActions.onHideFromPlayers}
+        >
+          {sessionActions.busy ? t('images.showToPlayersLoading') : t('images.hideFromPlayers')}
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        type="button"
+        variant="primary"
+        disabled={sessionActions.busy}
+        onClick={sessionActions.onShowToPlayers}
+      >
+        {sessionActions.busy ? t('images.showToPlayersLoading') : t('images.showToPlayers')}
+      </Button>
+    );
+  }
+
   return createPortal(
     <div
       className="image-preview-modal"
@@ -73,14 +104,7 @@ export function ImagePreviewModal({
         </div>
         {sessionActions ? (
           <footer className="image-preview-modal__actions">
-            <Button
-              type="button"
-              variant="primary"
-              disabled={sessionActions.busy}
-              onClick={sessionActions.onShowToPlayers}
-            >
-              {t('images.showToPlayers')}
-            </Button>
+            {renderHandoutButton()}
             {sessionActions.onSetTableBackground ? (
               <Button
                 type="button"

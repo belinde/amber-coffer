@@ -19,8 +19,10 @@ import { formatInvokeErrorMessage, parseInvokeError } from '../../bridge/parse-i
 import { Button } from '../../components/ui/Button.js';
 import { pickImageFilePath } from '../../components/ui/pick-image-file.js';
 import { fetchMasterSyncCredentials } from '../session-share/fetch-master-sync-credentials.js';
+import { ActiveHandoutsPanel } from '../tabletop-control/ActiveHandoutsPanel.js';
 import { ensureCampaignCharacterTokens, listTokens } from '../tabletop-control/bridge.js';
 import { buildTokenDisplayMaps } from '../tabletop-control/build-token-display-maps.js';
+import { GridSizeSlider } from '../tabletop-control/grid-size-slider.js';
 import { bumpTabletopSnapshot } from '../tabletop-control/tabletop-sync-bump.js';
 import { TabletopControlView } from '../tabletop-control/TabletopControlView.js';
 import { useTabletopLive } from '../tabletop-control/TabletopLiveContext.js';
@@ -222,6 +224,18 @@ export function SessionTabletopSection({
             {updatingBackground ? t('common.saving') : t('tabletop.changeMapBackground')}
           </Button>
         ) : null}
+        {syncEnabled && activeMap ? (
+          <GridSizeSlider
+            campaignId={campaignId}
+            sessionId={sessionId}
+            map={activeMap}
+            onGridChanged={(updated) => {
+              setMaps((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
+              void loadTokens();
+            }}
+            onError={onError}
+          />
+        ) : null}
       </header>
 
       {loading ? <p className="empty-state">{t('common.loading')}</p> : null}
@@ -260,6 +274,15 @@ export function SessionTabletopSection({
             onAfterMove={handleTokensChanged}
           />
         </div>
+      ) : null}
+
+      {syncEnabled ? (
+        <ActiveHandoutsPanel
+          campaignId={campaignId}
+          sessionId={sessionId}
+          activeMapId={activeMapId}
+          onError={onError}
+        />
       ) : null}
     </section>
   );

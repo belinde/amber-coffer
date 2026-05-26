@@ -11,7 +11,7 @@ import {
   tokenColorStyleForToken,
 } from '@amber/tabletop-engine';
 import type { CSSProperties, PointerEvent, ReactElement, ReactNode } from 'react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   buildTabletopBoardStyles,
@@ -66,7 +66,29 @@ export function TabletopBoard({
 
   const boardRef = useRef<HTMLDivElement | null>(null);
   const benchRef = useRef<HTMLDivElement | null>(null);
+  const boardAreaRef = useRef<HTMLDivElement | null>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
+  const [snappedMaxWidth, setSnappedMaxWidth] = useState<string | undefined>(undefined);
+
+  // Snap board width to a multiple of gridCols to avoid sub-pixel rounding artifacts
+  useEffect(() => {
+    const el = boardAreaRef.current;
+    if (!el) return;
+    const cols = gridConfig.cols;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const availableWidth = entry.contentRect.width;
+        // Account for the 1px border on each side of .tabletop-board
+        const innerAvailable = availableWidth - 2;
+        const snapped = Math.floor(innerAvailable / cols) * cols;
+        if (snapped > 0) {
+          setSnappedMaxWidth(`${snapped + 2}px`);
+        }
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [gridConfig.cols]);
 
   const occupiedKeys = useMemo(() => {
     const set = new Set<string>();
@@ -169,8 +191,8 @@ export function TabletopBoard({
 
   return (
     <div className="tabletop-wrap" {...wrapHandlers}>
-      <div className="tabletop-board-area">
-        <div className="tabletop-board" style={boardStyle}>
+      <div className="tabletop-board-area" ref={boardAreaRef}>
+        <div className="tabletop-board" style={{ ...boardStyle, maxWidth: snappedMaxWidth }}>
           <div
             ref={boardRef}
             className="tabletop-board__grid"

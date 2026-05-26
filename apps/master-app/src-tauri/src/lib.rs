@@ -146,6 +146,7 @@ pub fn run() {
             commands::list_maps,
             commands::create_map,
             commands::update_map_background,
+            commands::update_map_grid_cols,
             commands::list_tokens,
             commands::discord_user_access_token,
             commands::build_tabletop_snapshot_json,

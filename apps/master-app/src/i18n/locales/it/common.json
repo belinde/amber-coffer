@@ -539,7 +539,11 @@
     "setMapBackground": "Imposta come sfondo tavolo",
     "changeMapBackground": "Cambia sfondo mappa",
     "backgroundUpdated": "Sfondo mappa aggiornato per i giocatori.",
-    "backgroundNoActiveMap": "Seleziona prima una mappa attiva sul tavolo."
+    "backgroundNoActiveMap": "Seleziona prima una mappa attiva sul tavolo.",
+    "activeHandoutsTitle": "Immagini visibili ai giocatori",
+    "gridSize": {
+      "label": "Dimensione griglia (colonne)"
+    }
   },
   "images": {
     "listTitle": "Immagini di campagna",
@@ -550,6 +554,8 @@
     "previewAlt": "Anteprima",
     "closePreview": "Chiudi anteprima",
     "showToPlayers": "Mostra ai giocatori",
+    "showToPlayersLoading": "In caricamento…",
+    "hideFromPlayers": "Termina visualizzazione",
     "thumbnailFailed": "Anteprima non disponibile",
     "noFile": "Nessun file allegato",
     "chooseFile": "Scegli file…",

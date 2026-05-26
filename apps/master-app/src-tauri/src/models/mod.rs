@@ -30,7 +30,7 @@ pub use handout::{
 pub use faction::{CreateFactionInput, Faction, FactionRow, UpdateFactionInput};
 pub use item::{CreateItemInput, Item, UpdateItemInput};
 pub use location::{CreateLocationInput, Location, LocationRow, UpdateLocationInput};
-pub use map::{CreateMapInput, Map};
+pub use map::{CreateMapInput, Map, UpdateMapGridColsInput};
 pub use lore_note::{CreateLoreNoteInput, LoreNote, LoreNoteRow, UpdateLoreNoteInput};
 pub use narrative_seed::{
     CreateNarrativeSeedInput, NarrativeSeed, NarrativeSeedRow, UpdateNarrativeSeedInput,

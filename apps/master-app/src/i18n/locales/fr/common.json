@@ -539,7 +539,11 @@
     "setMapBackground": "Définir comme fond de table",
     "changeMapBackground": "Changer le fond de carte",
     "backgroundUpdated": "Fond de carte mis à jour pour les joueurs.",
-    "backgroundNoActiveMap": "Sélectionnez d'abord une carte active sur la table."
+    "backgroundNoActiveMap": "Sélectionnez d'abord une carte active sur la table.",
+    "activeHandoutsTitle": "Images visibles aux joueurs",
+    "gridSize": {
+      "label": "Taille de la grille (colonnes)"
+    }
   },
   "images": {
     "listTitle": "Images de campagne",
@@ -550,6 +554,8 @@
     "previewAlt": "Aperçu",
     "closePreview": "Fermer l'aperçu",
     "showToPlayers": "Montrer aux joueurs",
+    "showToPlayersLoading": "Chargement…",
+    "hideFromPlayers": "Masquer aux joueurs",
     "thumbnailFailed": "Aperçu indisponible",
     "noFile": "Aucun fichier joint",
     "chooseFile": "Choisir un fichier…",

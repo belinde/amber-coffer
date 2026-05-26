@@ -38,6 +38,7 @@
     "boardAria": "Mapa táctico",
     "benchAria": "Fichas fuera de escena",
     "handoutsAria": "Documentos compartidos",
+    "handoutCloseOverlay": "Cerrar imagen",
     "tokenOwned": "Tu ficha: {{name}}",
     "tokenLocked": "Ficha bloqueada: {{name}}"
   },

@@ -38,6 +38,7 @@
     "boardAria": "Tactical map",
     "benchAria": "Off-board tokens",
     "handoutsAria": "Shared handouts",
+    "handoutCloseOverlay": "Close image",
     "tokenOwned": "Your token: {{name}}",
     "tokenLocked": "Locked token: {{name}}"
   },

@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::db::validate::ensure_campaign_exists;
 use crate::db::AppState;
 use crate::error::AppError;
-use crate::models::{CreateMapInput, Map, UpdateMapBackgroundInput};
+use crate::models::{CreateMapInput, Map, UpdateMapBackgroundInput, UpdateMapGridColsInput, TokenRow};
 use crate::services::image_source::{copy_into_map_image_dir, resolve_image_source_path};
 use crate::services::session_assets::upload_session_image;
 use crate::services::tabletop_tokens;
@@ -148,6 +148,10 @@ pub async fn update_map_background(
     )
     .await?;
 
+    let grid_rows = (existing.grid_cols as f64 * uploaded.height_px as f64
+        / uploaded.width_px as f64)
+        .ceil() as i32;
+
     let now = now_ms();
     let next_version = existing.version + 1;
 
@@ -155,7 +159,7 @@ pub async fn update_map_background(
         r#"
         UPDATE maps
         SET image_path = ?, background_public_path = ?, width_px = ?, height_px = ?,
-            updated_at = ?, version = ?
+            grid_rows = ?, updated_at = ?, version = ?
         WHERE id = ?
         "#,
     )
@@ -163,6 +167,87 @@ pub async fn update_map_background(
     .bind(&uploaded.public_path)
     .bind(uploaded.width_px as i32)
     .bind(uploaded.height_px as i32)
+    .bind(grid_rows)
+    .bind(now)
+    .bind(next_version)
+    .bind(&input.map_id)
+    .execute(&pool)
+    .await?;
+
+    sqlx::query_as::<_, Map>(&query)
+        .bind(&input.map_id)
+        .fetch_optional(&pool)
+        .await?
+        .ok_or_else(|| AppError::Internal("map update succeeded but row missing".into()))
+}
+
+#[tauri::command]
+pub async fn update_map_grid_cols(
+    input: UpdateMapGridColsInput,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<Map, AppError> {
+    let pool = state.pool_for_entity_id(&app, &input.map_id).await?;
+    ensure_live_session_for_map(&pool, &input.session_id, &input.campaign_id).await?;
+
+    let query = format!("{MAP_SELECT} WHERE id = ?");
+    let existing = sqlx::query_as::<_, Map>(&query)
+        .bind(&input.map_id)
+        .fetch_optional(&pool)
+        .await?
+        .ok_or_else(|| AppError::NotFound(format!("map {}", input.map_id)))?;
+
+    if existing.campaign_id != input.campaign_id {
+        return Err(AppError::NotFound(format!("map {}", input.map_id)));
+    }
+
+    let grid_cols = input.grid_cols.clamp(8, 48);
+
+    let grid_rows = if existing.width_px > 0 && existing.height_px > 0 {
+        (grid_cols as f64 * existing.height_px as f64 / existing.width_px as f64).ceil() as i32
+    } else {
+        tabletop_defaults::GRID_ROWS
+    };
+
+    // Clamp board tokens that fall outside the new grid boundaries
+    let board_tokens = sqlx::query_as::<_, TokenRow>(
+        "SELECT id, map_id, entity_kind, entity_id, session_id, display_name, zone, x_cell, y_cell, bench_slot, visible_to_players, controlled_by_discord_id, created_at, updated_at, version FROM tokens WHERE map_id = ? AND zone = 'board'",
+    )
+    .bind(&input.map_id)
+    .fetch_all(&pool)
+    .await?;
+
+    let now = now_ms();
+
+    for token in &board_tokens {
+        let x = token.x_cell.unwrap_or(0);
+        let y = token.y_cell.unwrap_or(0);
+        if x >= grid_cols || y >= grid_rows {
+            let clamped_x = x.min(grid_cols - 1);
+            let clamped_y = y.min(grid_rows - 1);
+            sqlx::query(
+                "UPDATE tokens SET x_cell = ?, y_cell = ?, updated_at = ?, version = version + 1 WHERE id = ?",
+            )
+            .bind(clamped_x)
+            .bind(clamped_y)
+            .bind(now)
+            .bind(&token.id)
+            .execute(&pool)
+            .await?;
+        }
+    }
+
+    let next_version = existing.version + 1;
+
+    sqlx::query(
+        r#"
+        UPDATE maps
+        SET grid_cols = ?, grid_rows = ?, updated_at = ?, version = ?
+        WHERE id = ?
+        "#,
+    )
+    .bind(grid_cols)
+    .bind(grid_rows)
     .bind(now)
     .bind(next_version)
     .bind(&input.map_id)

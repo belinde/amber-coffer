@@ -38,6 +38,7 @@
     "boardAria": "Carte tactique",
     "benchAria": "Jetons hors scène",
     "handoutsAria": "Documents partagés",
+    "handoutCloseOverlay": "Fermer l'image",
     "tokenOwned": "Votre pion : {{name}}",
     "tokenLocked": "Pion verrouillé : {{name}}"
   },

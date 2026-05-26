@@ -539,7 +539,11 @@
     "setMapBackground": "Set as table background",
     "changeMapBackground": "Change map background",
     "backgroundUpdated": "Map background updated for players.",
-    "backgroundNoActiveMap": "Select an active map on the tabletop first."
+    "backgroundNoActiveMap": "Select an active map on the tabletop first.",
+    "activeHandoutsTitle": "Images visible to players",
+    "gridSize": {
+      "label": "Grid size (columns)"
+    }
   },
   "images": {
     "listTitle": "Campaign images",
@@ -550,6 +554,8 @@
     "previewAlt": "Preview",
     "closePreview": "Close preview",
     "showToPlayers": "Show to players",
+    "showToPlayersLoading": "Uploading…",
+    "hideFromPlayers": "Hide from players",
     "thumbnailFailed": "Preview unavailable",
     "noFile": "No file attached",
     "chooseFile": "Choose file…",

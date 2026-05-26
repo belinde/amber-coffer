@@ -38,6 +38,7 @@
     "boardAria": "Mappa tattica",
     "benchAria": "Token fuori scena",
     "handoutsAria": "Documenti conmotionati",
+    "handoutCloseOverlay": "Chiudi immagine",
     "tokenOwned": "Il tuo token: {{name}}",
     "tokenLocked": "Token bloccato: {{name}}"
   },

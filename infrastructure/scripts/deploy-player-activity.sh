@@ -31,7 +31,7 @@ DIST_ID="$(aws ssm get-parameter \
 
 pnpm --filter @amber/player-activity build
 
-aws s3 sync apps/player-activity/dist/ "s3://${BUCKET}/" --delete
+aws s3 sync apps/player-activity/dist/ "s3://${BUCKET}/" --delete --exclude "session-assets/*"
 
 aws cloudfront create-invalidation \
   --distribution-id "$DIST_ID" \

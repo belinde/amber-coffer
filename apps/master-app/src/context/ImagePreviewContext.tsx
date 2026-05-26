@@ -1,4 +1,4 @@
-import type { Campaign } from '@amber/shared';
+import type { Campaign, Handout } from '@amber/shared';
 import {
   createContext,
   useCallback,
@@ -11,11 +11,13 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import type { SessionImageSource } from '../bridge/handouts.js';
-import { shareImageAsHandout } from '../bridge/handouts.js';
+import { hideHandout, shareImageAsHandout } from '../bridge/handouts.js';
 import { updateMapBackground } from '../bridge/maps.js';
 import { formatInvokeErrorMessage } from '../bridge/parse-invoke-error.js';
 import { ImagePreviewModal } from '../components/ui/ImagePreviewModal.js';
 import { fetchMasterSyncCredentials } from '../features/session-share/fetch-master-sync-credentials.js';
+import { buildTabletopSnapshot } from '../features/tabletop-control/bridge.js';
+import { putSessionSnapshot } from '../features/tabletop-control/session-sync-api.js';
 import { bumpTabletopSnapshot } from '../features/tabletop-control/tabletop-sync-bump.js';
 import { useTabletopLive } from '../features/tabletop-control/TabletopLiveContext.js';
 
@@ -46,15 +48,17 @@ export function ImagePreviewProvider({ children, onError }: ProviderProps): Reac
   const tabletopLive = useTabletopLive();
   const [preview, setPreview] = useState<ImagePreviewRequest | null>(null);
   const [busy, setBusy] = useState(false);
+  const [sharedHandoutId, setSharedHandoutId] = useState<Handout['id'] | null>(null);
 
   const openPreview = useCallback((request: ImagePreviewRequest) => {
     setPreview(request);
+    setSharedHandoutId(null);
   }, []);
 
   const liveSession =
     activeSessionCtx?.activeSession?.playState === 'live' ? activeSessionCtx.activeSession : null;
 
-  async function runSessionAction(action: 'handout' | 'background'): Promise<void> {
+  async function runShowToPlayers(): Promise<void> {
     if (!preview || !liveSession) return;
     setBusy(true);
     try {
@@ -70,22 +74,80 @@ export function ImagePreviewProvider({ children, onError }: ProviderProps): Reac
         ...preview.imageSource,
       };
 
-      if (action === 'handout') {
-        await shareImageAsHandout({
-          ...base,
-          label: preview.title?.trim() || preview.alt,
-        });
-      } else {
-        const mapId = tabletopLive?.activeMapId;
-        if (!mapId) {
-          onError?.(t('tabletop.backgroundNoActiveMap'));
-          return;
-        }
-        await updateMapBackground({
-          ...base,
-          mapId,
-        });
+      const handout = await shareImageAsHandout({
+        ...base,
+        label: preview.title?.trim() || preview.alt,
+      });
+
+      // Publish snapshot immediately so the player-activity receives the handout
+      // even if the sync poll is not active (user navigated away from session view)
+      const activeMapId = tabletopLive?.activeMapId ?? null;
+      const snapshot = await buildTabletopSnapshot(liveSession.id, activeMapId);
+      await putSessionSnapshot({
+        sessionToken: creds.sessionToken,
+        campaignId: preview.campaignId,
+        sessionId: liveSession.id,
+        snapshot,
+      });
+      bumpTabletopSnapshot();
+      setSharedHandoutId(handout.id);
+    } catch (err) {
+      onError?.(formatInvokeErrorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function runHideFromPlayers(): Promise<void> {
+    if (!sharedHandoutId || !liveSession || !preview) return;
+    setBusy(true);
+    try {
+      await hideHandout(sharedHandoutId);
+
+      // Publish snapshot immediately so the player-activity hides the handout
+      const creds = await fetchMasterSyncCredentials({
+        campaignId: preview.campaignId,
+        sessionId: liveSession.id,
+      });
+      const activeMapId = tabletopLive?.activeMapId ?? null;
+      const snapshot = await buildTabletopSnapshot(liveSession.id, activeMapId);
+      await putSessionSnapshot({
+        sessionToken: creds.sessionToken,
+        campaignId: preview.campaignId,
+        sessionId: liveSession.id,
+        snapshot,
+      });
+      bumpTabletopSnapshot();
+      setSharedHandoutId(null);
+      setPreview(null);
+    } catch (err) {
+      onError?.(formatInvokeErrorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function runSetTableBackground(): Promise<void> {
+    if (!preview || !liveSession) return;
+    setBusy(true);
+    try {
+      const creds = await fetchMasterSyncCredentials({
+        campaignId: preview.campaignId,
+        sessionId: liveSession.id,
+      });
+      const mapId = tabletopLive?.activeMapId;
+      if (!mapId) {
+        onError?.(t('tabletop.backgroundNoActiveMap'));
+        return;
       }
+      await updateMapBackground({
+        sessionId: liveSession.id,
+        sessionToken: creds.sessionToken,
+        syncApiBaseUrl: creds.syncApiBaseUrl,
+        campaignId: preview.campaignId,
+        ...preview.imageSource,
+        mapId,
+      });
       bumpTabletopSnapshot();
       setPreview(null);
     } catch (err) {
@@ -100,16 +162,13 @@ export function ImagePreviewProvider({ children, onError }: ProviderProps): Reac
   const canSetBackground = Boolean(liveSession && tabletopLive?.activeMapId);
 
   const sessionActions = liveSession
-    ? canSetBackground
-      ? {
-          busy,
-          onShowToPlayers: () => void runSessionAction('handout'),
-          onSetTableBackground: () => void runSessionAction('background'),
-        }
-      : {
-          busy,
-          onShowToPlayers: () => void runSessionAction('handout'),
-        }
+    ? {
+        busy,
+        sharedHandoutId,
+        onShowToPlayers: () => void runShowToPlayers(),
+        onHideFromPlayers: () => void runHideFromPlayers(),
+        ...(canSetBackground ? { onSetTableBackground: () => void runSetTableBackground() } : {}),
+      }
     : undefined;
 
   return (
@@ -120,7 +179,14 @@ export function ImagePreviewProvider({ children, onError }: ProviderProps): Reac
         src={preview?.src ?? null}
         alt={preview?.alt ?? ''}
         {...(preview?.title ? { title: preview.title } : {})}
-        onClose={() => setPreview(null)}
+        onClose={() => {
+          if (sharedHandoutId) {
+            // Hide the handout when closing the modal while it's being shown
+            void runHideFromPlayers();
+          } else {
+            setPreview(null);
+          }
+        }}
         {...(sessionActions ? { sessionActions } : {})}
       />
     </ImagePreviewContext.Provider>

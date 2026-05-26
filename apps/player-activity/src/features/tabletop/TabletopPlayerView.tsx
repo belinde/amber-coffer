@@ -1,11 +1,12 @@
 import type { CampaignId, DiscordUserId, Map, SessionId, Token } from '@amber/shared';
 import { canPlayerMoveToken } from '@amber/tabletop-engine';
 import { TabletopBoard } from '@amber/ui';
-import type { ReactElement } from 'react';
+import { useCallback, useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { SyncClientLike } from '../../sync/types.js';
 
+import { HandoutImageOverlay } from './HandoutImageOverlay.js';
 import { publishTokenMoved } from './publish-token-moved.js';
 import { sessionAssetUrl } from './session-asset-url.js';
 import { tabletopStore, useTabletopState } from './store.js';
@@ -19,7 +20,7 @@ type Props = {
 };
 
 export function TabletopPlayerView({
-  map,
+  map: mapProp,
   campaignId,
   sessionId,
   playerDiscordId,
@@ -30,6 +31,13 @@ export function TabletopPlayerView({
   const tokens = state.tokens;
   const tokenLabels = state.tokenLabels;
   const tokenNames = state.tokenNames;
+  const [overlayImage, setOverlayImage] = useState<{ src: string; alt: string } | null>(null);
+
+  const closeOverlay = useCallback(() => setOverlayImage(null), []);
+
+  // Read active map from store state so map.updated events are reflected immediately
+  const map =
+    (state.activeMapId ? state.maps.find((m) => m.id === state.activeMapId) : undefined) ?? mapProp;
 
   const backgroundImageUrl = map.backgroundPublicPath
     ? (sessionAssetUrl(map.backgroundPublicPath) ?? null)
@@ -91,16 +99,29 @@ export function TabletopPlayerView({
     >
       {state.visibleHandouts.length > 0 ? (
         <section className="tabletop-handouts" aria-label={t('tabletop.handoutsAria')}>
-          {state.visibleHandouts.map((h) => (
-            <article key={h.id} className="tabletop-handout">
-              <header>{h.label}</header>
-              {sessionAssetUrl(h.image?.thumbnailUrl) ? (
-                <img src={sessionAssetUrl(h.image?.thumbnailUrl) ?? ''} alt={h.label} />
-              ) : null}
-              {h.body ? <p>{h.body}</p> : null}
-            </article>
-          ))}
+          {state.visibleHandouts.map((h) => {
+            const imgUrl = sessionAssetUrl(h.image?.thumbnailUrl);
+            return (
+              <article key={h.id} className="tabletop-handout">
+                <header>{h.label}</header>
+                {imgUrl ? (
+                  <button
+                    type="button"
+                    className="tabletop-handout__img-btn"
+                    onClick={() => setOverlayImage({ src: imgUrl, alt: h.label })}
+                    aria-label={h.label}
+                  >
+                    <img src={imgUrl} alt={h.label} />
+                  </button>
+                ) : null}
+                {h.body ? <p>{h.body}</p> : null}
+              </article>
+            );
+          })}
         </section>
+      ) : null}
+      {overlayImage ? (
+        <HandoutImageOverlay src={overlayImage.src} alt={overlayImage.alt} onClose={closeOverlay} />
       ) : null}
     </TabletopBoard>
   );

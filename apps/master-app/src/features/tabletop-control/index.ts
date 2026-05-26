@@ -1,4 +1,5 @@
 export { TabletopControlView } from './TabletopControlView.js';
+export { GridSizeSlider } from './grid-size-slider.js';
 export {
   createHandout,
   ensureCampaignCharacterTokens,

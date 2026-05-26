@@ -210,3 +210,64 @@
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+
+/* Handout image button (player-activity) */
+.tabletop-handout__img-btn {
+  all: unset;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+}
+
+.tabletop-handout__img-btn img {
+  max-width: 100%;
+  border-radius: 4px;
+  transition: opacity 0.15s;
+}
+
+.tabletop-handout__img-btn:hover img,
+.tabletop-handout__img-btn:focus-visible img {
+  opacity: 0.8;
+}
+
+/* Fullscreen handout image overlay */
+.handout-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  cursor: pointer;
+}
+
+.handout-overlay__img {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+.handout-overlay__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.handout-overlay__close:hover,
+.handout-overlay__close:focus-visible {
+  background: rgba(0, 0, 0, 0.9);
+}

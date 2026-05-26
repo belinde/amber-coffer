@@ -13,6 +13,14 @@ export const TABLETOP_VIEWPORT_HEIGHT_PX = 1440;
 /** CSS aspect-ratio when no map background image is set. */
 export const DEFAULT_TABLETOP_BOARD_ASPECT_RATIO = '4 / 3';
 
+/** Derive grid rows from grid columns and image pixel dimensions (square cells). */
+export function deriveGridRows(gridCols: number, widthPx: number, heightPx: number): number {
+  if (widthPx > 0 && heightPx > 0) {
+    return Math.ceil((gridCols * heightPx) / widthPx);
+  }
+  return TABLETOP_GRID_ROWS;
+}
+
 /** CSS `aspect-ratio` for a square-cell grid (width-driven layout). */
 export function tabletopGridAspectRatio(gridCols: number, gridRows: number): string {
   if (gridCols > 0 && gridRows > 0) {

@@ -26,3 +26,12 @@ pub struct CreateMapInput {
     pub campaign_id: String,
     pub name: Option<String>,
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateMapGridColsInput {
+    pub map_id: String,
+    pub campaign_id: String,
+    pub session_id: String,
+    pub grid_cols: i32,
+}

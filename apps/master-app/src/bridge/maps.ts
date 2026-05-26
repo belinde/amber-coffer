@@ -48,3 +48,18 @@ export async function updateMapBackground(input: UpdateMapBackgroundInput): Prom
   const raw = await invoke<unknown>('update_map_background', { input: payload });
   return parseMap(raw);
 }
+
+const updateMapGridColsInputSchema = z.object({
+  mapId: z.string().min(1),
+  campaignId: z.string().min(1),
+  sessionId: z.string().min(1),
+  gridCols: z.number().int().min(8).max(48),
+});
+
+export type UpdateMapGridColsInput = z.infer<typeof updateMapGridColsInputSchema>;
+
+export async function updateMapGridCols(input: UpdateMapGridColsInput): Promise<Map> {
+  const payload = parseBridgeInput(updateMapGridColsInputSchema, input);
+  const raw = await invoke<unknown>('update_map_grid_cols', { input: payload });
+  return parseMap(raw);
+}

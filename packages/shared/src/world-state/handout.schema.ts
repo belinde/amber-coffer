@@ -1,10 +1,6 @@
 import { z } from 'zod';
 
-import {
-  campaignIdSchema,
-  handoutIdSchema,
-  sessionIdSchema,
-} from '../ids/schemas.js';
+import { campaignIdSchema, handoutIdSchema, sessionIdSchema } from '../ids/schemas.js';
 
 /**
  * Handout: a document / image the Master shares with players during a session
@@ -18,8 +14,8 @@ import {
  */
 const handoutImageRefSchema = z.object({
   localPath: z.string().min(1).optional(),
-  thumbnailUrl: z.string().url().optional(),
-  canonUrl: z.string().url().optional(),
+  thumbnailUrl: z.string().min(1).optional(),
+  canonUrl: z.string().min(1).optional(),
   hash: z.string().min(1).optional(),
 });
 

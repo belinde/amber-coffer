@@ -148,7 +148,7 @@ async fn upload_handout_image_if_needed(
         &handout.session_id,
         "handout",
         &source,
-        1600,
+        800,
     )
     .await?;
 

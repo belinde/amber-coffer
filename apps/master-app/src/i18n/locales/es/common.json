@@ -539,7 +539,11 @@
     "setMapBackground": "Usar como fondo de mesa",
     "changeMapBackground": "Cambiar fondo del mapa",
     "backgroundUpdated": "Fondo del mapa actualizado para los jugadores.",
-    "backgroundNoActiveMap": "Selecciona primero un mapa activo en la mesa."
+    "backgroundNoActiveMap": "Selecciona primero un mapa activo en la mesa.",
+    "activeHandoutsTitle": "Imágenes visibles para los jugadores",
+    "gridSize": {
+      "label": "Tamaño de cuadrícula (columnas)"
+    }
   },
   "images": {
     "listTitle": "Imágenes de campaña",
@@ -550,6 +554,8 @@
     "previewAlt": "Vista previa",
     "closePreview": "Cerrar vista previa",
     "showToPlayers": "Mostrar a los jugadores",
+    "showToPlayersLoading": "Cargando…",
+    "hideFromPlayers": "Ocultar a los jugadores",
     "thumbnailFailed": "Vista previa no disponible",
     "noFile": "Sin archivo adjunto",
     "chooseFile": "Elegir archivo…",
