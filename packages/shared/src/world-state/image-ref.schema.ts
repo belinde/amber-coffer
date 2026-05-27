@@ -6,6 +6,7 @@ export const imageRefSchema = z.object({
   hash: z.string().nullish(),
   thumbnailUrl: z.string().nullish(),
   canonUrl: z.string().nullish(),
+  tokenPortraitUrl: z.string().nullish(),
 });
 
 export type ImageRef = z.infer<typeof imageRefSchema>;

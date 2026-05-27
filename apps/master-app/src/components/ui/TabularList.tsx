@@ -61,6 +61,7 @@ export function TabularList({
             title: row.title,
             campaignId,
             imageSource,
+            imageRef: row.image ?? undefined,
           });
           return;
         }

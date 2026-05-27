@@ -45,3 +45,21 @@ export function resolveFileId(mapping: AmberMappingFile, relativePath: string): 
 export function resolvePortraitImageId(mapping: AmberMappingFile, entityRelFile: string): string {
   return resolveFileId(mapping, `portrait:${entityRelFile}`);
 }
+
+/** Stable campaign-image id for extra images (index > 0) in `## Immagine`. */
+export function resolveExtraImageId(
+  mapping: AmberMappingFile,
+  entityRelFile: string,
+  index: number,
+): string {
+  return resolveFileId(mapping, `portrait-extra:${entityRelFile}:${index}`);
+}
+
+/** Stable campaign-image id for session recap images (`## Immagini salienti`, by title slug). */
+export function resolveSessionImageId(
+  mapping: AmberMappingFile,
+  sessionRelFile: string,
+  imageIndex: number,
+): string {
+  return resolveFileId(mapping, `session-image:${sessionRelFile}:${imageIndex}`);
+}

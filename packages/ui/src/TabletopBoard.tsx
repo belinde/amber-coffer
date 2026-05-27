@@ -11,7 +11,7 @@ import {
   tokenColorStyleForToken,
 } from '@amber/tabletop-engine';
 import type { CSSProperties, PointerEvent, ReactElement, ReactNode } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   buildTabletopBoardStyles,
@@ -36,6 +36,8 @@ export type TabletopBoardProps = {
   map: TabletopMapLayout;
   tokens: Token[];
   tokenLabels?: Record<string, string>;
+  tokenPortraitUrls?: Record<string, string>;
+  tokenNames?: Record<string, string>;
   backgroundImageUrl?: string | null;
   labels: TabletopBoardLabels;
   canDragToken: (token: Token) => boolean;
@@ -54,6 +56,8 @@ export function TabletopBoard({
   map,
   tokens,
   tokenLabels = {},
+  tokenPortraitUrls = {},
+  tokenNames = {},
   backgroundImageUrl = null,
   labels,
   canDragToken,
@@ -215,6 +219,8 @@ export function TabletopBoard({
                     })}
                     colorStyle={tokenStyle(token)}
                     label={tokenLabel(token)}
+                    portraitUrl={tokenPortraitUrls[token.id]}
+                    tokenName={tokenNames[token.id]}
                     {...(interactive
                       ? { onPointerDown: (ev: PointerEvent) => startDrag(ev, token) }
                       : {})}
@@ -252,6 +258,8 @@ export function TabletopBoard({
                 })}
                 colorStyle={tokenStyle(token)}
                 label={tokenLabel(token)}
+                portraitUrl={tokenPortraitUrls[token.id]}
+                tokenName={tokenNames[token.id]}
                 {...(interactive
                   ? { onPointerDown: (ev: PointerEvent) => startDrag(ev, token) }
                   : {})}
@@ -283,14 +291,28 @@ function TokenCell({
   placementStyle,
   colorStyle,
   label,
+  portraitUrl,
+  tokenName,
   onPointerDown,
 }: {
   interaction: TabletopTokenInteraction;
   placementStyle: CSSProperties;
   colorStyle: CSSProperties;
   label: string;
+  portraitUrl?: string | undefined;
+  tokenName?: string | undefined;
   onPointerDown?: (ev: PointerEvent) => void;
 }): ReactElement {
+  const [imgError, setImgError] = useState(false);
+  const handleImgError = useCallback(() => setImgError(true), []);
+
+  // Reset error state when portrait URL changes
+  useEffect(() => {
+    setImgError(false);
+  }, [portraitUrl]);
+
+  const showPortrait = portraitUrl != null && !imgError;
+
   return (
     <div
       className={interaction.className}
@@ -301,7 +323,22 @@ function TokenCell({
       aria-label={interaction.ariaLabel}
       title={interaction.title ?? interaction.ariaLabel}
     >
-      <span className="tabletop-token-label">{label}</span>
+      {showPortrait ? (
+        <img
+          src={portraitUrl}
+          alt={tokenName ?? label}
+          onError={handleImgError}
+          className="tabletop-token-portrait"
+          style={{
+            borderRadius: '50%',
+            objectFit: 'cover',
+            width: '100%',
+            height: '100%',
+          }}
+        />
+      ) : (
+        <span className="tabletop-token-label">{label}</span>
+      )}
     </div>
   );
 }

@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Lint & Typecheck after Task",
+  "description": "Runs ESLint and TypeScript type-checking after each spec task completes, ensuring pre-commit hooks will pass before the user attempts to commit.",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Run `pnpm lint` and `pnpm typecheck` to verify there are no lint errors or type errors. If any issues are found, fix them before marking the task as done. This ensures the husky pre-commit hook (lint-staged with eslint --fix) will pass cleanly."
+  }
+}

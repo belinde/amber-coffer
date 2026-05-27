@@ -1,7 +1,9 @@
 pub mod import_dump;
+pub mod image_sync;
 mod campaign;
 mod campaign_image;
 mod character;
+mod clip_region;
 mod handout;
 mod faction;
 mod item;
@@ -21,7 +23,8 @@ pub use campaign::{
     normalize_play_language, Campaign, CreateCampaignInput, UpdateCampaignInput,
 };
 pub use campaign_image::{
-    CampaignImage, CampaignImageRow, CreateCampaignImageInput, UpdateCampaignImageInput,
+    CampaignImage, CampaignImagePickerEntry, CampaignImageRow, CreateCampaignImageInput,
+    UpdateCampaignImageInput,
 };
 pub use character::{Character, CharacterRow, CreateCharacterInput, UpdateCharacterInput};
 pub use handout::{
@@ -42,3 +45,6 @@ pub use relationship::{
 pub use recording::Recording;
 pub use session::{CreateSessionInput, Session, UpdateSessionInput};
 pub use token::{normalize_optional_discord_id, Token, TokenPosition, TokenRow};
+pub use clip_region::ClipRegion;
+#[allow(unused_imports)]
+pub use image_sync::{ManifestEntry, SyncAction, SyncProgress, SyncReport, UploadReason};

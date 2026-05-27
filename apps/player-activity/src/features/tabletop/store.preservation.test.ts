@@ -84,12 +84,14 @@ const handoutArb: fc.Arbitrary<Handout> = fc.record({
 function setupStateWithTokens(tokens: Token[], map: Map): void {
   tabletopStore.applyMqttMessage({
     kind: 'tabletop.snapshot',
+    campaignName: null,
     sessionId: 'aaaaaaaa-aaaa-7aaa-8aaa-aaaaaaaaaaaa' as any,
     activeMapId: map.id,
     maps: [map],
     tokens,
     tokenLabels: {},
     tokenNames: {},
+    tokenPortraitUrls: {},
     visibleHandouts: [],
     snapshotAt: Date.now(),
   });
@@ -227,12 +229,14 @@ describe('2f. Session Ended Reset Preservation — session.ended resets tabletop
           // Set up arbitrary state
           tabletopStore.applyMqttMessage({
             kind: 'tabletop.snapshot',
+            campaignName: null,
             sessionId: sessionId as any,
             activeMapId,
             maps,
             tokens,
             tokenLabels: {},
             tokenNames: {},
+            tokenPortraitUrls: {},
             visibleHandouts: handouts,
             snapshotAt: Date.now(),
           });

@@ -109,6 +109,9 @@ pub fn run() {
             commands::delete_campaign_image,
             commands::attach_campaign_image_file,
             commands::resolve_campaign_image_path,
+            commands::set_clip_region_cmd,
+            commands::get_clip_region_cmd,
+            commands::get_campaign_images_for_picker_cmd,
             commands::list_sessions,
             commands::get_session,
             commands::create_session,
@@ -147,9 +150,11 @@ pub fn run() {
             commands::create_map,
             commands::update_map_background,
             commands::update_map_grid_cols,
+            commands::set_map_background_from_image_cmd,
             commands::list_tokens,
             commands::discord_user_access_token,
             commands::build_tabletop_snapshot_json,
+            commands::get_token_portrait_urls,
             commands::place_token,
             commands::create_custom_session_token,
             commands::move_token,
@@ -165,6 +170,7 @@ pub fn run() {
             commands::create_handout,
             commands::share_image_as_handout,
             commands::preview_public_canon_build,
+            commands::sync_campaign_images_cmd,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

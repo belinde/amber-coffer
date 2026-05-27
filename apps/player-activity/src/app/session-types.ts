@@ -8,6 +8,8 @@ export type MqttSessionContextValue = {
   readonly sessionStatus: SessionStatus;
   readonly sessionError: string | null;
   readonly playerDiscordId: DiscordUserId;
+  /** Campaign name from the handshake or snapshot; null when unavailable. */
+  readonly campaignName: string | null;
   setPlayerDiscordId: (id: DiscordUserId) => void;
   setSessionStatus: (status: SessionStatus, error?: string | null) => void;
   /** Re-run AWS handshake after a failed bootstrap (does not auto-retry). */

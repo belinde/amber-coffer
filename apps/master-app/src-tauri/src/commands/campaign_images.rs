@@ -11,7 +11,8 @@ use crate::db::AppState;
 use crate::error::AppError;
 use crate::models::vault_json::ImageRef;
 use crate::models::{
-    CampaignImage, CampaignImageRow, CreateCampaignImageInput, UpdateCampaignImageInput,
+    CampaignImage, CampaignImagePickerEntry, CampaignImageRow, ClipRegion,
+    CreateCampaignImageInput, UpdateCampaignImageInput,
 };
 use crate::services::campaign_storage;
 use crate::services::import_images::entity_image_dir;
@@ -223,6 +224,7 @@ pub async fn attach_campaign_image_file(
         hash: Some(hash),
         thumbnail_url: None,
         canon_url: None,
+        token_portrait_url: None,
     };
     let image_ref_json = serde_json::to_string(&image_ref)?;
     let now = now_ms();
@@ -271,4 +273,124 @@ pub async fn resolve_campaign_image_path(
         .into_os_string()
         .into_string()
         .map_err(|_| AppError::Internal("invalid image path encoding".into()))
+}
+
+#[tauri::command]
+pub async fn set_clip_region_cmd(
+    campaign_image_id: String,
+    clip: Option<ClipRegion>,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<(), AppError> {
+    let pool = state.pool_for_entity_id(&app, &campaign_image_id).await?;
+
+    // Validate ClipRegion bounds when provided
+    if let Some(ref clip_region) = clip {
+        clip_region.validate()?;
+    }
+
+    let clip_region_json = clip
+        .as_ref()
+        .map(|c| serde_json::to_string(c))
+        .transpose()?;
+
+    let now = now_ms();
+
+    sqlx::query(
+        r#"
+        UPDATE campaign_images
+        SET clip_region_json = ?, updated_at = ?
+        WHERE id = ?
+        "#,
+    )
+    .bind(&clip_region_json)
+    .bind(now)
+    .bind(&campaign_image_id)
+    .execute(&pool)
+    .await?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn get_clip_region_cmd(
+    campaign_image_id: String,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<Option<ClipRegion>, AppError> {
+    let pool = state.pool_for_entity_id(&app, &campaign_image_id).await?;
+
+    let row: Option<(Option<String>,)> = sqlx::query_as(
+        "SELECT clip_region_json FROM campaign_images WHERE id = ?",
+    )
+    .bind(&campaign_image_id)
+    .fetch_optional(&pool)
+    .await?;
+
+    let clip = row
+        .and_then(|(json,)| json)
+        .and_then(|json| serde_json::from_str::<ClipRegion>(&json).ok());
+
+    Ok(clip)
+}
+
+#[tauri::command]
+pub async fn get_campaign_images_for_picker_cmd(
+    campaign_id: String,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<Vec<CampaignImagePickerEntry>, AppError> {
+    let pool = state.pool_for_campaign(&app, &campaign_id).await?;
+    let campaign_root = campaign_storage::resolve_storage_folder(&app, &campaign_id)?;
+
+    let query = format!(
+        "{CAMPAIGN_IMAGE_SELECT} WHERE campaign_id = ? ORDER BY title COLLATE NOCASE"
+    );
+    let rows = sqlx::query_as::<_, CampaignImageRow>(&query)
+        .bind(&campaign_id)
+        .fetch_all(&pool)
+        .await?;
+
+    let entries = rows
+        .into_iter()
+        .map(|row| {
+            let image_ref: Option<ImageRef> =
+                crate::models::vault_json::parse_json_opt(row.image_ref_json.as_deref());
+
+            // Resolve the local image path and read dimensions
+            let (thumbnail_path, width_px, height_px) = match image_ref.as_ref().and_then(|r| r.local.as_deref()) {
+                Some(local) => {
+                    let abs_path = campaign_root.join(local);
+                    let thumbnail = abs_path
+                        .to_str()
+                        .map(|s| s.to_string());
+
+                    // Read image dimensions (best-effort, None if file missing or unreadable)
+                    let dims = image::image_dimensions(&abs_path).ok();
+                    let (w, h) = dims.map(|(w, h)| (Some(w), Some(h))).unwrap_or((None, None));
+
+                    (thumbnail, w, h)
+                }
+                None => (None, None, None),
+            };
+
+            // Extract distinct entity kinds from links
+            let links: Vec<crate::models::vault_json::ImageLink> =
+                crate::models::vault_json::parse_json(&row.links_json, Vec::new());
+            let mut link_kinds: Vec<String> = links.iter().map(|l| l.kind.clone()).collect();
+            link_kinds.sort();
+            link_kinds.dedup();
+
+            CampaignImagePickerEntry {
+                id: row.id,
+                title: row.title,
+                thumbnail_path,
+                width_px,
+                height_px,
+                link_kinds,
+            }
+        })
+        .collect();
+
+    Ok(entries)
 }

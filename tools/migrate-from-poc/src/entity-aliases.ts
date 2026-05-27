@@ -12,6 +12,7 @@ const ALIASES_BY_SLUG: Record<string, readonly string[]> = {
     'corridoio cabine di lusso',
   ],
   'fattoria-mercer': ['fattoria isolata'],
+  trepali: ['tre pali'],
 };
 
 export function registerEntityAliases(registry: EntityRegistry): void {

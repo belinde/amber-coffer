@@ -1,6 +1,7 @@
 export * from './appearance.schema.js';
 export * from './campaign.schema.js';
 export * from './campaign-image.js';
+export * from './clip-region.schema.js';
 export * from './image-link.schema.js';
 export * from './character.js';
 export * from './entity-ref.schema.js';

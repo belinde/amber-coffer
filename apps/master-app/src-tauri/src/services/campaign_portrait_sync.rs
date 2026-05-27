@@ -128,6 +128,7 @@ async fn migrate_orphan_portrait(
         hash: Some(hash),
         thumbnail_url: None,
         canon_url: None,
+        token_portrait_url: None,
     };
     let image_ref_json = serde_json::to_string(&archive_ref)?;
     let links = if link_kind == "faction" {

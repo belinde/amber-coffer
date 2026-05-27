@@ -56,7 +56,7 @@ Esempi canonici:
 | CDK                   | `"pnpm -w exec eslint infrastructure/bin infrastructure/lib"`                                 |
 | Tool CLI              | `"pnpm -w exec eslint tools/<tool>/src"` (+ `--max-warnings=0` se già usato negli altri tool) |
 
-Lintare di preferenza directory incluse nel `tsconfig` del workspace (di solito `src/`). File fuori dal progetto TS (`vitest.config.ts`, `test/` non in tsconfig, `packages/eslint-config/*.js`) sono già in `typeCheckExcludedFiles` in `eslint.config.mjs`; se ne aggiungi altri, estendi quell’array.
+Lintare di preferenza directory incluse nel `tsconfig` del workspace (di solito `src/`). File fuori dal progetto TS (`vitest.config.ts`, `vitest.setup.ts`, `vite.config.ts`, `test/` non in tsconfig, `packages/eslint-config/*.js`) sono già in `typeCheckExcludedFiles` in `eslint.config.mjs`; se ne aggiungi altri, estendi quell’array.
 
 ### 4. Verifica
 

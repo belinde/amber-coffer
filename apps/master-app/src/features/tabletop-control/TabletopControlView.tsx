@@ -1,6 +1,6 @@
 import type { Campaign, Map, Token } from '@amber/shared';
 import { TabletopBoard } from '@amber/ui';
-import { convertFileSrc } from '@tauri-apps/api/core';
+import { convertFileSrc, invoke } from '@tauri-apps/api/core';
 import type { ReactElement } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -34,6 +34,7 @@ export function TabletopControlView({
   onAfterMove,
 }: Props): ReactElement {
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
+  const [portraitUrls, setPortraitUrls] = useState<Record<string, string>>({});
 
   const loadBackground = useCallback(async () => {
     const local = map.imagePath.trim();
@@ -53,6 +54,21 @@ export function TabletopControlView({
     void loadBackground();
   }, [loadBackground]);
 
+  // Load token portrait URLs (local fallback when clip region defined)
+  useEffect(() => {
+    if (tokens.length === 0) {
+      setPortraitUrls({});
+      return;
+    }
+    const tokenIds = tokens.map((t) => t.id);
+    void invoke<Record<string, string>>('get_token_portrait_urls', {
+      campaignId,
+      tokenIds,
+    })
+      .then(setPortraitUrls)
+      .catch(() => setPortraitUrls({}));
+  }, [campaignId, tokens]);
+
   function tokenAriaLabel(token: Token): string {
     return tokenNames[token.id] ?? token.entityId;
   }
@@ -62,6 +78,8 @@ export function TabletopControlView({
       map={map}
       tokens={tokens}
       tokenLabels={tokenLabels}
+      tokenNames={tokenNames}
+      tokenPortraitUrls={portraitUrls}
       backgroundImageUrl={backgroundUrl}
       labels={{
         boardAria: 'Tabletop control',

@@ -119,10 +119,6 @@ export function PlayerActivityShell(): ReactElement {
 
   return (
     <section className="session-shell session-shell--connected">
-      <header className="session-shell__header">
-        <span className="discord-badge">{discordBadge}</span>
-        <span className="session-shell__player-id">{playerDiscordId}</span>
-      </header>
       <TabletopPlayerView
         map={activeMap}
         campaignId={campaignId}

@@ -18,6 +18,7 @@ export type TabletopState = {
   tokens: Token[];
   tokenLabels: Record<string, string>;
   tokenNames: Record<string, string>;
+  tokenPortraitUrls: Record<string, string>;
   visibleHandouts: Handout[];
 };
 
@@ -27,6 +28,7 @@ export const initialTabletopState: TabletopState = {
   tokens: [],
   tokenLabels: {},
   tokenNames: {},
+  tokenPortraitUrls: {},
   visibleHandouts: [],
 };
 
@@ -38,6 +40,7 @@ export type TabletopAction =
       tokens: Token[];
       tokenLabels: Record<string, string>;
       tokenNames: Record<string, string>;
+      tokenPortraitUrls: Record<string, string>;
       visibleHandouts: Handout[];
     }
   | { type: 'map.activated'; mapId: MapId }
@@ -58,6 +61,7 @@ export function tabletopReducer(state: TabletopState, action: TabletopAction): T
         tokens: action.tokens,
         tokenLabels: action.tokenLabels,
         tokenNames: action.tokenNames,
+        tokenPortraitUrls: action.tokenPortraitUrls,
         visibleHandouts: action.visibleHandouts,
       };
     case 'map.activated':

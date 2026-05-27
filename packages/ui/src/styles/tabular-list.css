@@ -1,5 +1,5 @@
 .tabular-list {
-  --tabular-cols: 52px minmax(10rem, 1.1fr) minmax(12rem, 1.6fr) auto;
+  --tabular-cols: 100px minmax(10rem, 1.1fr) minmax(12rem, 1.6fr) auto;
   border: 1px solid var(--panel-border);
   border-radius: 8px;
   overflow: hidden;
@@ -131,8 +131,8 @@ button.tabular-list-row-main:hover {
 
 .entity-thumbnail {
   display: block;
-  width: 48px;
-  height: 48px;
+  width: 96px;
+  height: 96px;
   object-fit: cover;
   border-radius: 6px;
   border: 1px solid var(--form-border);

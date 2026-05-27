@@ -19,6 +19,7 @@ import { formatInvokeErrorMessage, parseInvokeError } from '../../bridge/parse-i
 import { Button } from '../../components/ui/Button.js';
 import { pickImageFilePath } from '../../components/ui/pick-image-file.js';
 import { fetchMasterSyncCredentials } from '../session-share/fetch-master-sync-credentials.js';
+import { MapBackgroundPickerModal } from '../tabletop/components/map-background-picker-modal.js';
 import { ActiveHandoutsPanel } from '../tabletop-control/ActiveHandoutsPanel.js';
 import { ensureCampaignCharacterTokens, listTokens } from '../tabletop-control/bridge.js';
 import { buildTokenDisplayMaps } from '../tabletop-control/build-token-display-maps.js';
@@ -54,6 +55,7 @@ export function SessionTabletopSection({
   const [loading, setLoading] = useState(true);
   const [creatingMap, setCreatingMap] = useState(false);
   const [updatingBackground, setUpdatingBackground] = useState(false);
+  const [showMapPicker, setShowMapPicker] = useState(false);
   const tabletopLive = useTabletopLive();
 
   const reportErr = useCallback(
@@ -171,7 +173,7 @@ export function SessionTabletopSection({
     void loadEntityMeta();
   }
 
-  async function handleChangeMapBackground(): Promise<void> {
+  async function handleUploadMapBackground(): Promise<void> {
     if (!activeMap || !syncEnabled) return;
     const sourcePath = await pickImageFilePath();
     if (!sourcePath) return;
@@ -188,11 +190,19 @@ export function SessionTabletopSection({
       });
       setMaps((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
       bumpTabletopSnapshot();
+      setShowMapPicker(false);
     } catch (err) {
       reportErr(err);
     } finally {
       setUpdatingBackground(false);
     }
+  }
+
+  function handleMapPickerSelect(): void {
+    // Image was set via set_map_background_from_image_cmd inside the picker
+    void loadMaps();
+    bumpTabletopSnapshot();
+    setShowMapPicker(false);
   }
 
   return (
@@ -219,7 +229,7 @@ export function SessionTabletopSection({
           <Button
             type="button"
             disabled={updatingBackground}
-            onClick={() => void handleChangeMapBackground()}
+            onClick={() => setShowMapPicker(true)}
           >
             {updatingBackground ? t('common.saving') : t('tabletop.changeMapBackground')}
           </Button>
@@ -282,6 +292,17 @@ export function SessionTabletopSection({
           sessionId={sessionId}
           activeMapId={activeMapId}
           onError={onError}
+        />
+      ) : null}
+
+      {syncEnabled && activeMap ? (
+        <MapBackgroundPickerModal
+          open={showMapPicker}
+          campaignId={campaignId}
+          currentMapId={activeMap.id}
+          onSelect={handleMapPickerSelect}
+          onUploadNew={() => void handleUploadMapBackground()}
+          onClose={() => setShowMapPicker(false)}
         />
       ) : null}
     </section>

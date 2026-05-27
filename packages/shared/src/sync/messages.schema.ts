@@ -108,12 +108,16 @@ export const tabletopSnapshotSchema = z.object({
   kind: z.literal('tabletop.snapshot'),
   sessionId: sessionIdSchema,
   activeMapId: mapIdSchema.nullable(),
+  /** Campaign name for display in the player-activity header. */
+  campaignName: z.string().nullable().default(null),
   maps: z.array(mapSchema),
   tokens: z.array(tokenSchema),
   /** Short literal labels keyed by token id (no portrait images). */
   tokenLabels: z.record(z.string(), z.string()).default({}),
   /** Full entity names for accessibility, keyed by token id. */
   tokenNames: z.record(z.string(), z.string()).default({}),
+  /** CloudFront paths for token portrait images, keyed by token id. */
+  tokenPortraitUrls: z.record(z.string(), z.string().min(1)).default({}),
   visibleHandouts: z.array(handoutSchema),
   snapshotAt: z.number().int().nonnegative(),
 });

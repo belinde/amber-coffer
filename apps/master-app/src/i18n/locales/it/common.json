@@ -543,6 +543,28 @@
     "activeHandoutsTitle": "Immagini visibili ai giocatori",
     "gridSize": {
       "label": "Dimensione griglia (colonne)"
+    },
+    "clipEditor": {
+      "noImage": "Assegna un'immagine prima di definire un'area di ritaglio.",
+      "editorAria": "Editor area di ritaglio token",
+      "editorRoleDescription": "Trascina per spostare l'area, usa gli angoli per ridimensionare",
+      "sourceImageAlt": "Immagine sorgente",
+      "previewLabel": "Anteprima",
+      "previewAlt": "Anteprima token ritagliato",
+      "confirm": "Conferma ritaglio",
+      "remove": "Rimuovi ritaglio",
+      "keyboardHint": "Frecce per spostare, +/− per ridimensionare."
+    },
+    "mapPicker": {
+      "empty": "Nessuna immagine disponibile. Caricane una per iniziare.",
+      "uploadNew": "Carica nuova immagine",
+      "selectImage": "Seleziona {{name}} come sfondo mappa",
+      "searchPlaceholder": "Cerca immagine...",
+      "filterAll": "Tutti",
+      "filterCharacters": "PG",
+      "filterNpcs": "PNG",
+      "filterLocations": "Luoghi",
+      "filterUnlinked": "Senza link"
     }
   },
   "images": {
@@ -553,6 +575,7 @@
     "linkCount": "{{count}} collegamenti",
     "previewAlt": "Anteprima",
     "closePreview": "Chiudi anteprima",
+    "clipToken": "Ritaglia token",
     "showToPlayers": "Mostra ai giocatori",
     "showToPlayersLoading": "In caricamento…",
     "hideFromPlayers": "Termina visualizzazione",
@@ -567,6 +590,16 @@
       "title": "Titolo",
       "caption": "Didascalia",
       "links": "Collegamenti"
+    },
+    "sync": {
+      "button": "Sincronizza nel cloud",
+      "starting": "Avvio sincronizzazione…",
+      "progress": "Caricamento {{current}} / {{total}}…",
+      "success": "{{count}} immagine/i sincronizzate.",
+      "partialFailure": "{{count}} immagine/i non caricate.",
+      "manifestError": "Impossibile recuperare il manifesto. Sincronizzazione annullata.",
+      "noActiveSession": "Avvia una sessione in gioco prima di sincronizzare le immagini.",
+      "noSession": "Crea almeno una sessione per questa campagna prima di sincronizzare."
     }
   },
   "relationship": {

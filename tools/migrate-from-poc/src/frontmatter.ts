@@ -70,9 +70,7 @@ export function parseMarkdown(rawBody: string): ParsedMarkdownFile {
 }
 
 export function sectionBody(parsed: ParsedMarkdownFile, heading: string): string {
-  const section = parsed.sections.find(
-    (s) => s.heading.toLowerCase() === heading.toLowerCase(),
-  );
+  const section = parsed.sections.find((s) => s.heading.toLowerCase() === heading.toLowerCase());
   return section?.body ?? '';
 }
 
@@ -80,6 +78,17 @@ export function parseImageMarkdown(body: string): { alt: string; path: string } 
   const match = /!\[([^\]]*)\]\(([^)]+)\)/.exec(body);
   if (!match) return null;
   return { alt: match[1] ?? '', path: match[2] ?? '' };
+}
+
+/** Return ALL `![alt](path)` occurrences in a section body. */
+export function parseAllImages(body: string): Array<{ alt: string; path: string }> {
+  const results: Array<{ alt: string; path: string }> = [];
+  const re = /!\[([^\]]*)\]\(([^)]+)\)/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(body)) !== null) {
+    results.push({ alt: match[1] ?? '', path: match[2] ?? '' });
+  }
+  return results;
 }
 
 export function parseFencedText(body: string, lang = 'text'): string {

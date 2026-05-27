@@ -114,6 +114,7 @@ export function buildTabletopSnapshotPayload(): Extract<
   const tokens = buildDemoTokens();
   return {
     kind: 'tabletop.snapshot',
+    campaignName: null,
     sessionId: sessionIdSchema.parse(DEMO_SESSION_ID_RAW),
     activeMapId: DEMO_MAP_ID,
     maps: [buildDemoMap()],
@@ -128,6 +129,7 @@ export function buildTabletopSnapshotPayload(): Extract<
       [DEMO_TOKEN_SUMMON_ID]: 'Summoned wolf',
       [DEMO_TOKEN_OTHER_ID]: 'Rival',
     },
+    tokenPortraitUrls: {},
     visibleHandouts: [],
     snapshotAt: now,
   };

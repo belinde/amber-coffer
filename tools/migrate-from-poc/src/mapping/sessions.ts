@@ -3,7 +3,6 @@ import { join } from 'node:path';
 
 import {
   campaignImageSchema,
-  generateUuidV7,
   sessionSchema,
   type CampaignImage,
   type Location,
@@ -18,7 +17,7 @@ import {
   readMarkdownFile,
   sectionBody,
 } from '../frontmatter.js';
-import { resolveFileId } from '../id-mapping.js';
+import { resolveFileId, resolveSessionImageId } from '../id-mapping.js';
 import { resolveSessionEncounterIds } from '../session-resolve.js';
 import type { ExtractContext } from '../types.js';
 
@@ -120,8 +119,10 @@ export async function extractSessions(ctx: ExtractContext): Promise<SessionExtra
       sessions.push(sessionSchema.parse(session));
 
       const imagesSection = sectionBody(parsed, 'Immagini salienti');
+      let imageIndex = 0;
       for (const block of parseSessionImageBlocks(imagesSection)) {
-        const imageId = generateUuidV7();
+        const imageId = resolveSessionImageId(ctx.mapping, relFile, imageIndex);
+        imageIndex++;
         const timestampsImg = nowTimestamps();
         const captionMatch = /\*([^*]+)\*/.exec(block.body);
         const caption = captionMatch?.[1]?.trim() ?? '';

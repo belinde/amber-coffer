@@ -1,5 +1,6 @@
 mod campaign_images;
 mod discord_setup;
+mod image_sync;
 mod migrate;
 mod campaigns;
 mod characters;
@@ -21,6 +22,7 @@ mod vault_validate;
 
 pub use campaign_images::*;
 pub use discord_setup::*;
+pub use image_sync::*;
 pub use migrate::*;
 pub use campaigns::*;
 pub use characters::*;

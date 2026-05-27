@@ -25,6 +25,7 @@ type BootstrapArgs = {
   setSessionId: (id: SessionId) => void;
   setPlayerDiscordId: (id: string) => void;
   setSessionStatus: (status: SessionStatus, error?: string | null) => void;
+  setCampaignName?: (name: string) => void;
   retryNonce?: number;
 };
 
@@ -41,6 +42,7 @@ export function useHttpSessionBootstrap(args: BootstrapArgs): void {
     setSessionId,
     setPlayerDiscordId,
     setSessionStatus,
+    setCampaignName,
     retryNonce = 0,
   } = args;
 
@@ -112,6 +114,11 @@ export function useHttpSessionBootstrap(args: BootstrapArgs): void {
                 setSessionStatus('error', err.message);
               }
             },
+            onCampaignName: (name) => {
+              if (!cancelled) {
+                setCampaignName?.(name);
+              }
+            },
           },
         });
 
@@ -149,6 +156,7 @@ export function useHttpSessionBootstrap(args: BootstrapArgs): void {
     setSessionId,
     setPlayerDiscordId,
     setSessionStatus,
+    setCampaignName,
     retryNonce,
   ]);
 

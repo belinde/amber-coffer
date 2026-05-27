@@ -543,6 +543,28 @@
     "activeHandoutsTitle": "Imágenes visibles para los jugadores",
     "gridSize": {
       "label": "Tamaño de cuadrícula (columnas)"
+    },
+    "clipEditor": {
+      "noImage": "Asigna una imagen antes de definir un área de recorte.",
+      "editorAria": "Editor de área de recorte del token",
+      "editorRoleDescription": "Arrastra para mover el área, usa las esquinas para redimensionar",
+      "sourceImageAlt": "Imagen fuente",
+      "previewLabel": "Vista previa",
+      "previewAlt": "Vista previa del token recortado",
+      "confirm": "Confirmar recorte",
+      "remove": "Eliminar recorte",
+      "keyboardHint": "Flechas para mover, +/− para redimensionar."
+    },
+    "mapPicker": {
+      "empty": "No hay imágenes disponibles. Sube una para empezar.",
+      "uploadNew": "Subir nueva imagen",
+      "selectImage": "Seleccionar {{name}} como fondo de mapa",
+      "searchPlaceholder": "Buscar imagen...",
+      "filterAll": "Todos",
+      "filterCharacters": "PJ",
+      "filterNpcs": "PNJ",
+      "filterLocations": "Lugares",
+      "filterUnlinked": "Sin enlace"
     }
   },
   "images": {
@@ -553,6 +575,7 @@
     "linkCount": "{{count}} enlaces",
     "previewAlt": "Vista previa",
     "closePreview": "Cerrar vista previa",
+    "clipToken": "Recortar ficha",
     "showToPlayers": "Mostrar a los jugadores",
     "showToPlayersLoading": "Cargando…",
     "hideFromPlayers": "Ocultar a los jugadores",
@@ -567,6 +590,16 @@
       "title": "Título",
       "caption": "Leyenda",
       "links": "Enlaces"
+    },
+    "sync": {
+      "button": "Sincronizar en la nube",
+      "starting": "Iniciando sincronización…",
+      "progress": "Subiendo {{current}} / {{total}}…",
+      "success": "{{count}} imagen(es) sincronizadas.",
+      "partialFailure": "{{count}} imagen(es) no se pudieron subir.",
+      "manifestError": "No se pudo obtener el manifiesto. Sincronización cancelada.",
+      "noActiveSession": "Inicia una sesión en vivo antes de sincronizar las imágenes.",
+      "noSession": "Crea al menos una sesión para esta campaña antes de sincronizar."
     }
   },
   "relationship": {

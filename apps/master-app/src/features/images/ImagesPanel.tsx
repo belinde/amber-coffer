@@ -17,7 +17,7 @@ import { Field } from '../../components/ui/Field.js';
 import { ActionIcons } from '../../components/ui/icons.js';
 import { ImagePreviewModal } from '../../components/ui/ImagePreviewModal.js';
 import { pickImageFilePath } from '../../components/ui/pick-image-file.js';
-import { resolveImageDisplayUrlAsync } from '../../components/ui/resolve-local-image-url.js';
+import { resolveFullSizeImageUrlAsync } from '../../components/ui/resolve-local-image-url.js';
 import { buildTabularRow } from '../../components/ui/tabular-list.js';
 import { FormActionErrorOutlet } from '../../context/AppErrorContext.js';
 import { CrudPanel } from '../crud/CrudPanel.js';
@@ -25,6 +25,7 @@ import { applyValidationFailure } from '../validation/apply-validation-failure.j
 import { fieldErrorAt } from '../validation/field-error-helpers.js';
 
 import { ImageLinkPicker } from './ImageLinkPicker.js';
+import { triggerBackgroundSync } from './trigger-background-sync.js';
 
 type CampaignId = Campaign['id'];
 
@@ -104,7 +105,7 @@ function ImageEditor({
       return;
     }
     let cancelled = false;
-    void resolveImageDisplayUrlAsync(campaignId, image?.image ?? null).then((url) => {
+    void resolveFullSizeImageUrlAsync(campaignId, image?.image ?? null).then((url) => {
       if (!cancelled) setPreviewUrl(url);
     });
     return () => {
@@ -134,6 +135,9 @@ function ImageEditor({
           ? await attachCampaignImageFile(created.id, pendingFilePath)
           : created;
         setPendingFilePath(null);
+        if (pendingFilePath) {
+          triggerBackgroundSync(campaignId);
+        }
         onSaved(saved);
         return;
       }
@@ -147,6 +151,9 @@ function ImageEditor({
       const saved = pendingFilePath
         ? await attachCampaignImageFile(image.id, pendingFilePath)
         : updated;
+      if (pendingFilePath) {
+        triggerBackgroundSync(campaignId);
+      }
       setPendingFilePath(null);
       onSaved(saved);
     } catch (err) {

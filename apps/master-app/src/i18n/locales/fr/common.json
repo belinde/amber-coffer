@@ -543,6 +543,28 @@
     "activeHandoutsTitle": "Images visibles aux joueurs",
     "gridSize": {
       "label": "Taille de la grille (colonnes)"
+    },
+    "clipEditor": {
+      "noImage": "Assignez une image avant de définir une zone de recadrage.",
+      "editorAria": "Éditeur de zone de recadrage du pion",
+      "editorRoleDescription": "Glissez pour déplacer la zone, utilisez les coins pour redimensionner",
+      "sourceImageAlt": "Image source",
+      "previewLabel": "Aperçu",
+      "previewAlt": "Aperçu du pion recadré",
+      "confirm": "Confirmer le recadrage",
+      "remove": "Supprimer le recadrage",
+      "keyboardHint": "Flèches pour déplacer, +/− pour redimensionner."
+    },
+    "mapPicker": {
+      "empty": "Aucune image disponible. Importez-en une pour commencer.",
+      "uploadNew": "Importer une nouvelle image",
+      "selectImage": "Sélectionner {{name}} comme fond de carte",
+      "searchPlaceholder": "Chercher image...",
+      "filterAll": "Tous",
+      "filterCharacters": "PJ",
+      "filterNpcs": "PNJ",
+      "filterLocations": "Lieux",
+      "filterUnlinked": "Sans lien"
     }
   },
   "images": {
@@ -553,6 +575,7 @@
     "linkCount": "{{count}} liens",
     "previewAlt": "Aperçu",
     "closePreview": "Fermer l'aperçu",
+    "clipToken": "Recadrer jeton",
     "showToPlayers": "Montrer aux joueurs",
     "showToPlayersLoading": "Chargement…",
     "hideFromPlayers": "Masquer aux joueurs",
@@ -567,6 +590,16 @@
       "title": "Titre",
       "caption": "Légende",
       "links": "Liens"
+    },
+    "sync": {
+      "button": "Synchroniser vers le cloud",
+      "starting": "Démarrage de la synchronisation…",
+      "progress": "Téléversement {{current}} / {{total}}…",
+      "success": "{{count}} image(s) synchronisée(s).",
+      "partialFailure": "{{count}} image(s) n'ont pas pu être téléversées.",
+      "manifestError": "Impossible de récupérer le manifeste. Synchronisation annulée.",
+      "noActiveSession": "Démarrez une session en direct avant de synchroniser les images.",
+      "noSession": "Créez au moins une session pour cette campagne avant de synchroniser."
     }
   },
   "relationship": {

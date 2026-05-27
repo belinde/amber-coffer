@@ -63,5 +63,6 @@ pub fn copy_image_to_l1(
         hash: Some(hash),
         thumbnail_url: None,
         canon_url: None,
+        token_portrait_url: None,
     })
 }

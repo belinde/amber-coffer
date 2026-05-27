@@ -28,6 +28,7 @@ const nodeFiles = [
 const typeCheckExcludedFiles = [
   'packages/eslint-config/**/*.js',
   '**/vitest.config.ts',
+  '**/vitest.setup.ts',
   '**/vite.config.ts',
   'apps/discord-bot/test/**/*.{ts,tsx}',
   'infrastructure/lambdas/**/*.test.ts',

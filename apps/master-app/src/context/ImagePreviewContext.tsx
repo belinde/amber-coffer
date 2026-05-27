@@ -1,8 +1,9 @@
-import type { Campaign, Handout } from '@amber/shared';
+import type { Campaign, CampaignImage, Handout, ImageRef } from '@amber/shared';
 import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactElement,
@@ -15,6 +16,7 @@ import { hideHandout, shareImageAsHandout } from '../bridge/handouts.js';
 import { updateMapBackground } from '../bridge/maps.js';
 import { formatInvokeErrorMessage } from '../bridge/parse-invoke-error.js';
 import { ImagePreviewModal } from '../components/ui/ImagePreviewModal.js';
+import { resolveFullSizeImageUrlAsync } from '../components/ui/resolve-local-image-url.js';
 import { fetchMasterSyncCredentials } from '../features/session-share/fetch-master-sync-credentials.js';
 import { buildTabletopSnapshot } from '../features/tabletop-control/bridge.js';
 import { putSessionSnapshot } from '../features/tabletop-control/session-sync-api.js';
@@ -29,6 +31,8 @@ export type ImagePreviewRequest = {
   title?: string;
   campaignId: Campaign['id'];
   imageSource: SessionImageSource;
+  imageRef?: ImageRef | undefined;
+  campaignImageId?: CampaignImage['id'] | undefined;
 };
 
 type ImagePreviewContextValue = {
@@ -47,13 +51,30 @@ export function ImagePreviewProvider({ children, onError }: ProviderProps): Reac
   const activeSessionCtx = useOptionalActiveSession();
   const tabletopLive = useTabletopLive();
   const [preview, setPreview] = useState<ImagePreviewRequest | null>(null);
+  const [fullSizeSrc, setFullSizeSrc] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [sharedHandoutId, setSharedHandoutId] = useState<Handout['id'] | null>(null);
 
   const openPreview = useCallback((request: ImagePreviewRequest) => {
     setPreview(request);
     setSharedHandoutId(null);
+    setFullSizeSrc(null);
   }, []);
+
+  // Resolve full-size local image for the modal
+  useEffect(() => {
+    if (!preview) {
+      setFullSizeSrc(null);
+      return;
+    }
+    let cancelled = false;
+    void resolveFullSizeImageUrlAsync(preview.campaignId, preview.imageRef ?? null).then((url) => {
+      if (!cancelled) setFullSizeSrc(url ?? preview.src);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [preview]);
 
   const liveSession =
     activeSessionCtx?.activeSession?.playState === 'live' ? activeSessionCtx.activeSession : null;
@@ -176,7 +197,7 @@ export function ImagePreviewProvider({ children, onError }: ProviderProps): Reac
       {children}
       <ImagePreviewModal
         open={preview !== null}
-        src={preview?.src ?? null}
+        src={fullSizeSrc ?? preview?.src ?? null}
         alt={preview?.alt ?? ''}
         {...(preview?.title ? { title: preview.title } : {})}
         onClose={() => {
@@ -188,6 +209,9 @@ export function ImagePreviewProvider({ children, onError }: ProviderProps): Reac
           }
         }}
         {...(sessionActions ? { sessionActions } : {})}
+        {...(preview?.campaignImageId ? { campaignImageId: preview.campaignImageId } : {})}
+        {...(preview?.imageRef ? { imageRef: preview.imageRef } : {})}
+        {...(preview?.campaignId ? { campaignId: preview.campaignId } : {})}
       />
     </ImagePreviewContext.Provider>
   );

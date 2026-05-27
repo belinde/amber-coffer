@@ -31,6 +31,24 @@ export async function resolveImageDisplayUrlAsync(
   return url;
 }
 
+/** Resolves the full-size local image URL, bypassing cloud thumbnails. For use in preview modals. */
+export async function resolveFullSizeImageUrlAsync(
+  campaignId: Campaign['id'],
+  image: ImageRef | null | undefined,
+): Promise<string | null> {
+  const local = image?.local;
+  if (!local) return null;
+
+  const key = cacheKey(campaignId, local);
+  const cached = cache.get(key);
+  if (cached) return cached;
+
+  const absolute = await resolveCampaignImagePath(campaignId, local);
+  const url = convertFileSrc(absolute);
+  cache.set(key, url);
+  return url;
+}
+
 export function clearImageDisplayUrlCache(): void {
   cache.clear();
 }

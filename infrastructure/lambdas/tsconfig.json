@@ -6,6 +6,8 @@
     "types": ["node", "aws-lambda"]
   },
   "include": [
+    "image-manifest/src/**/*.ts",
+    "presigned-upload/src/**/*.ts",
     "session-handshake/src/**/*.ts",
     "session-master-token/src/**/*.ts",
     "session-sync/src/**/*.ts",

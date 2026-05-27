@@ -4,7 +4,11 @@ use uuid::Uuid;
 use crate::db::validate::ensure_campaign_exists;
 use crate::db::AppState;
 use crate::error::AppError;
-use crate::models::{CreateMapInput, Map, UpdateMapBackgroundInput, UpdateMapGridColsInput, TokenRow};
+use crate::models::{
+    CampaignImageRow, CreateMapInput, Map, UpdateMapBackgroundInput, UpdateMapGridColsInput,
+    TokenRow,
+};
+use crate::services::campaign_storage;
 use crate::services::image_source::{copy_into_map_image_dir, resolve_image_source_path};
 use crate::services::session_assets::upload_session_image;
 use crate::services::tabletop_tokens;
@@ -256,6 +260,111 @@ pub async fn update_map_grid_cols(
 
     sqlx::query_as::<_, Map>(&query)
         .bind(&input.map_id)
+        .fetch_optional(&pool)
+        .await?
+        .ok_or_else(|| AppError::Internal("map update succeeded but row missing".into()))
+}
+
+#[tauri::command]
+pub async fn set_map_background_from_image_cmd(
+    map_id: String,
+    campaign_image_id: String,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<Map, AppError> {
+    let pool = state.pool_for_entity_id(&app, &map_id).await?;
+
+    // Load the map
+    let query = format!("{MAP_SELECT} WHERE id = ?");
+    let existing = sqlx::query_as::<_, Map>(&query)
+        .bind(&map_id)
+        .fetch_optional(&pool)
+        .await?
+        .ok_or_else(|| AppError::NotFound(format!("map {map_id}")))?;
+
+    // Load the CampaignImage to get its local file path
+    let img_row = sqlx::query_as::<_, CampaignImageRow>(
+        r#"SELECT id, campaign_id, title, caption, image_ref_json, visibility, links_json,
+                  created_at, updated_at, version
+           FROM campaign_images WHERE id = ?"#,
+    )
+    .bind(&campaign_image_id)
+    .fetch_optional(&pool)
+    .await?
+    .ok_or_else(|| AppError::NotFound(format!("campaign_image {campaign_image_id}")))?;
+
+    // Extract the local relative path from image_ref_json
+    let image_ref: crate::models::vault_json::ImageRef = img_row
+        .image_ref_json
+        .as_deref()
+        .and_then(|json| serde_json::from_str(json).ok())
+        .unwrap_or_default();
+
+    let local_path = image_ref
+        .local
+        .ok_or_else(|| AppError::NotFound("campaign_image has no local file".into()))?;
+
+    // Resolve the absolute path from the campaign storage folder
+    let campaign_folder =
+        campaign_storage::resolve_storage_folder(&app, &existing.campaign_id)?;
+    let absolute_path = campaign_folder.join(&local_path);
+
+    if !absolute_path.is_file() {
+        return Err(AppError::NotFound(format!(
+            "image file not found: {}",
+            absolute_path.display()
+        )));
+    }
+
+    // Read image dimensions using the image crate
+    let img = image::open(&absolute_path).map_err(|e| {
+        AppError::Internal(format!(
+            "failed to read image {}: {e}",
+            absolute_path.display()
+        ))
+    })?;
+    let (width_px, height_px) = image::GenericImageView::dimensions(&img);
+
+    // Derive gridRows = max(1, round(gridCols * heightPx / widthPx))
+    let grid_rows = if width_px > 0 {
+        1i32.max(
+            (existing.grid_cols as f64 * height_px as f64 / width_px as f64).round() as i32,
+        )
+    } else {
+        1
+    };
+
+    let now = now_ms();
+    let next_version = existing.version + 1;
+
+    // Public path for the player-activity (relative, served via CloudFront proxy)
+    let background_public_path = format!(
+        "/campaign-images/{}/{}",
+        existing.campaign_id,
+        format!("{}.webp", campaign_image_id)
+    );
+
+    sqlx::query(
+        r#"
+        UPDATE maps
+        SET image_path = ?, background_public_path = ?, width_px = ?, height_px = ?, grid_rows = ?,
+            updated_at = ?, version = ?
+        WHERE id = ?
+        "#,
+    )
+    .bind(&local_path)
+    .bind(&background_public_path)
+    .bind(width_px as i32)
+    .bind(height_px as i32)
+    .bind(grid_rows)
+    .bind(now)
+    .bind(next_version)
+    .bind(&map_id)
+    .execute(&pool)
+    .await?;
+
+    sqlx::query_as::<_, Map>(&query)
+        .bind(&map_id)
         .fetch_optional(&pool)
         .await?
         .ok_or_else(|| AppError::Internal("map update succeeded but row missing".into()))

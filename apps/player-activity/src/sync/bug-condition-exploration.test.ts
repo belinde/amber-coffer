@@ -120,12 +120,14 @@ describe('Bug Condition Exploration — pendingEvents ignored (Req 1.1, 1.2)', (
     // Set up initial state with the token at (2,3)
     tabletopStore.applyMqttMessage({
       kind: 'tabletop.snapshot',
+      campaignName: null,
       sessionId,
       activeMapId: mapId,
       maps: [sampleMap],
       tokens: [sampleToken],
       tokenLabels: {},
       tokenNames: {},
+      tokenPortraitUrls: {},
       visibleHandouts: [],
       snapshotAt: 0,
     });
@@ -171,12 +173,14 @@ describe('Bug Condition Exploration — map.updated unhandled (Req 1.3)', () => 
     // Set up initial state with the sample map
     tabletopStore.applyMqttMessage({
       kind: 'tabletop.snapshot',
+      campaignName: null,
       sessionId,
       activeMapId: mapId,
       maps: [sampleMap],
       tokens: [],
       tokenLabels: {},
       tokenNames: {},
+      tokenPortraitUrls: {},
       visibleHandouts: [],
       snapshotAt: 0,
     });
@@ -270,12 +274,14 @@ describe('Bug Condition Exploration — snapshot clobbers pendingEvents (Req 1.1
         version: 2,
         snapshot: {
           kind: 'tabletop.snapshot',
+          campaignName: null,
           sessionId,
           activeMapId: mapId,
           maps: [sampleMap],
           tokens: [{ ...sampleToken, position: { zone: 'board', xCell: 2, yCell: 3 } }],
           tokenLabels: {},
           tokenNames: {},
+          tokenPortraitUrls: {},
           visibleHandouts: [],
           snapshotAt: 1,
         },
@@ -305,12 +311,14 @@ describe('Bug Condition Exploration — snapshot clobbers pendingEvents (Req 1.1
     // Set up initial state with token at (5,3) — simulating an optimistic local move
     tabletopStore.applyMqttMessage({
       kind: 'tabletop.snapshot',
+      campaignName: null,
       sessionId,
       activeMapId: mapId,
       maps: [sampleMap],
       tokens: [{ ...sampleToken, position: { zone: 'board', xCell: 5, yCell: 3 } }],
       tokenLabels: {},
       tokenNames: {},
+      tokenPortraitUrls: {},
       visibleHandouts: [],
       snapshotAt: 0,
     });

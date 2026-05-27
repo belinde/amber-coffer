@@ -1,8 +1,12 @@
-import type { Handout } from '@amber/shared';
+import type { Campaign, CampaignImage, ClipRegion, Handout, ImageRef } from '@amber/shared';
+import { invoke } from '@tauri-apps/api/core';
 import type { ReactElement } from 'react';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+
+import { triggerBackgroundSync } from '../../features/images/trigger-background-sync.js';
+import { TokenClipEditor } from '../../features/tabletop/components/token-clip-editor.js';
 
 import { Button } from './Button.js';
 import { ActionIcons } from './icons.js';
@@ -22,6 +26,9 @@ type Props = {
   title?: string | undefined;
   onClose: () => void;
   sessionActions?: SessionActions;
+  campaignImageId?: CampaignImage['id'];
+  imageRef?: ImageRef;
+  campaignId?: Campaign['id'];
 };
 
 export function ImagePreviewModal({
@@ -31,11 +38,20 @@ export function ImagePreviewModal({
   title,
   onClose,
   sessionActions,
+  campaignImageId,
+  imageRef,
+  campaignId,
 }: Props): ReactElement | null {
   const { t } = useTranslation();
+  const [showClipEditor, setShowClipEditor] = useState(false);
+  const [savedClipRegion, setSavedClipRegion] = useState<ClipRegion | null>(null);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setShowClipEditor(false);
+      setSavedClipRegion(null);
+      return;
+    }
     function onKeyDown(ev: KeyboardEvent): void {
       if (ev.key === 'Escape') onClose();
     }
@@ -48,9 +64,47 @@ export function ImagePreviewModal({
     };
   }, [open, onClose]);
 
+  // Load saved clip region when modal opens
+  useEffect(() => {
+    if (!open || !campaignImageId) {
+      setSavedClipRegion(null);
+      return;
+    }
+    void invoke<ClipRegion | null>('get_clip_region_cmd', { campaignImageId })
+      .then((clip) => setSavedClipRegion(clip))
+      .catch(() => setSavedClipRegion(null));
+  }, [open, campaignImageId]);
+
+  const handleClipConfirm = useCallback(
+    async (clip: ClipRegion) => {
+      if (!campaignImageId) return;
+      try {
+        await invoke('set_clip_region_cmd', { campaignImageId, clip });
+        setShowClipEditor(false);
+        if (campaignId) {
+          triggerBackgroundSync(campaignId);
+        }
+      } catch (err) {
+        console.error('[ClipEditor] save failed:', err);
+      }
+    },
+    [campaignImageId, campaignId],
+  );
+
+  const handleClipRemove = useCallback(async () => {
+    if (!campaignImageId) return;
+    try {
+      await invoke('set_clip_region_cmd', { campaignImageId, clip: null });
+      setShowClipEditor(false);
+    } catch (err) {
+      console.error('[ClipEditor] remove failed:', err);
+    }
+  }, [campaignImageId]);
+
   if (!open || !src) return null;
 
   const heading = title?.trim() || alt;
+  const canClipToken = Boolean(campaignImageId && imageRef && campaignId);
 
   function renderHandoutButton(): ReactElement | null {
     if (!sessionActions) return null;
@@ -99,19 +153,37 @@ export function ImagePreviewModal({
             onClick={onClose}
           />
         </header>
-        <div className="image-preview-modal__stage">
-          <img className="image-preview-modal__img" src={src} alt={alt} />
-        </div>
-        {sessionActions ? (
+        {showClipEditor && campaignImageId && imageRef && campaignId ? (
+          <div className="image-preview-modal__clip-editor">
+            <TokenClipEditor
+              campaignImageId={campaignImageId}
+              campaignId={campaignId}
+              imageRef={imageRef}
+              clipRegion={savedClipRegion}
+              onConfirm={(clip) => void handleClipConfirm(clip)}
+              onRemove={() => void handleClipRemove()}
+            />
+          </div>
+        ) : (
+          <div className="image-preview-modal__stage">
+            <img className="image-preview-modal__img" src={src} alt={alt} />
+          </div>
+        )}
+        {sessionActions || canClipToken ? (
           <footer className="image-preview-modal__actions">
             {renderHandoutButton()}
-            {sessionActions.onSetTableBackground ? (
+            {sessionActions?.onSetTableBackground ? (
               <Button
                 type="button"
                 disabled={sessionActions.busy}
                 onClick={sessionActions.onSetTableBackground}
               >
                 {t('tabletop.setMapBackground')}
+              </Button>
+            ) : null}
+            {canClipToken ? (
+              <Button type="button" onClick={() => setShowClipEditor((v) => !v)}>
+                {t('images.clipToken')}
               </Button>
             ) : null}
           </footer>

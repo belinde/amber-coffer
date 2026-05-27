@@ -25,7 +25,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const POLL_INTERVAL_MS = '2000';
 
-/** HTTP API — session handshake, tactical sync polling, master token. */
+/** HTTP API — session handshake, tactical sync polling, master token, image sync. */
 export class ApiStack extends cdk.Stack {
   readonly httpApi: apigwv2.HttpApi;
 
@@ -56,6 +56,8 @@ export class ApiStack extends cdk.Stack {
     const handshakeLogGroup = createOneYearLogGroup(this, 'HandshakeFnLogGroup');
     const syncLogGroup = createOneYearLogGroup(this, 'SessionSyncFnLogGroup');
     const masterTokenLogGroup = createOneYearLogGroup(this, 'MasterTokenFnLogGroup');
+    const imageManifestLogGroup = createOneYearLogGroup(this, 'ImageManifestFnLogGroup');
+    const presignedUploadLogGroup = createOneYearLogGroup(this, 'PresignedUploadFnLogGroup');
 
     const handshakeFn = new NodejsFunction(this, 'HandshakeFn', {
       functionName: resourceName(props.envName, 'api-handshake'),
@@ -124,13 +126,57 @@ export class ApiStack extends cdk.Stack {
       },
     });
 
+    const imageManifestFn = new NodejsFunction(this, 'ImageManifestFn', {
+      functionName: resourceName(props.envName, 'api-image-manifest'),
+      runtime: lambda.Runtime.NODEJS_22_X,
+      architecture: lambda.Architecture.ARM_64,
+      entry: path.join(__dirname, '../../../lambdas/image-manifest/src/handler.ts'),
+      handler: 'handler',
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(15),
+      logGroup: imageManifestLogGroup,
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        target: 'node22',
+      },
+      environment: {
+        BUCKET_NAME: props.playerActivityBucket.bucketName,
+        SESSION_AUTH_SECRET_ARN: props.sessionAuthSecret.secretArn,
+      },
+    });
+
+    const presignedUploadFn = new NodejsFunction(this, 'PresignedUploadFn', {
+      functionName: resourceName(props.envName, 'api-presigned-upload'),
+      runtime: lambda.Runtime.NODEJS_22_X,
+      architecture: lambda.Architecture.ARM_64,
+      entry: path.join(__dirname, '../../../lambdas/presigned-upload/src/handler.ts'),
+      handler: 'handler',
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(15),
+      logGroup: presignedUploadLogGroup,
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        target: 'node22',
+      },
+      environment: {
+        BUCKET_NAME: props.playerActivityBucket.bucketName,
+        SESSION_AUTH_SECRET_ARN: props.sessionAuthSecret.secretArn,
+      },
+    });
+
     props.handshakeTable.grantReadWriteData(handshakeFn);
     props.handshakeTable.grantReadWriteData(masterTokenFn);
     props.sessionSyncTable.grantReadWriteData(sessionSyncFn);
     props.playerActivityBucket.grantPut(sessionSyncFn, 'session-assets/*');
+    props.playerActivityBucket.grantRead(imageManifestFn, 'campaign-images/*');
+    props.playerActivityBucket.grantPut(presignedUploadFn, 'campaign-images/*');
     props.sessionAuthSecret.grantRead(handshakeFn);
     props.sessionAuthSecret.grantRead(sessionSyncFn);
     props.sessionAuthSecret.grantRead(masterTokenFn);
+    props.sessionAuthSecret.grantRead(imageManifestFn);
+    props.sessionAuthSecret.grantRead(presignedUploadFn);
     discordClientSecret.grantRead(handshakeFn);
 
     this.httpApi = new apigwv2.HttpApi(this, 'HttpApi', {
@@ -159,6 +205,14 @@ export class ApiStack extends cdk.Stack {
     const masterTokenIntegration = new integrations.HttpLambdaIntegration(
       'MasterTokenIntegration',
       masterTokenFn,
+    );
+    const imageManifestIntegration = new integrations.HttpLambdaIntegration(
+      'ImageManifestIntegration',
+      imageManifestFn,
+    );
+    const presignedUploadIntegration = new integrations.HttpLambdaIntegration(
+      'PresignedUploadIntegration',
+      presignedUploadFn,
     );
 
     this.httpApi.addRoutes({
@@ -201,6 +255,18 @@ export class ApiStack extends cdk.Stack {
       path: '/session/assets/presign',
       methods: [apigwv2.HttpMethod.POST, apigwv2.HttpMethod.OPTIONS],
       integration: syncIntegration,
+    });
+
+    this.httpApi.addRoutes({
+      path: '/campaign/{campaignId}/images/manifest',
+      methods: [apigwv2.HttpMethod.GET, apigwv2.HttpMethod.OPTIONS],
+      integration: imageManifestIntegration,
+    });
+
+    this.httpApi.addRoutes({
+      path: '/campaign/{campaignId}/images/presigned-urls',
+      methods: [apigwv2.HttpMethod.POST, apigwv2.HttpMethod.OPTIONS],
+      integration: presignedUploadIntegration,
     });
 
     const domainName = new apigwv2.DomainName(this, 'ApiDomain', {

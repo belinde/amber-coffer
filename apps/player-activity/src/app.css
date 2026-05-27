@@ -1,1 +1,14 @@
 /* App-specific overrides — shared tokens and components live in @amber/ui/styles.css */
+
+/* When connected, the layout fills the full viewport so the tabletop gets maximum space */
+.player-activity-layout--connected {
+  height: 100vh;
+  padding: 0;
+  gap: 0;
+}
+
+.player-activity-layout--connected .session-shell--connected {
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}

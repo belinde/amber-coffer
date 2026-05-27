@@ -543,6 +543,28 @@
     "activeHandoutsTitle": "Images visible to players",
     "gridSize": {
       "label": "Grid size (columns)"
+    },
+    "clipEditor": {
+      "noImage": "Assign an image before defining a clip region.",
+      "editorAria": "Token clip region editor",
+      "editorRoleDescription": "Drag to move the clip area, use corners to resize",
+      "sourceImageAlt": "Source image",
+      "previewLabel": "Preview",
+      "previewAlt": "Cropped token preview",
+      "confirm": "Confirm clip",
+      "remove": "Remove clip",
+      "keyboardHint": "Arrow keys move the region, +/− adjust size."
+    },
+    "mapPicker": {
+      "empty": "No images available. Upload one to get started.",
+      "uploadNew": "Upload new image",
+      "selectImage": "Select {{name}} as map background",
+      "searchPlaceholder": "Search image...",
+      "filterAll": "All",
+      "filterCharacters": "Characters",
+      "filterNpcs": "NPCs",
+      "filterLocations": "Locations",
+      "filterUnlinked": "Unlinked"
     }
   },
   "images": {
@@ -553,6 +575,7 @@
     "linkCount": "{{count}} links",
     "previewAlt": "Preview",
     "closePreview": "Close preview",
+    "clipToken": "Clip token",
     "showToPlayers": "Show to players",
     "showToPlayersLoading": "Uploading…",
     "hideFromPlayers": "Hide from players",
@@ -567,6 +590,16 @@
       "title": "Title",
       "caption": "Caption",
       "links": "Links"
+    },
+    "sync": {
+      "button": "Sync to cloud",
+      "starting": "Starting sync…",
+      "progress": "Uploading {{current}} / {{total}}…",
+      "success": "{{count}} image(s) synced successfully.",
+      "partialFailure": "{{count}} image(s) failed to upload.",
+      "manifestError": "Could not retrieve image manifest. Sync aborted.",
+      "noActiveSession": "Start a live session before syncing images.",
+      "noSession": "Create at least one session for this campaign before syncing."
     }
   },
   "relationship": {

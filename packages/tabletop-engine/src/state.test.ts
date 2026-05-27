@@ -43,6 +43,7 @@ describe('tabletopReducer', () => {
       tokens: [sampleToken],
       tokenLabels: { [tokenId]: 'CH' },
       tokenNames: { [tokenId]: 'Character One' },
+      tokenPortraitUrls: {},
       visibleHandouts: [sampleHandout],
     });
     expect(next.activeMapId).toBe(mapAId);

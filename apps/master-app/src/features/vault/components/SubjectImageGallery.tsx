@@ -112,6 +112,8 @@ export function SubjectImageGallery({
             title,
             campaignId,
             imageSource: { ...imageSource, campaignImageId: item.id },
+            imageRef: item.image ?? undefined,
+            campaignImageId: item.id,
           });
           return;
         }

@@ -5,7 +5,8 @@
   },
   "app": {
     "title": "Amber Coffer — Table de jeu",
-    "subtitle": "Table de jeu pour les joueurs"
+    "subtitle": "Table de jeu pour les joueurs",
+    "campaignNameFallback": "Campagne"
   },
   "session": {
     "connecting": "Connexion à la table de jeu…",

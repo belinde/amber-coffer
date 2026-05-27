@@ -50,6 +50,7 @@ export function SessionSyncProvider({ children }: SessionSyncProviderProps): Rea
   const [playerDiscordId, setPlayerDiscordId] = useState<DiscordUserId>(
     () => readPlayerIdFromQuery() ?? DEMO_PLAYER_A,
   );
+  const [campaignName, setCampaignName] = useState<string | null>(null);
 
   const {
     loading: discordLoading,
@@ -85,6 +86,7 @@ export function SessionSyncProvider({ children }: SessionSyncProviderProps): Rea
     setSessionId,
     setPlayerDiscordId: setPlayerDiscordIdFromHandshake,
     setSessionStatus,
+    setCampaignName,
     retryNonce: bootstrapRetryNonce,
   });
 
@@ -95,6 +97,7 @@ export function SessionSyncProvider({ children }: SessionSyncProviderProps): Rea
       sessionStatus,
       sessionError,
       playerDiscordId,
+      campaignName,
       setPlayerDiscordId,
       setSessionStatus,
       retrySessionBootstrap,
@@ -105,6 +108,7 @@ export function SessionSyncProvider({ children }: SessionSyncProviderProps): Rea
       sessionStatus,
       sessionError,
       playerDiscordId,
+      campaignName,
       setSessionStatus,
       retrySessionBootstrap,
     ],

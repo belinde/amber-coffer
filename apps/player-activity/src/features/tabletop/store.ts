@@ -49,6 +49,7 @@ class TabletopStore {
           tokens: payload.tokens,
           tokenLabels: payload.tokenLabels,
           tokenNames: payload.tokenNames,
+          tokenPortraitUrls: payload.tokenPortraitUrls,
           visibleHandouts: payload.visibleHandouts,
         });
         return;

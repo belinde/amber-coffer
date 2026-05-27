@@ -191,6 +191,29 @@
   font-size: 0.9rem;
 }
 
+.player-activity-layout__header--compact {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-height: 48px;
+  flex-shrink: 0;
+}
+
+.player-activity-layout__icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.player-activity-layout__campaign-name {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .session-shell {
   display: flex;
   flex-direction: column;

@@ -92,6 +92,10 @@ const tabletopStateArb: fc.Arbitrary<TabletopState> = fc.record({
     fc.string({ minLength: 1, maxLength: 8 }),
     fc.string({ maxLength: 20 }),
   ),
+  tokenPortraitUrls: fc.dictionary(
+    fc.string({ minLength: 1, maxLength: 8 }),
+    fc.string({ maxLength: 60 }),
+  ),
   visibleHandouts: fc.array(handoutArb, { minLength: 0, maxLength: 3 }),
 });
 
@@ -111,6 +115,10 @@ function existingActionArb(state: TabletopState): fc.Arbitrary<TabletopAction> {
       tokenNames: fc.dictionary(
         fc.string({ minLength: 1, maxLength: 8 }),
         fc.string({ maxLength: 20 }),
+      ),
+      tokenPortraitUrls: fc.dictionary(
+        fc.string({ minLength: 1, maxLength: 8 }),
+        fc.string({ maxLength: 60 }),
       ),
       visibleHandouts: fc.array(handoutArb, { minLength: 0, maxLength: 3 }),
     }),
@@ -170,6 +178,7 @@ describe('2a. Reducer Preservation — existing action types produce identical o
             tokens: state.tokens,
             tokenLabels: state.tokenLabels,
             tokenNames: state.tokenNames,
+            tokenPortraitUrls: state.tokenPortraitUrls,
             visibleHandouts: state.visibleHandouts,
           },
           {
@@ -248,6 +257,7 @@ describe('2a. Reducer Preservation — existing action types produce identical o
             expect(result).toHaveProperty('tokens');
             expect(result).toHaveProperty('tokenLabels');
             expect(result).toHaveProperty('tokenNames');
+            expect(result).toHaveProperty('tokenPortraitUrls');
             expect(result).toHaveProperty('visibleHandouts');
             expect(Array.isArray(result.maps)).toBe(true);
             expect(Array.isArray(result.tokens)).toBe(true);

@@ -465,6 +465,123 @@ async fn build_token_display_maps(
     Ok((labels, names))
 }
 
+/// Build a map of token ID → portrait URL for tokens that have
+/// a portrait available. Uses CloudFront URL if uploaded, otherwise falls back
+/// to the local image path (via asset:// protocol) when a clip_region is defined.
+async fn build_token_portrait_urls(
+    pool: &sqlx::SqlitePool,
+    campaign_id: &str,
+    tokens: &[Token],
+    campaign_storage_root: Option<&std::path::Path>,
+) -> AppResult<HashMap<String, String>> {
+    use crate::models::vault_json::{parse_json, parse_json_opt, ImageLink, ImageRef};
+
+    let mut portrait_urls: HashMap<String, String> = HashMap::new();
+
+    // Collect entity IDs that need portrait lookup (characters and NPCs only)
+    let entity_tokens: Vec<&Token> = tokens
+        .iter()
+        .filter(|t| t.entity_kind == "character" || t.entity_kind == "npc")
+        .collect();
+
+    if entity_tokens.is_empty() {
+        return Ok(portrait_urls);
+    }
+
+    // Load all campaign images for this campaign (with their links, image refs, and clip region)
+    let image_rows = sqlx::query_as::<_, (String, Option<String>, String, Option<String>)>(
+        "SELECT id, image_ref_json, links_json, clip_region_json FROM campaign_images WHERE campaign_id = ?",
+    )
+    .bind(campaign_id)
+    .fetch_all(pool)
+    .await?;
+
+    // Build a lookup: (entity_kind, entity_id) → portrait URL
+    // Build portrait URLs.
+    // When campaign_storage_root is provided (master-app local), always prefer the local
+    // crop cache — the relative CloudFront paths don't work in the Tauri webview.
+    // When campaign_storage_root is None (snapshot for player-activity), use CloudFront paths.
+    let mut entity_portrait_map: HashMap<(String, String), String> = HashMap::new();
+
+    for (_image_id, image_ref_json, links_json, clip_region_json) in &image_rows {
+        let image_ref: Option<ImageRef> = parse_json_opt(image_ref_json.as_deref());
+
+        let url = if let Some(ref ir) = image_ref {
+            if let Some(clip_json) = clip_region_json {
+                if let (Some(local), Some(root)) = (&ir.local, campaign_storage_root) {
+                    // Master-app local: generate/use cached crop
+                    let abs_path = root.join(local);
+                    if abs_path.is_file() {
+                        let clip: Option<crate::models::ClipRegion> =
+                            serde_json::from_str(clip_json).ok();
+                        if let Some(clip) = clip {
+                            let cache_path = abs_path.with_extension("token_cache.webp");
+                            let needs_regen = !cache_path.is_file() || {
+                                let src_meta = std::fs::metadata(&abs_path).ok();
+                                let cache_meta = std::fs::metadata(&cache_path).ok();
+                                match (src_meta, cache_meta) {
+                                    (Some(s), Some(c)) => {
+                                        s.modified().ok() > c.modified().ok()
+                                    }
+                                    _ => true,
+                                }
+                            };
+                            if needs_regen {
+                                if let Ok(bytes) = crate::services::image_processing::generate_token_portrait(&abs_path, &clip) {
+                                    let _ = std::fs::write(&cache_path, &bytes);
+                                }
+                            }
+                            if cache_path.is_file() {
+                                Some(format!("asset://localhost/{}", cache_path.display()))
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                } else if ir.token_portrait_url.is_some() {
+                    // Player-activity snapshot: use the relative CloudFront path
+                    ir.token_portrait_url.clone()
+                } else {
+                    None
+                }
+            } else if campaign_storage_root.is_none() {
+                // No clip region, but check if there's a CloudFront URL (for snapshot)
+                ir.token_portrait_url.clone()
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        let Some(url) = url else {
+            continue;
+        };
+
+        let links: Vec<ImageLink> = parse_json(links_json, Vec::new());
+        for link in links {
+            if link.kind == "character" || link.kind == "npc" {
+                entity_portrait_map
+                    .entry((link.kind, link.id))
+                    .or_insert(url.clone());
+            }
+        }
+    }
+
+    // Map token IDs to portrait URLs
+    for token in entity_tokens {
+        if let Some(url) = entity_portrait_map.get(&(token.entity_kind.clone(), token.entity_id.clone())) {
+            portrait_urls.insert(token.id.clone(), url.clone());
+        }
+    }
+
+    Ok(portrait_urls)
+}
+
 #[tauri::command]
 pub async fn build_tabletop_snapshot_json(
     session_id: String,
@@ -483,6 +600,12 @@ pub async fn build_tabletop_snapshot_json(
     .ok_or_else(|| AppError::NotFound(format!("session {session_id}")))?;
 
     let campaign_id = session_row.0;
+
+    // Read campaign name from the campaign JSON file
+    let campaign_name: Option<String> = crate::services::campaign_storage::resolve_storage_folder(&app, &campaign_id)
+        .and_then(|folder| crate::services::campaign_storage::read_campaign_json(&folder))
+        .map(|c| c.name)
+        .ok();
 
     let maps_query = format!("{MAP_SELECT} WHERE campaign_id = ? ORDER BY name COLLATE NOCASE");
     let maps = sqlx::query_as::<_, Map>(&maps_query)
@@ -507,6 +630,9 @@ pub async fn build_tabletop_snapshot_json(
 
     let (token_labels, token_names) =
         build_token_display_maps(&pool, &campaign_id, &all_tokens).await?;
+
+    let token_portrait_urls =
+        build_token_portrait_urls(&pool, &campaign_id, &all_tokens, None).await?;
 
     let active_map_id = active_map_id
         .filter(|id| maps.iter().any(|m| m.id == *id))
@@ -549,13 +675,44 @@ pub async fn build_tabletop_snapshot_json(
         "kind": "tabletop.snapshot",
         "sessionId": session_id,
         "activeMapId": active_map_id,
+        "campaignName": campaign_name,
         "maps": maps_json,
         "tokens": tokens_json,
         "tokenLabels": token_labels,
         "tokenNames": token_names,
+        "tokenPortraitUrls": token_portrait_urls,
         "visibleHandouts": handouts_json,
         "snapshotAt": snapshot_at,
     }))
+}
+
+/// Returns token portrait URLs for the master-app tabletop (includes local fallbacks).
+#[tauri::command]
+pub async fn get_token_portrait_urls(
+    campaign_id: String,
+    token_ids: Vec<String>,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<HashMap<String, String>, AppError> {
+    use crate::services::campaign_storage;
+
+    let pool = state.pool_for_campaign(&app, &campaign_id).await?;
+    let campaign_root = campaign_storage::resolve_storage_folder(&app, &campaign_id)?;
+
+    // Load tokens by IDs
+    let mut tokens: Vec<Token> = Vec::new();
+    for token_id in &token_ids {
+        let query = format!("{TOKEN_SELECT} WHERE id = ?");
+        if let Some(row) = sqlx::query_as::<_, TokenRow>(&query)
+            .bind(token_id)
+            .fetch_optional(&pool)
+            .await?
+        {
+            tokens.push(Token::from_row(row).map_err(AppError::Internal)?);
+        }
+    }
+
+    build_token_portrait_urls(&pool, &campaign_id, &tokens, Some(&campaign_root)).await
 }
 
 #[tauri::command]

@@ -6,6 +6,7 @@ import { ImagesIcon } from '../../components/ui/icons.js';
 import { PanelPageHeader } from '../../components/ui/PanelPageHeader.js';
 
 import { ImagesPanel } from './ImagesPanel.js';
+import { ImageSyncButton } from './ImageSyncButton.js';
 
 type Props = {
   campaignId: Campaign['id'];
@@ -20,6 +21,7 @@ export function ImagesView({ campaignId, onBack, onError }: Props): ReactElement
     <div className="vault-images">
       <PanelPageHeader icon={ImagesIcon} title={t('vault.imagesTitle')} onBack={onBack} />
       <p className="vault-section-help">{t('vault.imagesHint')}</p>
+      <ImageSyncButton campaignId={campaignId} onError={onError} />
       <ImagesPanel campaignId={campaignId} onError={onError} />
     </div>
   );

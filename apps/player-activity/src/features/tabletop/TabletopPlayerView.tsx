@@ -31,6 +31,7 @@ export function TabletopPlayerView({
   const tokens = state.tokens;
   const tokenLabels = state.tokenLabels;
   const tokenNames = state.tokenNames;
+  const tokenPortraitUrls = state.tokenPortraitUrls;
   const [overlayImage, setOverlayImage] = useState<{ src: string; alt: string } | null>(null);
 
   const closeOverlay = useCallback(() => setOverlayImage(null), []);
@@ -60,6 +61,8 @@ export function TabletopPlayerView({
       map={map}
       tokens={tokens}
       tokenLabels={tokenLabels}
+      tokenPortraitUrls={tokenPortraitUrls}
+      tokenNames={tokenNames}
       backgroundImageUrl={backgroundImageUrl}
       labels={{
         boardAria: t('tabletop.boardAria'),

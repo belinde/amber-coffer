@@ -45,6 +45,11 @@ urlencoding = "2"
 keyring = { version = "3", features = ["sync-secret-service"] }
 tauri-plugin-dialog = "2"
 
+[dev-dependencies]
+mockito = "1"
+proptest = "1"
+tempfile = "3"
+
 [features]
 default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]

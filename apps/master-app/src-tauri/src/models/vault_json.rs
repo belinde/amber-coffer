@@ -35,6 +35,7 @@ pub struct ImageRef {
     pub hash: Option<String>,
     pub thumbnail_url: Option<String>,
     pub canon_url: Option<String>,
+    pub token_portrait_url: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

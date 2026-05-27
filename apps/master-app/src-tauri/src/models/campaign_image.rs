@@ -69,3 +69,15 @@ pub struct UpdateCampaignImageInput {
     pub visibility: String,
     pub links: Vec<ImageLink>,
 }
+
+/// Lightweight entry for the map background image picker UI.
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CampaignImagePickerEntry {
+    pub id: String,
+    pub title: String,
+    pub thumbnail_path: Option<String>,
+    pub width_px: Option<u32>,
+    pub height_px: Option<u32>,
+    pub link_kinds: Vec<String>,
+}

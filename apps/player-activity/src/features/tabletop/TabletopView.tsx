@@ -52,6 +52,8 @@ export function TabletopView({
       map={map}
       tokens={state.tokens}
       tokenLabels={state.tokenLabels}
+      tokenPortraitUrls={state.tokenPortraitUrls}
+      tokenNames={state.tokenNames}
       backgroundImageUrl={backgroundImageUrl}
       labels={{
         boardAria: t('tabletop.boardAria', { defaultValue: 'Tabletop' }),

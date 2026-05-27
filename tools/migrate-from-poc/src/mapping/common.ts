@@ -12,13 +12,13 @@ import {
 } from '@amber/shared';
 
 import {
+  parseAllImages,
   parseEventiInteressanti,
   parseFencedText,
-  parseImageMarkdown,
   type ParsedMarkdownFile,
   sectionBody,
 } from '../frontmatter.js';
-import { resolvePortraitImageId } from '../id-mapping.js';
+import { resolvePortraitImageId, resolveExtraImageId } from '../id-mapping.js';
 import type { EntityRegistry } from '../registry.js';
 import type { DumpAssetEntityKind, ExtractContext, ExtractError } from '../types.js';
 
@@ -135,6 +135,7 @@ function portraitLink(entityKind: PortraitEntityKind, entityId: string): ImageLi
 /**
  * Portrait from `## Immagine` → archive `CampaignImage` + L1 asset on that row.
  * Entity `image` is set at import time via `portraitBindings` (same `ImageRef` as the archive).
+ * Supports multiple images: the first becomes the portrait binding, extras are additional campaign images.
  */
 export function queuePortraitAsCampaignImage(
   ctx: ExtractContext,
@@ -144,41 +145,52 @@ export function queuePortraitAsCampaignImage(
   entityTitle: string,
   sectionBodyText: string,
 ): void {
-  const parsed = parseImageMarkdown(sectionBodyText);
-  if (!parsed?.path) return;
+  const images = parseAllImages(sectionBodyText);
+  if (images.length === 0) return;
 
-  const imageId = resolvePortraitImageId(ctx.mapping, entityRelFile);
-  const pocPath = parsed.path.startsWith('/') ? parsed.path.slice(1) : parsed.path;
-  const sourcePath = join(ctx.rootPath, pocPath);
-  const ext = pocPath.includes('.') ? pocPath.slice(pocPath.lastIndexOf('.')) : '.jpg';
-  const link = portraitLink(entityKind, entityId);
-  const timestamps = nowTimestamps();
+  for (let i = 0; i < images.length; i++) {
+    const img = images[i]!;
+    const imageId =
+      i === 0
+        ? resolvePortraitImageId(ctx.mapping, entityRelFile)
+        : resolveExtraImageId(ctx.mapping, entityRelFile, i);
 
-  const campaignImage: CampaignImage = {
-    id: imageId as CampaignImage['id'],
-    campaignId: ctx.campaignId as CampaignImage['campaignId'],
-    title: entityTitle,
-    caption: parsed.alt.trim(),
-    image: null,
-    links: link ? [link] : [],
-    visibility: 'gm_only',
-    ...timestamps,
-    version: 1,
-  };
+    const pocPath = img.path.startsWith('/') ? img.path.slice(1) : img.path;
+    const sourcePath = join(ctx.rootPath, pocPath);
+    const ext = pocPath.includes('.') ? pocPath.slice(pocPath.lastIndexOf('.')) : '.jpg';
+    const link = portraitLink(entityKind, entityId);
+    const timestamps = nowTimestamps();
 
-  ctx.portraitCampaignImages.push(campaignImageSchema.parse(campaignImage));
-  ctx.portraitBindings.push({
-    entityKind,
-    entityId,
-    campaignImageId: imageId,
-  });
+    const campaignImage: CampaignImage = {
+      id: imageId as CampaignImage['id'],
+      campaignId: ctx.campaignId as CampaignImage['campaignId'],
+      title: i === 0 ? entityTitle : `${entityTitle} — ${img.alt || `#${i + 1}`}`,
+      caption: img.alt.trim(),
+      image: null,
+      links: link ? [link] : [],
+      visibility: 'gm_only',
+      ...timestamps,
+      version: 1,
+    };
 
-  ctx.assets.push({
-    entityKind: 'campaign_image',
-    entityId: imageId,
-    sourcePath,
-    relativeLocal: `${ctx.campaignId}/${imageId}/original${ext}`,
-  });
+    ctx.portraitCampaignImages.push(campaignImageSchema.parse(campaignImage));
+
+    // Only the first image is the portrait binding for the entity
+    if (i === 0) {
+      ctx.portraitBindings.push({
+        entityKind,
+        entityId,
+        campaignImageId: imageId,
+      });
+    }
+
+    ctx.assets.push({
+      entityKind: 'campaign_image',
+      entityId: imageId,
+      sourcePath,
+      relativeLocal: `${ctx.campaignId}/${imageId}/original${ext}`,
+    });
+  }
 }
 
 export function freeformSections(

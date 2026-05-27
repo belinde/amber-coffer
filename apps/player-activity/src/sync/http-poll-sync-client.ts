@@ -16,6 +16,7 @@ export type HttpPollSyncCallbacks = {
   onPollError?: (error: Error) => void;
   onSessionEnded?: () => void;
   onFirstSnapshot?: () => void;
+  onCampaignName?: (name: string) => void;
 };
 
 /**
@@ -162,6 +163,10 @@ export class HttpPollSyncClient implements SyncClientLike {
         if (!this.gotSnapshot) {
           this.gotSnapshot = true;
           this.callbacks.onFirstSnapshot?.();
+        }
+        // Extract campaign name from snapshot if available
+        if (snapshot.kind === 'tabletop.snapshot' && snapshot.campaignName) {
+          this.callbacks.onCampaignName?.(snapshot.campaignName);
         }
       }
 

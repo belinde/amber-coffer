@@ -75,18 +75,26 @@ export function EntityThumbnail({
 
     if (canPreview) {
       return (
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
           className="entity-thumbnail-btn"
           onClick={(ev) => {
             ev.stopPropagation();
             onPreview?.();
           }}
+          onKeyDown={(ev) => {
+            if (ev.key === 'Enter' || ev.key === ' ') {
+              ev.preventDefault();
+              ev.stopPropagation();
+              onPreview?.();
+            }
+          }}
           aria-label={t('list.openPreview', { name: alt })}
           style={{ width: size, height: size }}
         >
           {img}
-        </button>
+        </div>
       );
     }
 

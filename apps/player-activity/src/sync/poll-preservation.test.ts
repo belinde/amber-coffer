@@ -86,12 +86,14 @@ describe('2b. Poll Empty Events Preservation — empty pendingEvents produces sa
           // Apply a snapshot directly (simulating what pollOnce does for empty pendingEvents)
           const snapshotPayload: MqttMessage = {
             kind: 'tabletop.snapshot',
+            campaignName: null,
             sessionId: sessionId as any,
             activeMapId: map.id,
             maps: [map],
             tokens,
             tokenLabels: {},
             tokenNames: {},
+            tokenPortraitUrls: {},
             visibleHandouts: [],
             snapshotAt: Date.now(),
           };
@@ -124,12 +126,14 @@ describe('2b. Poll Empty Events Preservation — empty pendingEvents produces sa
           // Apply first snapshot
           tabletopStore.applyMqttMessage({
             kind: 'tabletop.snapshot',
+            campaignName: null,
             sessionId: sessionA as any,
             activeMapId: mapA.id,
             maps: [mapA],
             tokens: tokensA,
             tokenLabels: {},
             tokenNames: {},
+            tokenPortraitUrls: {},
             visibleHandouts: [],
             snapshotAt: Date.now(),
           });
@@ -137,12 +141,14 @@ describe('2b. Poll Empty Events Preservation — empty pendingEvents produces sa
           // Apply second snapshot (simulating poll with empty pendingEvents)
           tabletopStore.applyMqttMessage({
             kind: 'tabletop.snapshot',
+            campaignName: null,
             sessionId: sessionB as any,
             activeMapId: mapB.id,
             maps: [mapB],
             tokens: tokensB,
             tokenLabels: {},
             tokenNames: {},
+            tokenPortraitUrls: {},
             visibleHandouts: [],
             snapshotAt: Date.now(),
           });
@@ -162,12 +168,14 @@ describe('2b. Poll Empty Events Preservation — empty pendingEvents produces sa
     // This is a concrete preservation test: session ended always resets to initial
     tabletopStore.applyMqttMessage({
       kind: 'tabletop.snapshot',
+      campaignName: null,
       sessionId: 'aaaaaaaa-aaaa-7aaa-8aaa-aaaaaaaaaaaa' as any,
       activeMapId: 'bbbbbbbb-bbbb-7bbb-8bbb-bbbbbbbbbbbb' as any,
       maps: [],
       tokens: [],
       tokenLabels: {},
       tokenNames: {},
+      tokenPortraitUrls: {},
       visibleHandouts: [],
       snapshotAt: Date.now(),
     });
