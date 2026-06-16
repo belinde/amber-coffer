@@ -95,7 +95,18 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       return jsonResponse(304, '', { etag: etagForVersion(state.version) });
     }
 
-    return jsonResponse(200, state, { etag: etagForVersion(state.version) });
+    // Content-filter: return only events newer than the client's last seen version.
+    // When sinceVersion is null (first poll / bootstrap), deliver the full buffer.
+    const filteredEvents =
+      sinceVersion !== null
+        ? state.pendingEvents.filter((e) => e.eventVersion > sinceVersion)
+        : state.pendingEvents;
+
+    return jsonResponse(
+      200,
+      { ...state, pendingEvents: filteredEvents },
+      { etag: etagForVersion(state.version) },
+    );
   }
 
   if (path === '/session/sync/snapshot' && method === 'PUT') {

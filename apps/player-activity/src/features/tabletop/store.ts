@@ -6,6 +6,10 @@ import { useSyncExternalStore } from 'react';
 /**
  * Tiny pub/sub store for the Player Activity tabletop state.
  * Avoids adding Zustand/Redux as dependencies until we need their features.
+ *
+ * NOTE: The sync-loop convergence fix (versioned envelopes + per-client filtering) is
+ * confined to HttpPollSyncClient delivery semantics. This store receives already-unwrapped
+ * MqttMessage payloads and applies them via the reducer — no change needed here.
  */
 class TabletopStore {
   private state: TabletopState = initialTabletopState;

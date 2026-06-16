@@ -11,6 +11,10 @@ type TokenPosition = Token['position'];
  * On the master-app this state is rebuilt from SQLite + invokes; on the player-activity
  * it is bootstrapped from a retained `tabletop.snapshot` MQTT message and then mutated
  * by incremental events (`token.created` / `token.moved` / ...).
+ *
+ * NOTE: The sync-loop convergence fix (versioned envelopes + per-client filtering) lives
+ * entirely in HttpPollSyncClient delivery semantics. This reducer handles per-message state
+ * mutation only and requires no change — each action kind is already covered exhaustively.
  */
 export type TabletopState = {
   activeMapId: MapId | null;

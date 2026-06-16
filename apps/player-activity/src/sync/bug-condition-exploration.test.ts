@@ -100,10 +100,13 @@ describe('Bug Condition Exploration — pendingEvents ignored (Req 1.1, 1.2)', (
         sessionEnded: false,
         pendingEvents: [
           {
-            kind: 'token.moved',
-            tokenId,
-            mapId,
-            position: { zone: 'board', xCell: 5, yCell: 3 },
+            eventVersion: 1,
+            message: {
+              kind: 'token.moved',
+              tokenId,
+              mapId,
+              position: { zone: 'board', xCell: 5, yCell: 3 },
+            },
           },
         ],
       } satisfies SessionSyncStateResponse,
@@ -288,10 +291,13 @@ describe('Bug Condition Exploration — snapshot clobbers pendingEvents (Req 1.1
         sessionEnded: false,
         pendingEvents: [
           {
-            kind: 'token.moved',
-            tokenId,
-            mapId,
-            position: { zone: 'board', xCell: 5, yCell: 3 },
+            eventVersion: 2,
+            message: {
+              kind: 'token.moved',
+              tokenId,
+              mapId,
+              position: { zone: 'board', xCell: 5, yCell: 3 },
+            },
           },
         ],
       } satisfies SessionSyncStateResponse,

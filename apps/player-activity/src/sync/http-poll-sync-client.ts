@@ -1,6 +1,5 @@
 import type { CampaignId, MqttMessage, SessionId, SyncChannel, Token } from '@amber/shared';
-import { mqttMessageSchema } from '@amber/shared';
-import { buildSyncTopic } from '@amber/shared';
+import { buildSyncTopic, mqttMessageSchema } from '@amber/shared';
 
 import {
   getSessionSyncState,
@@ -36,10 +35,12 @@ export class HttpPollSyncClient implements SyncClientLike {
   /**
    * Tracks optimistic token positions posted via postEvents() but not yet
    * confirmed by a server pendingEvent. Prevents snapshot clobbering.
+   * postedAtVersion records the client's lastVersion at the time of posting,
+   * enabling deterministic clearing once the server advances past that point.
    */
   private pendingMoves = new Map<
     Token['id'],
-    { mapId: Token['mapId']; position: Token['position'] }
+    { mapId: Token['mapId']; position: Token['position']; postedAtVersion: number }
   >();
 
   subscribe(channel: SyncChannel, handler: SyncMessageHandler): () => void {
@@ -98,6 +99,7 @@ export class HttpPollSyncClient implements SyncClientLike {
         this.pendingMoves.set(event.tokenId, {
           mapId: event.mapId,
           position: event.requestedPosition,
+          postedAtVersion: this.lastVersion,
         });
       }
     }
@@ -135,10 +137,6 @@ export class HttpPollSyncClient implements SyncClientLike {
       }
 
       const { state } = result;
-      if (state.version > this.lastVersion) {
-        this.lastVersion = state.version;
-      }
-
       if (state.sessionEnded) {
         this.pendingMoves.clear();
         this.callbacks.onSessionEnded?.();
@@ -147,12 +145,27 @@ export class HttpPollSyncClient implements SyncClientLike {
       }
 
       // 1. Process pendingEvents — clear confirmed optimistic moves
-      for (const rawEvent of state.pendingEvents) {
-        const parsed = mqttMessageSchema.parse(rawEvent);
+      // Events are now versioned envelopes { eventVersion, message }
+      let maxEventVersion = 0;
+      for (const event of state.pendingEvents) {
+        if (event.eventVersion > maxEventVersion) {
+          maxEventVersion = event.eventVersion;
+        }
 
         // Clear optimistic move when server confirms a token.moved
-        if (parsed.kind === 'token.moved') {
-          this.pendingMoves.delete(parsed.tokenId);
+        if (event.message.kind === 'token.moved') {
+          this.pendingMoves.delete(event.message.tokenId);
+        }
+      }
+
+      // Advance lastVersion to the maximum of state.version and the highest eventVersion seen
+      this.lastVersion = Math.max(this.lastVersion, state.version, maxEventVersion);
+
+      // Clear stale optimistic moves by version: if the server has advanced past
+      // the point where the move was posted, it is either reflected or superseded
+      for (const [tokenId, entry] of this.pendingMoves) {
+        if (this.lastVersion > entry.postedAtVersion) {
+          this.pendingMoves.delete(tokenId);
         }
       }
 
@@ -170,10 +183,9 @@ export class HttpPollSyncClient implements SyncClientLike {
         }
       }
 
-      // 3. Apply pendingEvents on top of snapshot (they are newer confirmed deltas)
-      for (const rawEvent of state.pendingEvents) {
-        const parsed = mqttMessageSchema.parse(rawEvent);
-        this.dispatchEvent(parsed);
+      // 3. Apply pendingEvents on top of snapshot — each event dispatched exactly once
+      for (const event of state.pendingEvents) {
+        this.dispatchEvent(event.message);
       }
 
       // 4. Re-overlay any remaining optimistic moves not yet confirmed

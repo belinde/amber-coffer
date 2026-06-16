@@ -7,12 +7,26 @@ import { mqttMessageSchema, tabletopSnapshotSchema } from './messages.schema.js'
 /** Default poll interval returned by handshake (ms). */
 export const DEFAULT_SESSION_POLL_INTERVAL_MS = 2000;
 
+/**
+ * Versioned event envelope: wraps an MQTT message with a per-event monotonic
+ * version so clients can content-filter already-applied events and the server
+ * can deliver only what each client has not yet seen.
+ *
+ * @see docs/adr/0016-session-sync-versioned-event-envelope.md
+ */
+export const sessionSyncEventSchema = z.object({
+  eventVersion: z.number().int().positive(),
+  message: mqttMessageSchema,
+});
+
+export type SessionSyncEvent = z.infer<typeof sessionSyncEventSchema>;
+
 /** GET /session/sync/state */
 export const sessionSyncStateResponseSchema = z.object({
   version: z.number().int().nonnegative(),
   snapshot: tabletopSnapshotSchema.nullable(),
   sessionEnded: z.boolean(),
-  pendingEvents: z.array(mqttMessageSchema),
+  pendingEvents: z.array(sessionSyncEventSchema),
 });
 
 export type SessionSyncStateResponse = z.infer<typeof sessionSyncStateResponseSchema>;

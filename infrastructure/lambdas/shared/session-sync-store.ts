@@ -5,11 +5,21 @@ const dynamo = new DynamoDBClient({});
 
 const MAX_PENDING_EVENTS = 64;
 
+/**
+ * Versioned event envelope stored in the rolling buffer.
+ * Mirrors `SessionSyncEvent` from `@amber/shared` (kept local to avoid
+ * cross-package dependency in the Lambda bundle).
+ */
+export type StoredSyncEvent = {
+  eventVersion: number;
+  message: unknown;
+};
+
 export type SessionSyncRow = {
   pk: string;
   version: number;
   snapshot: unknown;
-  pendingEvents: unknown[];
+  pendingEvents: StoredSyncEvent[];
   sessionEnded: boolean;
   updatedAt: number;
 };
@@ -76,8 +86,22 @@ export async function appendPendingEvents(args: {
   events: unknown[];
 }): Promise<SessionSyncRow> {
   const existing = await getSessionSyncRow(args.tableName, args.campaignId, args.sessionId);
-  const merged = [...(existing?.pendingEvents ?? []), ...args.events].slice(-MAX_PENDING_EVENTS);
-  const version = (existing?.version ?? 0) + 1;
+  const baseVersion = existing?.version ?? 0;
+  const version = baseVersion + 1;
+
+  // Derive a strictly increasing eventVersion for each new event.
+  // The first event in this batch gets `version * 1000 + 1`, subsequent
+  // events increment from there. This leaves room for multiple events per
+  // version bump while guaranteeing monotonicity across calls (each call
+  // bumps `version`, so the next batch's base is always higher).
+  const batchBase = version * 1000;
+  const envelopes: StoredSyncEvent[] = args.events.map((message, index) => ({
+    eventVersion: batchBase + index + 1,
+    message,
+  }));
+
+  const merged = [...(existing?.pendingEvents ?? []), ...envelopes].slice(-MAX_PENDING_EVENTS);
+
   const row: SessionSyncRow = {
     pk: sessionSyncPk(args.campaignId, args.sessionId),
     version,
@@ -95,22 +119,33 @@ export async function appendPendingEvents(args: {
   return row;
 }
 
+/**
+ * Drains (trims) events whose `eventVersion` is at or below
+ * `acknowledgedEventVersion`. This prevents unbounded retention while letting
+ * slow clients catch up within the rolling window.
+ *
+ * If `acknowledgedEventVersion` is omitted, all pending events are cleared
+ * (legacy full-drain behavior, retained for session-end cleanup).
+ */
 export async function clearPendingEvents(args: {
   tableName: string;
   campaignId: string;
   sessionId: string;
-  consumeUpToVersion?: number;
+  acknowledgedEventVersion?: number;
 }): Promise<SessionSyncRow | null> {
   const existing = await getSessionSyncRow(args.tableName, args.campaignId, args.sessionId);
   if (!existing) {
     return null;
   }
-  if (args.consumeUpToVersion !== undefined && existing.version > args.consumeUpToVersion) {
-    return existing;
-  }
+
+  const trimmed =
+    args.acknowledgedEventVersion !== undefined
+      ? existing.pendingEvents.filter((e) => e.eventVersion > args.acknowledgedEventVersion!)
+      : [];
+
   const row: SessionSyncRow = {
     ...existing,
-    pendingEvents: [],
+    pendingEvents: trimmed,
     updatedAt: Date.now(),
   };
   await dynamo.send(
@@ -126,7 +161,7 @@ export function rowToStateResponse(row: SessionSyncRow | null): {
   version: number;
   snapshot: unknown;
   sessionEnded: boolean;
-  pendingEvents: unknown[];
+  pendingEvents: StoredSyncEvent[];
 } {
   if (!row) {
     return { version: 0, snapshot: null, sessionEnded: false, pendingEvents: [] };

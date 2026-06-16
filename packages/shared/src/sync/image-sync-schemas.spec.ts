@@ -258,6 +258,7 @@ describe('Property 11: Tabletop Snapshot Serialization Round-Trip', () => {
     kind: fc.constant('tabletop.snapshot' as const),
     sessionId: arbUuidV7,
     activeMapId: fc.oneof(arbUuidV7, fc.constant(null)),
+    campaignName: fc.oneof(fc.constant(null), fc.string({ minLength: 1, maxLength: 40 })),
     maps: fc.array(arbMap, { minLength: 0, maxLength: 3 }),
     tokens: fc.array(arbToken, { minLength: 0, maxLength: 5 }),
     tokenLabels: arbTokenLabels,
