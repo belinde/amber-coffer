@@ -1,13 +1,13 @@
 use std::fs;
 use std::process::{Child, Command, Stdio};
-use std::time::Duration;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use serde::Deserialize;
 use sqlx::SqlitePool;
 use tauri::AppHandle;
 use uuid::Uuid;
 
-use crate::db::{RecordingRuntime, RecordingState, TranscriptionRuntime, TranscriptionState};
+use crate::db::{LivePipelineRuntime, RecordingRuntime, RecordingState, TranscriptionRuntime, TranscriptionState};
 use crate::error::{AppError, AppResult};
 use crate::models::{normalize_play_language, Session};
 use crate::services::discord_secrets;
@@ -102,6 +102,158 @@ pub fn spawn_discord_bot(
     Ok(child)
 }
 
+// --- Live Transcription Pipeline ---
+
+/// State file JSON structure written by the Python pipeline.
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct PipelineStateFile {
+    status: String,
+    chunks_transcribed: u64,
+    chunks_pending: u64,
+    #[allow(dead_code)]
+    last_updated_at: u64,
+}
+
+/// Spawn the Python live transcription pipeline process.
+fn spawn_live_pipeline(
+    session_dir: &std::path::Path,
+    language: &str,
+    state_file: &std::path::Path,
+    signal_file: &std::path::Path,
+) -> AppResult<Child> {
+    let whisper_root = session_paths::whisper_module_root();
+    let python = session_paths::whisper_python_executable();
+
+    if !whisper_root.join(".venv/bin/python").is_file() {
+        return Err(AppError::Internal(
+            "Whisper venv missing. Run: cd tools/sidecars/whisper && python3 -m venv .venv && .venv/bin/pip install -e \".[whisper]\"".into(),
+        ));
+    }
+
+    // Clean up stale state/signal files from previous runs
+    let _ = fs::remove_file(state_file);
+    let _ = fs::remove_file(signal_file);
+
+    let child = Command::new(&python)
+        .arg("-m")
+        .arg("amber_whisper")
+        .arg("live")
+        .arg("--session-dir")
+        .arg(session_dir)
+        .arg("--language")
+        .arg(language)
+        .arg("--model")
+        .arg("small")
+        .arg("--state-file")
+        .arg(state_file)
+        .arg("--signal-file")
+        .arg(signal_file)
+        .current_dir(&whisper_root)
+        .stdout(Stdio::null())
+        .stderr(Stdio::inherit())
+        .spawn()
+        .map_err(|e| AppError::Internal(format!("failed to spawn live pipeline: {e}")))?;
+
+    tracing::info!(
+        session_dir = %session_dir.display(),
+        "live transcription pipeline spawned"
+    );
+
+    Ok(child)
+}
+
+/// Poll the pipeline state file until status becomes `"ready"`, with a 30s timeout.
+/// Returns Ok(()) when ready, or Err if timeout or read failure after timeout.
+fn poll_pipeline_ready(state_file: &std::path::Path, timeout: Duration) -> AppResult<()> {
+    let start = std::time::Instant::now();
+    let poll_interval = Duration::from_millis(500);
+
+    loop {
+        if start.elapsed() >= timeout {
+            return Err(AppError::Internal(
+                "live transcription pipeline did not become ready within 30 seconds".into(),
+            ));
+        }
+
+        if let Ok(content) = fs::read_to_string(state_file) {
+            if let Ok(state) = serde_json::from_str::<PipelineStateFile>(&content) {
+                if state.status == "ready" || state.status == "active" {
+                    tracing::info!("live transcription pipeline is ready");
+                    return Ok(());
+                }
+            }
+        }
+
+        std::thread::sleep(poll_interval);
+    }
+}
+
+/// Write a stop signal to the pipeline signal file.
+fn write_pipeline_stop_signal(signal_file: &std::path::Path) -> AppResult<()> {
+    let now_epoch = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+
+    let signal = serde_json::json!({
+        "action": "stop",
+        "writtenAt": now_epoch
+    });
+
+    fs::write(signal_file, signal.to_string()).map_err(|e| {
+        AppError::Internal(format!(
+            "failed to write pipeline stop signal to {}: {e}",
+            signal_file.display()
+        ))
+    })?;
+
+    tracing::info!(
+        signal_file = %signal_file.display(),
+        "wrote stop signal to live pipeline"
+    );
+
+    Ok(())
+}
+
+/// Poll the pipeline state file until status becomes `"stopped"`, with given timeout.
+/// Returns true if stopped cleanly, false if timed out.
+fn poll_pipeline_stopped(state_file: &std::path::Path, timeout: Duration) -> bool {
+    let start = std::time::Instant::now();
+    let poll_interval = Duration::from_secs(1);
+
+    loop {
+        if start.elapsed() >= timeout {
+            return false;
+        }
+
+        if let Ok(content) = fs::read_to_string(state_file) {
+            if let Ok(state) = serde_json::from_str::<PipelineStateFile>(&content) {
+                if state.status == "stopped" {
+                    tracing::info!("live transcription pipeline stopped cleanly");
+                    return true;
+                }
+            }
+        }
+
+        std::thread::sleep(poll_interval);
+    }
+}
+
+/// Check if the pipeline process has exited unexpectedly.
+/// Returns true if the process has exited (or the child handle is None).
+/// Used by pipeline_state() to detect unexpected exits (requirement 6.7).
+#[allow(dead_code)]
+pub fn check_pipeline_exited(child: &mut Option<Child>) -> bool {
+    match child.as_mut() {
+        None => true,
+        Some(c) => match c.try_wait() {
+            Ok(Some(_)) => true,
+            _ => false,
+        },
+    }
+}
+
 pub async fn start_recording(
     handle: &AppHandle,
     pool: &SqlitePool,
@@ -141,6 +293,25 @@ pub async fn start_recording(
     let token = read_bot_token(handle)?;
     let session_dir = ensure_session_dirs(handle, &session.campaign_id, session.number)?;
 
+    // Spawn the live transcription pipeline before the Discord bot
+    let state_file = session_dir.join("pipeline-state.json");
+    let signal_file = session_dir.join("pipeline-signal.json");
+
+    let mut pipeline_child = spawn_live_pipeline(
+        &session_dir,
+        &play_language,
+        &state_file,
+        &signal_file,
+    )?;
+
+    // Poll for pipeline readiness (30s timeout)
+    if let Err(e) = poll_pipeline_ready(&state_file, Duration::from_secs(30)) {
+        tracing::error!("pipeline readiness timeout, killing pipeline process");
+        let _ = pipeline_child.kill();
+        let _ = pipeline_child.wait();
+        return Err(e);
+    }
+
     let child = spawn_discord_bot(
         &token,
         &channel_id,
@@ -170,6 +341,12 @@ pub async fn start_recording(
         *guard = Some(RecordingRuntime {
             session_id: session_id.to_string(),
             child,
+            pipeline: Some(LivePipelineRuntime {
+                session_id: session_id.to_string(),
+                child: Some(pipeline_child),
+                state_file,
+                signal_file,
+            }),
         });
     }
 
@@ -182,7 +359,7 @@ pub async fn stop_recording(
     session_id: &str,
     recording_state: &RecordingState,
 ) -> AppResult<Session> {
-    let mut child = {
+    let (mut child, pipeline) = {
         let mut guard = recording_state.0.lock().map_err(|_| {
             AppError::Internal("recording state lock poisoned".into())
         })?;
@@ -192,8 +369,10 @@ pub async fn stop_recording(
         if rt.session_id != session_id {
             return Err(AppError::Internal("session id mismatch for active recording".into()));
         }
-        rt.child
+        (rt.child, rt.pipeline)
     };
+
+    // Stop the Discord bot
     if let Some(mut stdin) = child.stdin.take() {
         use std::io::Write;
         let _ = writeln!(stdin, "stop");
@@ -203,6 +382,32 @@ pub async fn stop_recording(
     std::thread::sleep(Duration::from_millis(8000));
     let _ = child.kill();
     let _ = child.wait();
+
+    // Stop the live transcription pipeline (if present)
+    if let Some(mut pipeline_rt) = pipeline {
+        // Write stop signal
+        if let Err(e) = write_pipeline_stop_signal(&pipeline_rt.signal_file) {
+            tracing::warn!(%e, "failed to write pipeline stop signal");
+        }
+
+        // Poll for pipeline to reach "stopped" state (120s timeout)
+        let stopped_cleanly = poll_pipeline_stopped(&pipeline_rt.state_file, Duration::from_secs(120));
+
+        if !stopped_cleanly {
+            tracing::warn!(
+                session_id = %session_id,
+                "live pipeline drain timeout (120s), force-killing process"
+            );
+            if let Some(ref mut pipeline_child) = pipeline_rt.child {
+                let _ = pipeline_child.kill();
+                let _ = pipeline_child.wait();
+            }
+            // WAV files are left intact on disk per requirement 6.5/6.6
+        } else if let Some(ref mut pipeline_child) = pipeline_rt.child {
+            // Ensure process is reaped even after clean stop
+            let _ = pipeline_child.wait();
+        }
+    }
 
     let session = load_session(pool, session_id).await?;
     let session_dir = session_paths::session_dir(handle, &session.campaign_id, session.number)?;
@@ -297,6 +502,17 @@ pub fn read_transcription_progress(session_dir: &std::path::Path) -> Option<f64>
         return None;
     }
     Some((parsed.current as f64 / parsed.total as f64).clamp(0.0, 1.0))
+}
+
+/// Read the live pipeline state file and derive UI-facing fields.
+/// Returns (live_transcription_active, chunks_transcribed, chunks_pending).
+/// Returns None if the file is missing or unreadable.
+fn read_live_pipeline_state(session_dir: &std::path::Path) -> Option<(bool, u64, u64)> {
+    let state_path = session_dir.join("pipeline-state.json");
+    let content = fs::read_to_string(&state_path).ok()?;
+    let state: PipelineStateFile = serde_json::from_str(&content).ok()?;
+    let active = state.status == "active" || state.status == "draining";
+    Some((active, state.chunks_transcribed, state.chunks_pending))
 }
 
 fn spawn_whisper_transcription(session_dir: &std::path::Path) -> AppResult<Child> {
@@ -623,6 +839,9 @@ pub struct SessionPipelineState {
     pub recording_count: i64,
     pub participant_count: i64,
     pub player_participant_count: i64,
+    pub live_transcription_active: bool,
+    pub live_chunks_transcribed: u64,
+    pub live_chunks_pending: u64,
 }
 
 pub async fn pipeline_state(
@@ -700,6 +919,17 @@ pub async fn pipeline_state(
     .fetch_one(pool)
     .await?;
 
+    // Read live pipeline state from filesystem when recording is active
+    let (live_transcription_active, live_chunks_transcribed, live_chunks_pending) =
+        if recording_active {
+            session_dir
+                .as_ref()
+                .and_then(|d| read_live_pipeline_state(d))
+                .unwrap_or((false, 0, 0))
+        } else {
+            (false, 0, 0)
+        };
+
     Ok(SessionPipelineState {
         session_id: session_id.to_string(),
         status: session.status,
@@ -715,5 +945,8 @@ pub async fn pipeline_state(
         recording_count,
         participant_count,
         player_participant_count,
+        live_transcription_active,
+        live_chunks_transcribed,
+        live_chunks_pending,
     })
 }

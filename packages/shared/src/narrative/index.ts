@@ -7,4 +7,5 @@ export * from './canon-diff.js';
 export * from './audio-source.schema.js';
 export * from './recording-manifest.schema.js';
 export * from './whisper-sidecar.schema.js';
+export * from './pipeline-state.schema.js';
 export * from './merge-transcript-segments.js';

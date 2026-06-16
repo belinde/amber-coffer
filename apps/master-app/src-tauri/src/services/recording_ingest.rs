@@ -20,9 +20,19 @@ pub const GM_SPEAKER_LABEL: &str = "Master";
 /// ffmpeg may leave a tiny invalid Ogg shell when a speaking segment had no decoded audio.
 const MIN_OGG_BYTES: u64 = 256;
 
-fn is_usable_ogg_file(path: &Path) -> bool {
+/// Minimum size for a valid WAV file (RIFF header + fmt + minimal data).
+const MIN_WAV_BYTES: u64 = 512;
+
+/// Validates audio files regardless of codec — supports both .ogg and .wav extensions.
+fn is_usable_audio_file(path: &Path) -> bool {
+    let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
+    let min_bytes = match ext {
+        "ogg" => MIN_OGG_BYTES,
+        "wav" => MIN_WAV_BYTES,
+        _ => MIN_OGG_BYTES, // fallback for legacy paths without extension
+    };
     fs::metadata(path)
-        .map(|meta| meta.is_file() && meta.len() >= MIN_OGG_BYTES)
+        .map(|meta| meta.is_file() && meta.len() >= min_bytes)
         .unwrap_or(false)
 }
 
@@ -48,6 +58,7 @@ struct ManifestChunk {
     duration_ms: i64,
     sample_rate: Option<i32>,
     channels: Option<i32>,
+    codec: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -66,6 +77,7 @@ struct RecordingManifest {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)] // codec field stored for future consolidation strategy decisions
 struct HandoffSegment {
     discord_user_id: String,
     display_name: String,
@@ -74,6 +86,7 @@ struct HandoffSegment {
     duration_ms: Option<i64>,
     sample_rate: Option<i32>,
     channels: Option<i32>,
+    codec: Option<String>,
 }
 
 pub async fn ingest_recording_handoff(
@@ -107,7 +120,7 @@ pub async fn ingest_recording_handoff(
         .into_iter()
         .filter(|seg| {
             let abs = session_dir.join(&seg.relative_path);
-            if is_usable_ogg_file(&abs) {
+            if is_usable_audio_file(&abs) {
                 return true;
             }
             tracing::warn!(
@@ -146,6 +159,7 @@ fn handoff_segments_from_manifest(manifest: &RecordingManifest) -> Vec<HandoffSe
                 duration_ms: Some(c.duration_ms),
                 sample_rate: c.sample_rate,
                 channels: c.channels,
+                codec: c.codec.clone(),
             })
             .collect();
     }
@@ -164,6 +178,7 @@ fn handoff_segments_from_manifest(manifest: &RecordingManifest) -> Vec<HandoffSe
             duration_ms: t.duration_ms,
             sample_rate: t.sample_rate,
             channels: t.channels,
+            codec: None, // legacy tracks are always opus_ogg
         })
         .collect()
 }
@@ -324,7 +339,7 @@ async fn consolidate_user_recording(
     for (id, rel, _offset, dur, sr, ch) in &rows {
         segment_ids.push(id.clone());
         let abs = session_dir.join(rel);
-        if is_usable_ogg_file(&abs) && seen_paths.insert(abs.clone()) {
+        if is_usable_audio_file(&abs) && seen_paths.insert(abs.clone()) {
             input_paths.push(abs);
         }
         total_duration += dur.unwrap_or(0);
@@ -340,9 +355,17 @@ async fn consolidate_user_recording(
         return Ok(());
     }
 
+    // Determine codec from file extension of first input
+    let is_wav = input_paths[0]
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|e| e == "wav")
+        .unwrap_or(false);
+
     let user_dir = session_dir.join("audio").join("discord").join(discord_user_id);
     fs::create_dir_all(&user_dir).map_err(|e| AppError::Internal(e.to_string()))?;
-    let track_rel = format!("audio/discord/{discord_user_id}/track.ogg");
+    let track_ext = if is_wav { "wav" } else { "ogg" };
+    let track_rel = format!("audio/discord/{discord_user_id}/track.{track_ext}");
     let track_abs = session_dir.join(&track_rel);
 
     if input_paths.len() == 1 {
@@ -353,6 +376,8 @@ async fn consolidate_user_recording(
                     .map_err(|e| AppError::Internal(format!("copy track: {e}")))?;
             }
         }
+    } else if is_wav {
+        concat_audio_files(&input_paths, &track_abs)?;
     } else {
         concat_ogg_files(&input_paths, &track_abs)?;
     }
@@ -401,6 +426,11 @@ async fn consolidate_user_recording(
 }
 
 fn concat_ogg_files(inputs: &[PathBuf], output: &Path) -> AppResult<()> {
+    concat_audio_files(inputs, output)
+}
+
+/// Concatenate audio files using ffmpeg's concat demuxer. Works for both Ogg and WAV.
+fn concat_audio_files(inputs: &[PathBuf], output: &Path) -> AppResult<()> {
     let list_path = output.with_extension("concat.txt");
     let mut list_file =
         fs::File::create(&list_path).map_err(|e| AppError::Internal(e.to_string()))?;
@@ -456,7 +486,7 @@ struct ExportManifestChunk {
     relative_path: String,
     session_offset_ms: i64,
     duration_ms: i64,
-    codec: &'static str,
+    codec: String,
     sample_rate: i32,
     channels: i32,
 }
@@ -501,15 +531,22 @@ pub async fn export_manifest_from_db(
             .strip_prefix(&format!("sessions/{}/", session.number))
             .unwrap_or(&file_path)
             .to_string();
+        // Derive codec from file extension
+        let codec = if rel.ends_with(".wav") {
+            "pcm_wav".to_string()
+        } else {
+            "opus_ogg".to_string()
+        };
+        let default_channels = if codec == "pcm_wav" { 1 } else { 2 };
         chunks.push(ExportManifestChunk {
             discord_user_id: user_id,
             display_name,
             relative_path: rel,
             session_offset_ms: offset,
             duration_ms: dur.unwrap_or(0),
-            codec: "opus_ogg",
+            codec,
             sample_rate: sr.unwrap_or(48_000),
-            channels: ch.unwrap_or(2),
+            channels: ch.unwrap_or(default_channels),
         });
     }
 

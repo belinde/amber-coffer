@@ -24,9 +24,9 @@ export const recordingManifestChunkSchema = z.object({
   /** Milliseconds from session `startedAt` when this chunk began. */
   sessionOffsetMs: z.number().int().nonnegative(),
   durationMs: z.number().int().nonnegative(),
-  codec: z.literal('opus_ogg'),
+  codec: z.enum(['opus_ogg', 'pcm_wav']),
   sampleRate: z.literal(48_000),
-  channels: z.literal(2),
+  channels: z.union([z.literal(1), z.literal(2)]),
 });
 
 export type RecordingManifestChunk = z.infer<typeof recordingManifestChunkSchema>;

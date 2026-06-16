@@ -1,15 +1,9 @@
-import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdir, readFile, stat, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import * as readline from 'node:readline';
 import type { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
 
-import {
-  discordUserIdSchema,
-  recordingManifestV2Schema,
-  type RecordingManifestChunk,
-} from '@amber/shared';
+import { discordUserIdSchema, recordingManifestV2Schema } from '@amber/shared';
 import { parsePlayLanguage } from '@amber/shared';
 import {
   EndBehaviorType,
@@ -19,11 +13,17 @@ import {
   type VoiceConnection,
 } from '@discordjs/voice';
 import { Client, GatewayIntentBits, type GuildMember, type VoiceBasedChannel } from 'discord.js';
-import ffmpegStatic from 'ffmpeg-static';
 import prism from 'prism-media';
 
+import { validateChunk } from './chunk-validator.js';
+import { ManifestBuilder } from './manifest-builder.js';
 import { playRecordingAnnouncement } from './play-announcement.js';
-import { chunkFileName, MIN_OGG_BYTES, restoreChunkCountersFromManifest } from './record-utils.js';
+import {
+  CollisionTracker,
+  chunkDirectoryPath,
+  timestampChunkFileName,
+} from './timestamp-chunk-naming.js';
+import { WavWriter } from './wav-writer.js';
 
 type RecordOptions = {
   token: string;
@@ -40,68 +40,28 @@ type ActiveSegment = {
   relativePath: string;
   sessionOffsetMs: number;
   wallStartedAt: number;
-  ffmpegProc: ChildProcess;
+  wavWriter: WavWriter;
   opusStream: Readable;
   decoder: prism.opus.Decoder;
 };
 
-type CompletedChunk = RecordingManifestChunk;
+/**
+ * Downmix stereo interleaved Int16 PCM to mono Int16 PCM.
+ * Each stereo frame is 2 samples (left, right); output is (left + right) / 2.
+ */
+function downmixStereoToMono(stereoBuffer: Buffer): Buffer {
+  const sampleCount = stereoBuffer.length / 2; // total Int16 samples (L+R interleaved)
+  const frameCount = sampleCount / 2; // stereo frames
+  const monoBuffer = Buffer.alloc(frameCount * 2); // one Int16 per frame
 
-function ffmpegPath(): string {
-  return typeof ffmpegStatic === 'string' ? ffmpegStatic : 'ffmpeg';
-}
+  for (let i = 0; i < frameCount; i++) {
+    const left = stereoBuffer.readInt16LE(i * 4);
+    const right = stereoBuffer.readInt16LE(i * 4 + 2);
+    const mono = Math.round((left + right) / 2);
+    monoBuffer.writeInt16LE(mono, i * 2);
+  }
 
-/** Opus-in-Ogg via ffmpeg; faster-whisper decodes via libav/ffmpeg. */
-function spawnOggEncoder(outputPath: string): ChildProcess {
-  return spawn(
-    ffmpegPath(),
-    [
-      '-f',
-      's16le',
-      '-ar',
-      '48000',
-      '-ac',
-      '2',
-      '-i',
-      'pipe:0',
-      '-c:a',
-      'libopus',
-      '-b:a',
-      '64k',
-      '-vbr',
-      'on',
-      '-application',
-      'voip',
-      '-y',
-      outputPath,
-    ],
-    { stdio: ['pipe', 'ignore', 'inherit'] },
-  );
-}
-
-async function closeOggEncoder(proc: ChildProcess): Promise<void> {
-  await new Promise<void>((resolve, reject) => {
-    proc.on('error', (err: Error) => reject(err));
-    proc.on('close', (code: number | null) => {
-      if (code === 0) resolve();
-      else reject(new Error(`ffmpeg exited with code ${code}`));
-    });
-    if (proc.stdin) {
-      proc.stdin.end();
-    } else {
-      reject(new Error('ffmpeg stdin missing'));
-    }
-  });
-}
-
-function isPrematureStreamClose(err: unknown): boolean {
-  if (err === null || typeof err !== 'object' || !('code' in err)) return false;
-  return String(Reflect.get(err, 'code')) === 'ERR_STREAM_PREMATURE_CLOSE';
-}
-
-function teardownPipeline(segment: ActiveSegment): void {
-  segment.opusStream.destroy();
-  segment.decoder.destroy();
+  return monoBuffer;
 }
 
 export async function runRecordSession(opts: RecordOptions): Promise<void> {
@@ -111,16 +71,17 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
 
   const sessionStartedAt = Date.now();
   const activeSegments = new Map<string, ActiveSegment>();
-  const completedChunks: CompletedChunk[] = [];
-  const chunkCounters = new Map<string, number>();
+  const manifestBuilder = new ManifestBuilder();
+  const collisionTracker = new CollisionTracker();
   const finalizeTimers = new Map<string, ReturnType<typeof setTimeout>>();
   const SPEAKING_END_DEBOUNCE_MS = 2000;
   const manifestPath = join(opts.outputDir, 'audio', 'manifest.json');
 
+  // Merge existing manifest chunks if present
   try {
     const existingRaw = await readFile(manifestPath, 'utf8');
     const existing = recordingManifestV2Schema.parse(JSON.parse(existingRaw));
-    restoreChunkCountersFromManifest(existing.chunks, chunkCounters);
+    manifestBuilder.mergeExisting(existing.chunks);
   } catch {
     // No prior manifest for this session.
   }
@@ -146,29 +107,47 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
     if (!segment) return;
 
     activeSegments.delete(userId);
-    teardownPipeline(segment);
+
+    // Destroy the opus stream and decoder
+    segment.opusStream.destroy();
+    segment.decoder.destroy();
 
     try {
-      await closeOggEncoder(segment.ffmpegProc);
-      const fileStat = await stat(segment.filePath);
-      if (fileStat.size < MIN_OGG_BYTES) {
+      const { bytesWritten } = await segment.wavWriter.finalize();
+
+      // WavWriter already deletes files < 512 bytes
+      if (bytesWritten === 0) {
+        return;
+      }
+
+      // Run chunk validator for silence detection
+      const validation = await validateChunk(segment.filePath);
+
+      if (validation.status === 'silent') {
+        console.log(
+          `chunk discarded (silent, mean_volume=${validation.meanVolume} dB): ${segment.filePath}`,
+        );
         await unlink(segment.filePath).catch(() => undefined);
         return;
       }
-      const durationMs = Math.max(0, Date.now() - segment.wallStartedAt);
-      completedChunks.push({
+
+      if (validation.status === 'error') {
+        // Treat as valid per requirement 4.5
+        console.log(`chunk validation error (treating as valid): ${validation.reason}`);
+      }
+
+      const endTime = Date.now();
+      manifestBuilder.addChunk({
         discordUserId: discordUserIdSchema.parse(segment.discordUserId),
         displayName: segment.displayName,
         relativePath: segment.relativePath,
-        sessionOffsetMs: segment.sessionOffsetMs,
-        durationMs,
-        codec: 'opus_ogg',
-        sampleRate: 48_000,
-        channels: 2,
+        startTime: segment.wallStartedAt,
+        endTime,
+        sessionStartTime: sessionStartedAt,
       });
     } catch (err: unknown) {
       console.error(`failed to finalize chunk for ${userId}:`, err);
-      await unlink(segment.filePath).catch(() => undefined);
+      await segment.wavWriter.abort().catch(() => undefined);
     }
   };
 
@@ -182,17 +161,24 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
 
     const member: GuildMember | undefined = voiceChannel.guild.members.cache.get(userId);
     const displayName = member?.displayName ?? member?.user.username ?? userId;
-    const chunkIndex = chunkCounters.get(userId) ?? 0;
-    chunkCounters.set(userId, chunkIndex + 1);
 
-    const userDir = join(audioDiscordDir, userId);
+    const userDir = chunkDirectoryPath(opts.outputDir, userId);
     await mkdir(userDir, { recursive: true });
 
-    const fileName = chunkFileName(chunkIndex);
+    const nowEpochSeconds = Math.floor(Date.now() / 1000);
+    const collisionIndex = collisionTracker.nextIndex(userId, nowEpochSeconds);
+    const fileName = timestampChunkFileName(nowEpochSeconds, collisionIndex);
     const filePath = join(userDir, fileName);
     const relativePath = `audio/discord/${userId}/${fileName}`;
 
-    const ffmpegProc = spawnOggEncoder(filePath);
+    let wavWriter: WavWriter;
+    try {
+      wavWriter = new WavWriter(filePath, 48_000, 1, 16);
+    } catch (err: unknown) {
+      console.error(`failed to create WavWriter for ${userId}:`, err);
+      return;
+    }
+
     const decoder = new prism.opus.Decoder({ rate: 48_000, channels: 2, frameSize: 960 });
     const opusStream = connection.receiver.subscribe(userId, {
       end: { behavior: EndBehaviorType.Manual },
@@ -206,23 +192,36 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
       relativePath,
       sessionOffsetMs: wallStartedAt - sessionStartedAt,
       wallStartedAt,
-      ffmpegProc,
+      wavWriter,
       opusStream,
       decoder,
     };
 
     activeSegments.set(userId, segment);
 
-    if (!ffmpegProc.stdin) {
-      console.error(`ffmpeg stdin missing for ${userId}`);
-      activeSegments.delete(userId);
-      teardownPipeline(segment);
-      return;
-    }
+    // Pipe opus stream through decoder, then listen for PCM data
+    opusStream.pipe(decoder);
 
-    void pipeline(opusStream, decoder, ffmpegProc.stdin).catch((err: unknown) => {
-      if (isPrematureStreamClose(err)) return;
-      console.error(`pipeline error for ${userId}:`, err);
+    decoder.on('data', (pcmChunk: Buffer) => {
+      try {
+        const monoData = downmixStereoToMono(pcmChunk);
+        wavWriter.write(monoData);
+      } catch (err: unknown) {
+        // I/O error: abort writer, delete incomplete file, log, continue
+        console.error(`write error for ${userId}, aborting chunk:`, err);
+        segment.opusStream.destroy();
+        segment.decoder.destroy();
+        activeSegments.delete(userId);
+        void wavWriter.abort().catch(() => undefined);
+      }
+    });
+
+    decoder.on('error', (err: Error) => {
+      console.error(`decoder error for ${userId}:`, err);
+    });
+
+    opusStream.on('error', (err: Error) => {
+      console.error(`opus stream error for ${userId}:`, err);
     });
   };
 
@@ -248,16 +247,19 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
     }
     await finalizeAllSegments();
 
-    let mergedChunks = completedChunks;
+    // Re-read existing manifest in case it was updated externally
     let manifestStartedAt = sessionStartedAt;
     try {
       const existingRaw = await readFile(manifestPath, 'utf8');
       const existing = recordingManifestV2Schema.parse(JSON.parse(existingRaw));
-      mergedChunks = [...existing.chunks, ...completedChunks];
       manifestStartedAt = Math.min(manifestStartedAt, existing.startedAt);
+      // Merge again in case another process wrote to it
+      manifestBuilder.mergeExisting(existing.chunks);
     } catch {
       // No prior manifest or invalid — use this run only.
     }
+
+    const chunks = manifestBuilder.build();
 
     const manifest = recordingManifestV2Schema.parse({
       version: 2,
@@ -266,7 +268,7 @@ export async function runRecordSession(opts: RecordOptions): Promise<void> {
       startedAt: manifestStartedAt,
       endedAt,
       channelId: opts.channelId,
-      chunks: mergedChunks,
+      chunks,
     });
 
     await writeFile(manifestPath, JSON.stringify(manifest, null, 2));

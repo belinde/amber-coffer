@@ -3,7 +3,7 @@ pub mod transcription_state;
 mod state;
 pub mod validate;
 
-pub use recording_state::{RecordingRuntime, RecordingState};
+pub use recording_state::{LivePipelineRuntime, RecordingRuntime, RecordingState};
 pub use transcription_state::{TranscriptionRuntime, TranscriptionState};
 pub use state::AppState;
 

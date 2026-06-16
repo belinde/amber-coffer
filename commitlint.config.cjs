@@ -14,6 +14,8 @@ module.exports = {
         'deps',
         'ci',
         'root',
+        'discord-bot',
+        'whisper',
       ],
     ],
   },
